@@ -1,11 +1,12 @@
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { Hero } from '@/components/home/Hero';
+import Hero from '@/components/home/Hero';
 import { FeaturedProducts } from '@/components/home/FeaturedProducts';
 import { HowToOrder } from '@/components/home/HowToOrder';
 import { Testimonials } from '@/components/home/Testimonials';
 import { ShippingInfo } from '@/components/home/ShippingInfo';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
+import  MobileUSPs from '@/components/home/MobileUSPs';
 
 const Index = () => {
   return (
@@ -13,6 +14,7 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
+        <MobileUSPs />
         <FeaturedProducts />
         <HowToOrder />
         <Testimonials />

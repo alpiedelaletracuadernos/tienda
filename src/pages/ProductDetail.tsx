@@ -226,7 +226,7 @@ Cantidad: ${quantity}
                     </Badge>
                   )}
                 </div>
-                <p className="text-2xl sm:text-3xl font-bold text-primary mt-3 sm:mt-4">{formattedPrice}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-primary mt-3 sm:mt-4">{formattedPrice}</p><p className='text-gray-400 font-light text-sm'>10% descuento en efectivo/transferencia</p>
                 <p className="text-muted-foreground mt-3 break-words">{product.description}</p>
               </div>
 

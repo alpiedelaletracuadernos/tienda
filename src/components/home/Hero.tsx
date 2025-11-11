@@ -1,67 +1,130 @@
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { WhatsAppButton } from '@/components/WhatsAppButton';
-import heroImage from '@/assets/hero-notebook.jpg';
+// src/components/landing/Hero.tsx
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 
-export const Hero = () => {
+// Importá dos assets:
+// 1) heroPoster.webp (LCP): imagen estática optimizada (2000–2400px ancho)
+// 2) heroLoop.mp4 (opcional): loop sutil <8s, muted; NO debe ser LCP
+import heroPoster from "@/assets/hero/heroPosterAlt.png";
+import heroPosterJpg from "@/assets/hero/heroPosterAlt.png"; // fallback
+import heroLoop from "@/assets/hero/heroLoop.mp4"; // opcional
+
+export default function Hero() {
   return (
-    <section className="relative min-h-[90vh] flex items-center">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src={heroImage}
-          alt="Agendas artesanales personalizadas"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/40" />
+    <section
+      className="relative isolate min-h-[90svh] flex items-center overflow-hidden"
+      aria-label="Agendas y cuadernos artesanales personalizables"
+    >
+      {/* Background media: video opcional + imagen LCP como capa */}
+      <div className="absolute inset-0 -z-10">
+        {/* IMAGEN LCP (no lazy), alto contraste con overlay */}
+        <picture>
+          <source srcSet={heroPoster} type="image/webp" />
+          <img
+            src={heroPosterJpg}
+            alt="Agenda personalizada sobre mesa, tapa con nombre y vista del interior"
+            width={2400}
+            height={1400}
+            fetchPriority="high"
+            loading="eager"
+            decoding="sync"
+            className="h-full w-full object-cover"
+          />
+        </picture>
+
+        {/* VIDEO decorativo opcional (no bloquea LCP) */}
+        <video
+          className="absolute inset-0 h-full w-full object-cover opacity-0 md:opacity-100"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+        >
+          <source src={heroLoop} type="video/mp4" />
+        </video>
+
+        {/* Overlay para contraste WCAG */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-black/20" />
       </div>
 
-      {/* Content */}
+      {/* Contenido */}
       <div className="container relative z-10 px-4">
-        <div className="max-w-2xl space-y-8">
-          <div className="space-y-4">
-            <p className="text-sm font-medium text-primary uppercase tracking-wider">
-              ✨ Edición Limitada - Solo 15 Cupos por Semana
-            </p>
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight text-balance">
-              Tu agenda,{' '}
-              <span className="gradient-primary bg-clip-text text-white p-1">
-                tu estilo
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground text-balance">
-              Agendas y cuadernos artesanales 100% personalizados. Diseñados y hechos a mano en San Nicolás, Argentina.
-            </p>
-          </div>
+        <div className="max-w-[44rem] text-white space-y-6">
+          {/* Eyebrow con escasez/urgencia moderada */}
+          <p className="text-xs sm:text-sm font-semibold tracking-wide uppercase text-primary-200">
+            ✨ Cupos limitados · Hasta 15 por semana
+          </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button asChild size="lg" className="text-lg px-8 py-6">
-              <Link to="/catalogo">
-                Comprar Ahora
+          <h1 className="text-4xl sm:text-6xl font-bold leading-tight">
+            Tu agenda, <span className="underline decoration-primary/70">a tu medida</span>
+          </h1>
+
+          <p className="text-base sm:text-xl text-white/90">
+            Agendas y cuadernos artesanales con{" "}
+            <strong>personalización total</strong>: nombre, frase, foto o tramas.
+            Hecho a mano en San Nicolás de los Arroyos, con entrega rápida.
+          </p>
+
+          {/* CTA primario/secundario */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <Button asChild size="lg" className="px-7">
+              <Link to="/catalogo" aria-label="Ir al catálogo y comprar ahora">
+                Comprar ahora
               </Link>
             </Button>
-            <WhatsAppButton 
-              className="text-lg px-8 py-6"
-              message="Hola! Me interesa conocer más sobre sus agendas personalizadas ✨"
+            <WhatsAppButton
+              className="px-7"
+              message="¡Hola! Quiero personalizar mi agenda/cuaderno. ¿Me ayudás a elegir modelo y tapa? ✨"
+              aria-label="Chatear por WhatsApp para personalizar"
             />
           </div>
 
-          <div className="flex flex-wrap gap-8 pt-8 border-t">
-            <div>
-              <p className="text-3xl font-bold text-primary">15+</p>
-              <p className="text-sm text-muted-foreground">Diseños únicos</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-primary">48h</p>
-              <p className="text-sm text-muted-foreground">Entrega rápida</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-primary">100%</p>
-              <p className="text-sm text-muted-foreground">Personalizable</p>
-            </div>
+          {/* Trust + Objeciones resueltas */}
+          <ul className="hidden mt-4 md:grid grid-cols-3 gap-4 text-left text-[0.8rem] sm:text-sm">
+            <li className="flex flex-col">
+              <span className="text-xl sm:text-2xl font-bold text-primary-300">100%</span>
+              <span className="text-white/85">Personalizable</span>
+            </li>
+            <li className="flex flex-col">
+              <span className="text-xl sm:text-2xl font-bold text-primary-300">48&nbsp;h</span>
+              <span className="text-white/85">Entrega rápida</span>
+            </li>
+            <li className="flex flex-col">
+              <span className="text-xl sm:text-2xl font-bold text-primary-300">+60</span>
+              <span className="text-white/85">Modelos listos</span>
+            </li>
+          </ul>
+
+          {/* Atajos a categorías de alta intención */}
+          <nav
+            className="mt-6 flex flex-wrap gap-2"
+            aria-label="Accesos rápidos a categorías"
+          >
+            {[
+              { to: "/catalogo?cat=agendas&size=A5", label: "Agendas A5" },
+              { to: "/catalogo?cat=agendas%20docentes", label: "Docentes" },
+              { to: "/catalogo?cat=agendas&interior=perpetua", label: "Perpetuas" },
+              { to: "/catalogo?cat=cuadernos&size=A4", label: "Cuadernos A4" },
+            ].map((c) => (
+              <Link
+                key={c.label}
+                to={c.to}
+                className="rounded-full bg-white/10 hover:bg-white/15 border border-white/20 px-3 py-1.5 backdrop-blur-sm"
+              >
+                {c.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Micro-reseña/UGC (no LCP) */}
+          <div className="mt-4 text-white/85 text-sm">
+            ★★★★★ “La personalización quedó perfecta y llegó rapidísimo.” — Sofía, SN
           </div>
         </div>
       </div>
     </section>
   );
-};
+}
