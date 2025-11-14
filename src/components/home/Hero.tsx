@@ -6,9 +6,6 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 // Importá dos assets:
 // 1) heroPoster.webp (LCP): imagen estática optimizada (2000–2400px ancho)
 // 2) heroLoop.mp4 (opcional): loop sutil <8s, muted; NO debe ser LCP
-import heroPoster from "@/hero/heroPosterAlt.png";
-import heroPosterJpg from "@/assets/hero/heroPosterAlt.png"; // fallback
-import heroLoop from "@/assets/hero/heroLoop.mp4"; // opcional
 
 export default function Hero() {
   return (
@@ -20,9 +17,9 @@ export default function Hero() {
       <div className="absolute inset-0 -z-10">
         {/* IMAGEN LCP (no lazy), alto contraste con overlay */}
         <picture>
-          <source srcSet="public/hero/heroPoster.jpg" type="image/webp" />
+          <source srcSet="src/assets/hero/heroPoster.png" type="image/webp" />
           <img
-            src="public/hero/heroPoster.jpg"
+            src="src/assets/hero/heroPoster.png"
             alt="Agenda personalizada sobre mesa, tapa con nombre y vista del interior"
             width={2400}
             height={1400}
@@ -43,7 +40,7 @@ export default function Hero() {
           preload="metadata"
           aria-hidden="true"
         >
-          <source src="public/hero/heroLoop.mp4" type="video/mp4" />
+          <source src="src/assets/hero/heroLoop.mp4" type="video/mp4" />
         </video>
 
         {/* Overlay para contraste WCAG */}

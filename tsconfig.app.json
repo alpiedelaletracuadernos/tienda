@@ -25,5 +25,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "public/productos"]
+  "include": ["src", "src/assets/productos"]
 }
