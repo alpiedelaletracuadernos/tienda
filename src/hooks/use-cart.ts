@@ -155,9 +155,18 @@ export const useCart = create<CartStore>()(
 
       // Compatibilidad con código previo:
       // Antes sumaba item.price (que podía venir descontado). Ahora lo redefinimos como el TOTAL final.
+      // getTotalPrice: () => {
+      //   return get().getTotalAfterDiscount();
+      // },
+      // Precio total basado en items con price (legacy)
       getTotalPrice: () => {
-        return get().getTotalAfterDiscount();
-      },
+        const { items } = get();
+        return items.reduce((total, item) => {
+          const unit = item.product?.basePrice ?? item.price ?? 0;
+          return total + unit * item.quantity;
+        }, 0);
+},
+
     }),
     {
       name: 'cart:v2',        // bump de versión para activar migración

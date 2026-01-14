@@ -1,251 +1,207 @@
-// src/pages/Checkout.tsx
-import { useMemo, useState } from 'react';
+// src/pages/Cart.tsx
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ArrowLeft, ShoppingCart } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
-import AppVars from '@/data/data';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
+import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { formatARS } from '@/lib/currency';
-import { buildCheckoutMessage, buildWaLink } from '@/lib/whatsapp';
-import type { BuyerInfo } from '@/types/cart';
 
-type DeliveryMethod = 'retiro' | 'envio';
+export default function Cart() {
+  const { items, removeItem, updateQuantity, getTotalPrice, clearCart } = useCart();
 
-const Checkout = () => {
-  const navigate = useNavigate();
-  const { items, getTotalPrice, clearCart } = useCart();
+  const total = getTotalPrice();
 
-  // Datos del comprador
-  const [buyerName, setBuyerName] = useState('');
-  const [buyerCity, setBuyerCity] = useState('');
-  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('retiro');
-  const [deliveryAddress, setDeliveryAddress] = useState(''); // si envío
-  const [buyerNotes, setBuyerNotes] = useState('');
+  if (items.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center py-16">
+          <div className="container px-4 text-center space-y-6">
+            <ShoppingBag className="h-24 w-24 mx-auto text-muted-foreground" />
+            <h1 className="text-4xl font-bold">Tu carrito está vacío</h1>
+            <p className="text-xl text-muted-foreground">
+              Explorá nuestro catálogo y encontrá tu agenda o cuaderno perfecto
+            </p>
+            <Button asChild size="lg">
+              <Link to="/catalogo">Ver Productos</Link>
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
-  // (Opcional) método de pago para informar en el mensaje
-  const [paymentMethod, setPaymentMethod] = useState<'efectivo' | 'transferencia' | 'mercado-pago'>('efectivo');
-
-  const whatsappMessage = useMemo(() => {
-    const buyer: BuyerInfo = {
-      name: buyerName,
-      city: buyerCity,
-      deliveryMethod,
-      address: deliveryAddress,
-      notes: buyerNotes,
-      paymentMethod,
-    };
-    return buildCheckoutMessage(items, buyer);
-  }, [items, buyerName, buyerCity, deliveryMethod, deliveryAddress, buyerNotes, paymentMethod]);
-
-  const phoneNumber = AppVars.phoneNumber; // ej.: 549336XXXXXXX
-  const waHref = buildWaLink(phoneNumber, whatsappMessage);
-
-  const canContinue =
-    (items?.length ?? 0) > 0 &&
-    buyerName.trim().length > 1 &&
-    buyerCity.trim().length > 1 &&
-    (deliveryMethod === 'retiro' || (deliveryMethod === 'envio' && deliveryAddress.trim().length > 3));
+  const totalQty = items.reduce((acc, it) => acc + it.quantity, 0);
 
   return (
-    <div className="min-h-screen overflow-x-clip">
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="py-8 w-full max-w-full">
+      <main className="flex-1 py-12">
         <div className="container px-4">
-          {/* Breadcrumb */}
-          <Button variant="ghost" asChild className="mb-6">
-            <Link to="/catalogo" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Seguir comprando
-            </Link>
-          </Button>
+          <h1 className="text-4xl font-bold mb-8">Tu Carrito</h1>
 
-          <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
-            {/* Datos del comprador */}
-            <section className="lg:col-span-2 space-y-6">
-              <div className="space-y-2">
-                <h1 className="text-2xl sm:text-3xl font-bold">Finalizar compra</h1>
-                <p className="text-sm text-muted-foreground">
-                  Completá tus datos para enviarnos el pedido por WhatsApp y coordinar el pago/envío.
-                </p>
-              </div>
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Items */}
+            <div className="lg:col-span-2 space-y-4">
+              {items.map((item) => {
+                const unit = item.price; // precio unitario FINAL (sin promos)
+                const lineTotal = unit * item.quantity;
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="buyerName">Nombre y apellido</Label>
-                  <Input
-                    id="buyerName"
-                    value={buyerName}
-                    onChange={(e) => setBuyerName(e.target.value)}
-                    placeholder="Ej.: María López"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="buyerCity">Ciudad / Localidad</Label>
-                  <Input
-                    id="buyerCity"
-                    value={buyerCity}
-                    onChange={(e) => setBuyerCity(e.target.value)}
-                    placeholder="Ej.: San Nicolás de los Arroyos"
-                  />
-                </div>
-
-                <div className="space-y-2 sm:col-span-2">
-                  <Label>Entrega</Label>
-                  <RadioGroup
-                    value={deliveryMethod}
-                    onValueChange={(v) => setDeliveryMethod(v as DeliveryMethod)}
-                    className="flex flex-wrap gap-6"
+                return (
+                  <Card
+                    key={`${item.product.id}-${item.selectedSize}-${item.selectedInterior}-${item.selectedCover}-${item.personalization ?? ''}`}
+                    className="overflow-hidden"
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="retiro" id="retiro" />
-                      <Label htmlFor="retiro">Retiro en punto de entrega</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="envio" id="envio" />
-                      <Label htmlFor="envio">Envío a domicilio</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
+                    <CardContent className="p-6">
+                      <div className="flex gap-6">
+                        {/* Image */}
+                        <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted shrink-0">
+                          <img
+                            src={item.product.images?.[0]}
+                            alt={item.product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
 
-                {deliveryMethod === 'envio' && (
-                  <div className="space-y-2 sm:col-span-2">
-                    <Label htmlFor="deliveryAddress">Dirección</Label>
-                    <Input
-                      id="deliveryAddress"
-                      value={deliveryAddress}
-                      onChange={(e) => setDeliveryAddress(e.target.value)}
-                      placeholder="Calle, número, barrio, referencias"
-                    />
-                  </div>
-                )}
-
-                <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="buyerNotes">Notas (opcional)</Label>
-                  <Textarea
-                    id="buyerNotes"
-                    value={buyerNotes}
-                    onChange={(e) => setBuyerNotes(e.target.value)}
-                    placeholder="Aclaraciones, horarios para recibir, color favorito, etc."
-                  />
-                </div>
-
-                <div className="space-y-2 sm:col-span-2">
-                  <Label>Método de pago preferido</Label>
-                  <RadioGroup
-                    value={paymentMethod}
-                    onValueChange={(v) => setPaymentMethod(v as 'efectivo' | 'transferencia' | 'mercado-pago')}
-                    className="flex flex-wrap gap-6"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="efectivo" id="p-efectivo" />
-                      <Label htmlFor="p-efectivo">Efectivo</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="transferencia" id="p-transf" />
-                      <Label htmlFor="p-transf">Transferencia</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="mercado-pago" id="p-mp" />
-                      <Label htmlFor="p-mp">Mercado Pago</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              </div>
-            </section>
-
-            {/* Resumen */}
-            <aside className="lg:col-span-1 space-y-4">
-              <div className="rounded-2xl border p-4 sm:p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-semibold">Tu carrito</h2>
-                  <Badge variant="outline">{items?.length ?? 0} ítems</Badge>
-                </div>
-
-                <div className="space-y-3 max-h-[40svh] overflow-auto pr-1
-                  [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.400)_transparent]
-                  [&::-webkit-scrollbar]:w-2
-                  [&::-webkit-scrollbar-track]:bg-transparent
-                  [&::-webkit-scrollbar-thumb]:bg-slate-400/60
-                  hover:[&::-webkit-scrollbar-thumb]:bg-slate-500/70
-                  [&::-webkit-scrollbar-thumb]:rounded-full">
-                  {(!items || items.length === 0) && (
-                    <p className="text-sm text-muted-foreground">Tu carrito está vacío.</p>
-                  )}
-                  {items?.map((it, i) => {
-                    const unit = it.price ?? it.product?.basePrice ?? 0;
-                    return (
-                      <div key={i} className="border rounded-xl p-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="font-medium break-words">{it.product?.name ?? 'Producto'}</p>
-                            <div className="text-xs text-muted-foreground space-y-0.5 mt-1">
-                              {it.selectedModel && <p>Modelo: {it.selectedModel}</p>}
-                              {it.selectedSize && <p>Tamaño: {it.selectedSize}</p>}
-                              {it.selectedInterior && <p>Interior: {it.selectedInterior}</p>}
-                              {it.selectedCover && <p>Tapa: {it.selectedCover}</p>}
-                              {it.personalization && <p>Personalización: “{it.personalization}”</p>}
+                        {/* Details */}
+                        <div className="flex-1 space-y-2 min-w-0">
+                          <div className="flex justify-between items-start gap-3">
+                            <div className="min-w-0">
+                              <h3 className="font-semibold break-words">{item.product.name}</h3>
+                              {item.personalization && (
+                                <p className="text-sm text-primary break-words">"{item.personalization}"</p>
+                              )}
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Precio unitario: {formatARS(unit)}
+                              </p>
                             </div>
+
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() =>
+                                removeItem(
+                                  item.product.id,
+                                  item.selectedSize,
+                                  item.selectedInterior,
+                                  item.selectedCover
+                                )
+                              }
+                              aria-label="Eliminar ítem"
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
                           </div>
-                          <div className="text-right shrink-0">
-                            <p className="text-sm">x{it.quantity ?? 1}</p>
-                            <p className="text-sm text-muted-foreground">{formatARS(unit)}</p>
+
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            <p>Tamaño: {item.selectedSize}</p>
+                            <p>Interior: {item.selectedInterior}</p>
+                            <p>Tapa: {item.selectedCover}</p>
+                            {item.selectedModel && <p>Modelo: {item.selectedModel}</p>}
+                          </div>
+
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+                            {/* Quantity */}
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() =>
+                                  updateQuantity(
+                                    item.product.id,
+                                    item.selectedSize,
+                                    item.selectedInterior,
+                                    item.selectedCover,
+                                    Math.max(1, item.quantity - 1)
+                                  )
+                                }
+                                aria-label="Restar una unidad"
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <span className="w-8 text-center font-medium">{item.quantity}</span>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() =>
+                                  updateQuantity(
+                                    item.product.id,
+                                    item.selectedSize,
+                                    item.selectedInterior,
+                                    item.selectedCover,
+                                    item.quantity + 1
+                                  )
+                                }
+                                aria-label="Sumar una unidad"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+
+                            {/* Line total */}
+                            <p className="text-lg font-bold text-primary">{formatARS(lineTotal)}</p>
                           </div>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
 
-                <div className="flex items-center justify-between mt-4">
-                  <p className="font-semibold">Total</p>
-                  <p className="font-semibold">{formatARS(getTotalPrice())}</p>
-                </div>
+              <Button variant="ghost" onClick={clearCart} className="w-full">
+                Vaciar Carrito
+              </Button>
+            </div>
 
+            {/* Summary */}
+            <div className="lg:col-span-1">
+              <Card className="sticky top-24">
+                <CardContent className="p-6 space-y-6">
+                  <h2 className="text-2xl font-bold">Resumen</h2>
 
-                {/* Continuar al pago -> WhatsApp + limpiar carrito + gracias */}
-                <Button
-                  size="lg"
-                  className="w-full mt-4"
-                  disabled={!canContinue}
-                  onClick={() => {
-                    const href = buildWaLink(AppVars.phoneNumber, whatsappMessage);
-                    // Abrir WhatsApp en nueva pestaña
-                    window.open(href, '_blank', 'noopener,noreferrer');
-                    // Limpiar carrito y redirigir
-                    clearCart();
-                    navigate('/gracias');
-                  }}
-                >
-                  <ShoppingCart className="mr-2 h-5 w-5" />
-                  Continuar al pago por WhatsApp
-                </Button>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Subtotal ({totalQty} {totalQty === 1 ? 'unidad' : 'unidades'})</span>
+                      <span>{formatARS(total)}</span>
+                    </div>
 
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Envío</span>
+                      <span>A calcular</span>
+                    </div>
 
-                {!canContinue && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Completá nombre, ciudad y {deliveryMethod === 'envio' ? 'dirección' : 'método de entrega'} para continuar.
-                  </p>
-                )}
+                    <div className="border-t pt-2 flex justify-between text-xl font-bold">
+                      <span>Total</span>
+                      <span className="text-primary">{formatARS(total)}</span>
+                    </div>
+                  </div>
 
-                <Button variant="ghost" asChild className="w-full mt-2">
-                  <Link to="/catalogo">Seguir comprando</Link>
-                </Button>
-              </div>
-            </aside>
+                  <div className="space-y-3">
+                    <Button asChild size="lg" className="w-full">
+                      <Link to="/checkout">Finalizar Compra</Link>
+                    </Button>
+                    <Button asChild variant="outline" size="lg" className="w-full">
+                      <Link to="/catalogo">Seguir Comprando</Link>
+                    </Button>
+                  </div>
+
+                  <div className="text-sm text-muted-foreground space-y-2 pt-4 border-t">
+                    <p>✓ Envíos a todo el país</p>
+                    <p>✓ Retiro sin cargo en San Nicolás</p>
+                    <p>✓ Pago seguro con Mercado Pago</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </main>
       <Footer />
     </div>
   );
-};
-
-export default Checkout;
+}

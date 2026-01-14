@@ -20,9 +20,10 @@ export const FeaturedProducts = () => {
           {featured.map(product => (
             <div key={product.id} className="relative">
               <ProductCard key={product.id} product={product} />
-              <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
+              {/* Descuentos  */}
+              {/* <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
                 hasta -30%
-              </span>
+              </span> */}
             </div>
           ))}
         </div>

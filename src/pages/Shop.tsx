@@ -148,7 +148,7 @@ const Shop = () => {
       <Header />
 
       {/* Barra informativa sticky: escalera de descuentos */}
-      <div className="sticky top-16 z-40 bg-black text-white">
+      {/* <div className="sticky top-16 z-40 bg-black text-white">
         <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Badge className="bg-amber-400 text-black hover:bg-amber-400">Escalera de Descuentos</Badge>
@@ -177,7 +177,7 @@ const Shop = () => {
             </DialogContent>
           </Dialog>
         </div>
-      </div>
+      </div> */}
 
       <main>
         {/* Hero Section (catálogo) */}
@@ -195,12 +195,12 @@ const Shop = () => {
                 >
                   ✨ 15 cupos disponibles esta semana
                 </Badge>
-
-                <Badge
+                {/* Escalera de descuentos */}
+                {/* <Badge
                   className="bg-amber-400 text-black hover:bg-amber-400 px-3 py-1.5 text-xs sm:text-sm whitespace-normal break-words leading-snug max-w-full sm:max-w-[480px]"
                 >
                   <span className="[text-wrap:balance]">{LADDER_LABEL}</span>
-                </Badge>
+                </Badge> */}
               </div>
 
             </div>
@@ -208,7 +208,7 @@ const Shop = () => {
         </section>
 
         {/* Filters */}
-        <section className="py-8 border-b bg-background lg:sticky top-24 z-30">
+        <section className="py-8 border-b bg-background lg:sticky top-16 z-30">
           <div className="container px-4 w-full max-w-full">
             <div className="flex flex-col sm:flex-row gap-4 w-full max-w-full">
               <Select
@@ -268,7 +268,8 @@ const Shop = () => {
                 Mostrando {filteredProducts.length}{' '}
                 {filteredProducts.length === 1 ? 'producto' : 'productos'}
               </p>
-              <Dialog>
+              {/* Escalera de descuentos */}
+              {/* <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="ghost" size="sm" className="text-amber-600 hover:text-amber-700 hover:bg-amber-50">
                     <Sparkles className="h-4 w-4 mr-2" />
@@ -290,11 +291,10 @@ const Shop = () => {
                     </p>
                   </div>
                 </DialogContent>
-              </Dialog>
+              </Dialog> */}
             </div>
           </div>
         </section>
-
         {/* Products Grid + Card educativa inserta */}
         <section className="py-12">
           <div className="container px-4">
@@ -304,41 +304,13 @@ const Shop = () => {
                   <div key={product.id} className="relative">
                     <ProductCard product={product} />
                     {/* Badge pequeño en esquina (refuerzo visual sin invadir) */}
-                    <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
+                    {/* <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
                       hasta -30%
-                    </span>
-
+                    </span> */}
                     {/* Insertar una card educativa a mitad de la primera “pantalla” */}
                     {(
                       (idx === 1 && filteredProducts.length > 2) || // mobile 2col
                       (idx === 3 && filteredProducts.length > 4)    // desktop 4col
-                    ) && (
-                      <Card className="sm:col-span-2 lg:col-span-3 xl:col-span-2 overflow-hidden border-amber-200 bg-amber-50 my-4">
-                        <CardContent className="p-5 flex flex-col md:flex-row items-start md:items-center gap-4">
-                          <div className="flex-1">
-                            <p className="text-sm font-semibold text-amber-900 uppercase tracking-wide">Mejor precio garantizado</p>
-                            <h3 className="text-xl md:text-2xl font-bold text-amber-900 mt-1">
-                              Llevá 3 y obtené <span className="underline">30% OFF</span>
-                            </h3>
-                            <p className="text-sm text-amber-900/80 mt-1">
-                              Sumá cualquier combinación de agendas/cuadernos. El descuento se aplica al finalizar.
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button asChild size="sm" className="whitespace-nowrap">
-                              <a href="#catalogo">Ver productos</a>
-                            </Button>
-                            <Button asChild variant="outline" size="sm" className="whitespace-nowrap">
-                              <a
-                                href={`https://wa.me/${waNumber}?text=${encodeURIComponent('Hola! ¿Qué combinaciones me recomendás para aprovechar la escalera de descuentos 1u -15% / 2u -20% / 3u -30%?')}`}
-                                target="_blank" rel="noopener noreferrer"
-                              >
-                                Consultar por WhatsApp
-                              </a>
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
                     )}
                   </div>
                 ))}

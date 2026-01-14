@@ -14,7 +14,7 @@ import { useCart } from '@/hooks/use-cart';
 import { toast } from 'sonner';
 import {
   ArrowLeft, ShoppingCart, Wand2, Maximize2,
-  LayoutGrid, Sparkles, Timer
+  LayoutGrid, Sparkles
 } from 'lucide-react';
 import { ProductSize, InteriorType, CoverType } from '@/types/product';
 import AppVars from '@/data/data';
@@ -24,22 +24,6 @@ import { AgendaModelSelector } from '@/components/products/AgendaModelOption';
 import ProductImageGallery from '@/components/products/ProductImageGallery';
 import FullscreenModelDialog from '@/components/products/FullscreenModelDialog';
 import { safeStorage } from '@/lib/safe-storage';
-
-// ————————————————————————————————————————————————
-// Config Promo Escalera (Ladder)
-const LADDER = [
-  { qty: 1, off: 0.15, label: '15% OFF' },
-  { qty: 2, off: 0.20, label: '20% OFF' },
-  { qty: 3, off: 0.30, label: '30% OFF' },
-] as const;
-
-type LadderTier = typeof LADDER[number];
-
-const LADDER_LABEL = '15% en 1u • 20% en 2u • 30% en 3+u';
-
-// —— Config Black Friday (opcional) ————————————————
-const BLACK_FRIDAY_ACTIVE = false;
-const BLACK_FRIDAY_END_ISO = '2025-12-02T02:59:59-03:00';
 
 // —— WhatsApp ————————————————————————————————————————
 const WHATSAPP_NUMBER = AppVars.phoneNumber;
@@ -51,22 +35,12 @@ const PERSONALIZATION_STYLES = [
   { id: 'trama', label: 'Trama/Patrón' },
   { id: 'logo', label: 'Logo/Marca' },
 ] as const;
+
 type PersonalizationStyleId = typeof PERSONALIZATION_STYLES[number]['id'];
 type Mode = 'ready' | 'custom';
 
 const formatARS = (n: number) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(n);
-
-// Tipado explícito (evita el error de asignación dentro del bucle)
-const getLadderTier = (qty: number): LadderTier => {
-  let tier: LadderTier = LADDER[0];
-  for (const t of LADDER) {
-    if (qty >= t.qty) tier = t;
-  }
-  return tier;
-};
-const getNextTier = (qty: number): LadderTier | null =>
-  LADDER.find(t => t.qty > qty) ?? null;
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -89,12 +63,16 @@ const ProductDetail = () => {
     try {
       const saved = safeStorage.get<string>('pdp:selectedModelId', null);
       if (saved) setSelectedModelId(saved);
-    } catch { /* no-op */ }
+    } catch {
+      /* no-op */
+    }
   }, []);
   useEffect(() => {
     try {
       safeStorage.set('pdp:selectedModelId', selectedModelId);
-    } catch { /* no-op */ }
+    } catch {
+      /* no-op */
+    }
   }, [selectedModelId]);
 
   const selectedModelDef = useMemo(
@@ -146,65 +124,36 @@ const ProductDetail = () => {
 
   const modeSpecificMessage = mode === 'custom' ? waPersonalizationMessage2 : waReadyMessage2;
 
-  // ——— Countdown BF (si se activa)
-  const [countdown, setCountdown] = useState<string>('');
-  useEffect(() => {
-    if (!BLACK_FRIDAY_ACTIVE || !BLACK_FRIDAY_END_ISO) return;
-    const end = new Date(BLACK_FRIDAY_END_ISO).getTime();
-    const tick = () => {
-      const now = Date.now();
-      const diff = Math.max(end - now, 0);
-      const dd = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hh = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const mm = Math.floor((diff / (1000 * 60)) % 60);
-      const ss = Math.floor((diff / 1000) % 60);
-      setCountdown(`${dd}d ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`);
-    };
-    tick();
-    const i = setInterval(tick, 1000);
-    return () => clearInterval(i);
-  }, []);
+  // ——— Precios (SIN DESCUENTOS) ————————————————————————
+  const basePrice = product?.basePrice ?? 0; // unitario
+  const totalPrice = basePrice * quantity;
 
-  // ——— Precios visuales (PDP) con “mejor descuento” (BF vs Ladder)
-  const basePrice = product?.basePrice ?? 0;
-  const ladder = getLadderTier(quantity);
-  const bfOff = BLACK_FRIDAY_ACTIVE ? 0.15 : 0;
-  const appliedOff = Math.max(ladder.off, bfOff);
-  const unitAfterOff = Math.round(basePrice * (1 - appliedOff));
-  const totalAfterOff = unitAfterOff * quantity;
-  const totalBefore = basePrice * quantity;
-  const totalSavings = totalBefore - totalAfterOff;
+  const formattedUnit = formatARS(basePrice);
+  const formattedTotal = formatARS(totalPrice);
 
-  const formattedDiscounted = formatARS(totalAfterOff);
-  const formattedBaseTotal = formatARS(totalBefore);
-  const formattedSavings = formatARS(totalSavings);
-
-  // ——— Agregar al carrito (SIEMPRE con precio base; el Cart calcula el descuento)
+  // ——— Agregar al carrito (SIN DESCUENTOS) ——————————————
   const handleAddToCart = () => {
     if (!product) return;
     addItem({
       product: {
         id: product.id,
         name: product.name,
-        basePrice: product.basePrice, // ← guardamos el base unitario
+        basePrice: basePrice, // unitario sin descuento
         images: product.images,
       },
       quantity,
-      price: product.basePrice,        // ← idem, base unitario; Cart aplica la escalera
+      price: basePrice, // unitario sin descuento
       selectedSize,
       selectedInterior,
       selectedCover,
       personalization: personalization || undefined,
       selectedModel: selectedModelLabel,
     });
+
     toast.success('¡Producto agregado al carrito!', {
       description: `${product.name} ${personalization ? `- "${personalization}"` : ''}`,
     });
   };
-
-  // ——— Ayuda: “sumá X unidades” para próximo escalón
-  const nextTier = getNextTier(quantity);
-  const unitsToNext = nextTier ? Math.max(nextTier.qty - quantity, 0) : 0;
 
   if (!product) {
     return (
@@ -226,23 +175,6 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen overflow-x-clip">
       <Header />
-
-      {BLACK_FRIDAY_ACTIVE && (
-        <div className="sticky top-16 z-40 bg-black text-white">
-          <div className="container px-4 py-2 flex items-center justify-between gap-3">
-            <span className="text-sm sm:text-base font-semibold flex items-center gap-2">
-              <Badge className="bg-amber-400 text-black hover:bg-amber-400">-15% Black Friday</Badge>
-              Solo por tiempo limitado
-            </span>
-            {BLACK_FRIDAY_END_ISO && (
-              <span className="text-xs sm:text-sm flex items-center gap-1 opacity-90">
-                <Timer className="h-4 w-4" />
-                Termina en: {countdown}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
 
       <main className="py-8 w-full max-w-full">
         <div className="container px-4">
@@ -275,79 +207,22 @@ const ProductDetail = () => {
                   )}
                 </div>
 
-                {/* Precio claro (descuento + tachado + ahorro) */}
+                {/* Precio (SIN DESCUENTOS) */}
                 <div className="mt-3 sm:mt-4 space-y-1">
                   <div className="flex items-baseline gap-3 flex-wrap">
                     <span className="text-2xl sm:text-3xl font-bold text-primary">
-                      {formattedDiscounted}
+                      {formattedUnit}
                     </span>
-                    <span className="text-lg line-through text-muted-foreground">
-                      {formattedBaseTotal}
+                    <span className="text-sm text-muted-foreground">
+                      por unidad
                     </span>
-                    <Badge variant="outline" className="font-semibold">
-                      {Math.round(appliedOff * 100)}% OFF
-                    </Badge>
                   </div>
-                  <p className="text-xs text-emerald-700">
-                    Ahorro: {formattedSavings} (aplicado automáticamente).
+                  <p className="text-sm text-muted-foreground">
+                    Total por {quantity} unidad{quantity > 1 ? 'es' : ''}: <span className="font-semibold text-slate-900">{formattedTotal}</span>
                   </p>
                 </div>
 
                 <p className="text-muted-foreground mt-3 break-words">{product.description}</p>
-              </div>
-
-              {/* Escalera de descuentos (chips + progreso) */}
-              <div className="space-y-3 rounded-xl border p-3 sm:p-4">
-                <div className="flex items-center justify-center gap-2 flex-wrap">
-                  {LADDER.map(t => {
-                    const active = appliedOff === t.off;
-                    return (
-                      <span
-                        key={t.qty}
-                        className={[
-                          "px-3 py-1.5 rounded-full text-sm font-medium",
-                          active ? "bg-amber-400 text-black" : "bg-slate-100 text-slate-700"
-                        ].join(" ")}
-                        title={`Desde ${t.qty} unidad${t.qty > 1 ? 'es' : ''}`}
-                      >
-                        {t.qty}{t.qty >= 3 ? '+' : ''} u • {t.label}
-                      </span>
-                    );
-                  })}
-                </div>
-
-                {/* Hint para subir de escalón */}
-                {nextTier && unitsToNext > 0 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-                    <p className="text-sm text-slate-600 text-center sm:text-left">
-                      Sumá <strong>{unitsToNext}</strong> unidad{unitsToNext > 1 ? 'es' : ''} y pasás a <strong>{Math.round(nextTier.off * 100)}% OFF</strong>.
-                    </p>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setQuantity(q => q + 1)}
-                      >
-                        Agregar 1 y ahorrar más
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setQuantity(nextTier.qty)}
-                        className="hidden sm:inline-flex"
-                      >
-                        Ir a {nextTier.qty} u
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Etiqueta responsive con detalle compacto */}
-                <div className="flex items-center justify-center gap-2 text-center">
-                  <Badge variant="outline" className="px-3 py-1.5 text-[0.8rem] leading-snug whitespace-normal break-words">
-                    {LADDER_LABEL}
-                  </Badge>
-                </div>
               </div>
 
               {/* —— Segmented Control —— */}
@@ -443,7 +318,11 @@ const ProductDetail = () => {
                       <Label>Tamaño</Label>
                       <div className="flex flex-wrap gap-2">
                         {product.sizes.map((size) => (
-                          <Button key={size} variant={selectedSize === size ? 'default' : 'outline'} onClick={() => setSelectedSize(size)}>
+                          <Button
+                            key={size}
+                            variant={selectedSize === size ? 'default' : 'outline'}
+                            onClick={() => setSelectedSize(size)}
+                          >
                             {size}
                           </Button>
                         ))}
@@ -494,11 +373,6 @@ const ProductDetail = () => {
                           onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                           className="w-24"
                         />
-                        {nextTier && (
-                          <Button variant="secondary" size="sm" onClick={() => setQuantity(q => Math.max(q, nextTier.qty))}>
-                            Ir a {nextTier.qty} u ({Math.round(nextTier.off * 100)}% OFF)
-                          </Button>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -579,7 +453,6 @@ const ProductDetail = () => {
                           Definir personalización por WhatsApp
                         </a>
                       </Button>
-                      {/* Botón corregido: hace scroll confiable al bloque "inspirate" */}
                       <Button variant="outline" className="w-full" onClick={handleScrollToInspire}>
                         Ver ideas e inspiración
                       </Button>
@@ -613,7 +486,11 @@ const ProductDetail = () => {
                       <Label>Tamaño</Label>
                       <div className="flex flex-wrap gap-2">
                         {product.sizes.map((size) => (
-                          <Button key={size} variant={selectedSize === size ? 'default' : 'outline'} onClick={() => setSelectedSize(size)}>
+                          <Button
+                            key={size}
+                            variant={selectedSize === size ? 'default' : 'outline'}
+                            onClick={() => setSelectedSize(size)}
+                          >
                             {size}
                           </Button>
                         ))}
@@ -621,8 +498,6 @@ const ProductDetail = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Interior</Label>
-                      <div className="space-y-2">
                       <Label>Interior</Label>
                       <div className="flex flex-wrap gap-2">
                         {product.interiors.map((interior) => (
@@ -636,7 +511,6 @@ const ProductDetail = () => {
                           </Button>
                         ))}
                       </div>
-                    </div>
                     </div>
 
                     <div className="space-y-2">
