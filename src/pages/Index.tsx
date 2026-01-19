@@ -8,6 +8,7 @@ import { Testimonials } from '@/components/home/Testimonials';
 import { ShippingInfo } from '@/components/home/ShippingInfo';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import MobileUSPs from '@/components/home/MobileUSPs';
+import Promo2x1Modal from '@/components/promos/Promo2x1';
 // import Promo2x1Modal from '@/components/promos/Promo2x1';
 import AppVars from '../data/data';
 
@@ -37,11 +38,11 @@ const Index = () => {
       </div>
 
       {/* ——— Modal 2×1 (sólo diseños en stock) con delay/cooldown ——— */}
-      {/* <Promo2x1Modal
+      <Promo2x1Modal
         waNumber={AppVars.phoneNumber}
         cooldownDays={7}      // no reabrir por 7 días tras cerrar
         delayMs={5500}        // delay mínimo recomendado para no ser intrusivo
-      /> */}
+      />
 
       <Header />
       <main>
