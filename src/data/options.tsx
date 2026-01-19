@@ -1,6 +1,5 @@
 import { AgendaModelOption } from "@/components/products/AgendaModelOption";
 const routeBase = "assets/";
-
 export const modeloOptions: AgendaModelOption[] = [
   {
     "id": "48",

@@ -19,7 +19,16 @@ export const FeaturedProducts = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {featured.map(product => (
             <div key={product.id} className="relative">
+              
               <ProductCard key={product.id} product={product} />
+              {/* Badge pequeño en esquina (refuerzo visual sin invadir) */}
+                    {
+                      product.name.includes('Agenda') && (
+                        <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
+                          DISPONIBLE 2X1
+                        </span>
+                      )
+                    }
               {/* Descuentos  */}
               {/* <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
                 hasta -30%

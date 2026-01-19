@@ -53,6 +53,7 @@ const ProductDetail = () => {
   const [selectedCover, setSelectedCover] = useState<CoverType>(product?.coverTypes?.[0] || 'dura');
   const [personalization, setPersonalization] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const PROMO_2X1_LABEL_DETAIL = 'Consultá diseños en stock por WhatsApp'; // usado en varios lados
 
   // ——— Modo (modelos listos | personalizar)
   const [mode, setMode] = useState<Mode>('ready');
@@ -140,6 +141,7 @@ const ProductDetail = () => {
         name: product.name,
         basePrice: basePrice, // unitario sin descuento
         images: product.images,
+        category: product.category,
       },
       quantity,
       price: basePrice, // unitario sin descuento
@@ -175,6 +177,15 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen overflow-x-clip">
       <Header />
+      {/* Barra informativa sticky: 2X1 */}
+            <div className="sticky top-16 z-40 bg-black text-white">
+              <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-amber-400 text-black hover:bg-amber-400">2X1</Badge>
+                  <span className="text-sm sm:text-base font-semibold">{PROMO_2X1_LABEL_DETAIL}</span>
+                </div>
+              </div>
+            </div>
 
       <main className="py-8 w-full max-w-full">
         <div className="container px-4">

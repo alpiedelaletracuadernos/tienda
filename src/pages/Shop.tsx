@@ -32,6 +32,7 @@ const DISCOUNT_LADDER = [
 ] as const;
 
 const LADDER_LABEL = '1u -15% · 2u -20% · 3u -30%';
+const PROMO_2X1_LABEL = '2X1 en agendas con diseños en stock, por tiempo limitado'; // usado en varios lados
 
 // (Opcional) mismo set de estilos de personalización para contexto visual
 const PERSONALIZATION_STYLES = [
@@ -147,6 +148,15 @@ const Shop = () => {
     <div className="min-h-screen overflow-x-clip">
       <Header />
 
+      {/* Barra informativa sticky: 2X1 */}
+      <div className="sticky top-16 z-40 bg-black text-white">
+        <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
+            <span className="text-sm sm:text-base font-semibold">{PROMO_2X1_LABEL}</span>
+          </div>
+        </div>
+      </div>
       {/* Barra informativa sticky: escalera de descuentos */}
       {/* <div className="sticky top-16 z-40 bg-black text-white">
         <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
@@ -303,6 +313,14 @@ const Shop = () => {
                 {filteredProducts.map((product, idx) => (
                   <div key={product.id} className="relative">
                     <ProductCard product={product} />
+                    {/* Badge pequeño en esquina (refuerzo visual sin invadir) */}
+                    {
+                      product.name.includes('Agenda') && (
+                        <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
+                          DISPONIBLE 2X1
+                        </span>
+                      )
+                    }
                     {/* Badge pequeño en esquina (refuerzo visual sin invadir) */}
                     {/* <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
                       hasta -30%

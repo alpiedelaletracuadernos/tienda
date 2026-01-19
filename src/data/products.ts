@@ -265,7 +265,7 @@ export const products: Product[] = [
     name: "Agenda 2 dias por hoja 2026",
     slug: "agenda-2-dias-por-hoja-a5",
     category: "agendas",
-    description: "MMás espacio por día para anotar TODO! Formato de 2 días por cada hoja con bloques amplios para escribir. Personaliza la tapa con tu nombre o lo que más te guste. Hecha a mano por pedido, con tapa dura y en papel de 80gr con anillado doble alambre. Entrega rápida. Envíos a todo el país y retiro en zona centro de San Nicolás de los Arroyos.",
+    description: "Más espacio por día para anotar TODO! Formato de 2 días por cada hoja con bloques amplios para escribir. Personaliza la tapa con tu nombre o lo que más te guste. Hecha a mano por pedido, con tapa dura y en papel de 80gr con anillado doble alambre. Entrega rápida. Envíos a todo el país y retiro en zona centro de San Nicolás de los Arroyos.",
     basePrice: 39930,
     sizes: ["A5"],
     interiors: ["dos-por-hoja"],

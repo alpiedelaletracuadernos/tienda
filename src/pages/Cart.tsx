@@ -1,4 +1,5 @@
 // src/pages/Cart.tsx
+import { useMemo } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { useCart } from '@/hooks/use-cart';
@@ -7,18 +8,26 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { formatARS } from '@/lib/currency';
+import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
+
+function getLineKey(item: any) {
+  return [
+    item.product.id,
+    item.selectedSize ?? '',
+    item.selectedInterior ?? '',
+    item.selectedCover ?? '',
+    item.personalization ?? '',
+  ].join('|');
+}
 
 export default function Cart() {
-  const { items, removeItem, updateQuantity, getTotalPrice, clearCart } = useCart();
+  const { items, removeItem, updateQuantity, clearCart } = useCart();
 
-  console.log('Cart items:', items);
+  const pricing = useMemo(() => calculateCartPricing(items), [items]);
 
-  // Subtotal / Total: sin descuentos
-  const subtotal = getTotalPrice();
-  const totalQty = items.reduce((acc, it) => acc + (it.quantity ?? 0), 0);
-
-  const formattedSubtotal = formatARS(subtotal);
-  const formattedTotal = formatARS(subtotal);
+  const totalQty = pricing.totalQty;
+  const formattedSubtotal = formatARS(pricing.subtotalList);
+  const formattedTotal = formatARS(pricing.total);
 
   if (items.length === 0) {
     return (
@@ -52,13 +61,18 @@ export default function Cart() {
             {/* Items */}
             <div className="lg:col-span-2 space-y-4">
               {items.map((item) => {
-                const unitPrice = item.price; // precio unitario guardado en el carrito (sin descuentos)
-                const lineSubtotal = unitPrice * item.quantity;
-                const formattedLine = formatARS(lineSubtotal);
+                const key = getLineKey(item);
+                const line = pricing.lines[key];
+
+                const unitPrice = item.product.basePrice; // precio de lista
+                const listLineSubtotal = unitPrice * item.quantity;
+
+                const formattedLineList = formatARS(listLineSubtotal);
+                const formattedLineTotal = formatARS(line?.total ?? listLineSubtotal);
 
                 return (
                   <Card
-                    key={`${item.product.id}-${item.selectedSize}-${item.selectedInterior}-${item.selectedCover}-${item.personalization ?? ''}`}
+                    key={key}
                     className="overflow-hidden"
                   >
                     <CardContent className="p-6">
@@ -90,7 +104,8 @@ export default function Cart() {
                                   item.product.id,
                                   item.selectedSize,
                                   item.selectedInterior,
-                                  item.selectedCover
+                                  item.selectedCover,
+                                  item.personalization
                                 )
                               }
                               aria-label="Eliminar ítem"
@@ -118,7 +133,8 @@ export default function Cart() {
                                     item.selectedSize,
                                     item.selectedInterior,
                                     item.selectedCover,
-                                    Math.max(1, item.quantity - 1)
+                                    Math.max(1, item.quantity - 1),
+                                    item.personalization
                                   )
                                 }
                                 aria-label="Restar una unidad"
@@ -138,7 +154,8 @@ export default function Cart() {
                                     item.selectedSize,
                                     item.selectedInterior,
                                     item.selectedCover,
-                                    item.quantity + 1
+                                    item.quantity + 1,
+                                    item.personalization
                                   )
                                 }
                                 aria-label="Sumar una unidad"
@@ -147,8 +164,28 @@ export default function Cart() {
                               </Button>
                             </div>
 
-                            {/* Line Subtotal */}
-                            <p className="text-lg font-bold text-primary">{formattedLine}</p>
+                            {/* Line pricing */}
+                            <div className="text-right">
+                              {line?.discount > 0 ? (
+                                <>
+                                  <p className="text-sm text-muted-foreground line-through">
+                                    {formattedLineList}
+                                  </p>
+                                  <p className="text-lg font-bold text-primary">
+                                    {formattedLineTotal}
+                                  </p>
+                                  {line.freeUnits > 0 && (
+                                    <p className="text-xs text-muted-foreground">
+                                      2x1 aplicado: {line.freeUnits} gratis
+                                    </p>
+                                  )}
+                                </>
+                              ) : (
+                                <p className="text-lg font-bold text-primary">
+                                  {formattedLineList}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -170,9 +207,18 @@ export default function Cart() {
 
                   <div className="space-y-2">
                     <div className="flex justify-between text-muted-foreground">
-                      <span>Subtotal ({totalQty} {totalQty === 1 ? 'unidad' : 'unidades'})</span>
+                      <span>
+                        Subtotal ({totalQty} {totalQty === 1 ? 'unidad' : 'unidades'})
+                      </span>
                       <span>{formattedSubtotal}</span>
                     </div>
+
+                    {pricing.promo && pricing.promo.amount > 0 && (
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>{pricing.promo.label}</span>
+                        <span>-{formatARS(pricing.promo.amount)}</span>
+                      </div>
+                    )}
 
                     <div className="flex justify-between text-muted-foreground">
                       <span>Envío</span>

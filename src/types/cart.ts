@@ -2,7 +2,7 @@
 import type { Product, ProductSize, InteriorType, CoverType } from './product';
 
 export interface CartItem {
-  product: Pick<Product, 'id' | 'name' | 'basePrice' | 'images'>;
+  product: Pick<Product, 'id' | 'name' | 'basePrice' | 'images' | 'category'>;
   quantity: number;
   price: number; // unitario guardado
   personalization?: string;

@@ -23,14 +23,14 @@ const Index = () => {
         <div className="container px-4 py-2">
           <div className="flex items-center justify-center gap-2 text-center">
             {/* etiqueta responsive (envuelve a varias líneas si hace falta) */}
-            <span className="inline-flex items-center justify-center rounded-full border border-amber-300 bg-white px-3 py-1 text-[0.8rem] font-semibold text-amber-800 whitespace-normal break-words">
+            {/* <span className="inline-flex items-center justify-center rounded-full border border-amber-300 bg-white px-3 py-1 text-[0.8rem] font-semibold text-amber-800 whitespace-normal break-words">
               {LADDER_LABEL}
-            </span>
+            </span> */}
             <a
               href="/catalogo"
-              className="hidden sm:inline text-sm font-medium text-amber-800 underline underline-offset-4 hover:no-underline"
+              className=" inline text-sm font-medium text-amber-800 underline underline-offset-4 hover:no-underline"
             >
-              Ver catálogo
+              2x1 en diseños en stock. ¡Aprovechá la oferta!
             </a>
           </div>
         </div>
