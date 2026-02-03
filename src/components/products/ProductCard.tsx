@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
+import { DESCUENTOS } from '@/config/promotions';
 
 interface ProductCardProps {
   product: Product;
@@ -17,18 +18,21 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     minimumFractionDigits: 0,
   }).format(product.basePrice);
 
+  let formattedDiscountedPrice = null;
+  if (DESCUENTOS.enabled) {
+    const discountPercentage = parseInt(import.meta.env.VITE_PORCENTAJE_DESCUENTO) || 0;
+    const discountedPrice = product.basePrice * (1 - discountPercentage / 100);
+    formattedDiscountedPrice = new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+    }).format(discountedPrice);
+  }
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
       <Link to={`/producto/${product.slug}`}>
         {/* 👇 Hacemos el wrapper RELATIVE para anclar el badge */}
         <div className="relative aspect-square overflow-hidden bg-muted">
-          {/* Badge 2x1 visible siempre sobre la imagen */}
-          {/* {twoForOne && (
-            <span className="absolute left-2 top-2 z-10 rounded-full bg-amber-400 text-black text-xs font-semibold px-2 py-1 shadow">
-              2×1 en stock
-            </span>
-          )} */}
-
           <img
             src={product.images[0]}
             alt={product.name}
@@ -51,14 +55,26 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           )}
         </div>
 
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {product.description}
-        </p>
+        <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
 
-        <div className="flex items-baseline gap-1">
-          <span className="text-sm text-muted-foreground">Desde</span>
-          <span className="text-2xl font-bold text-primary">{formattedPrice}</span>
-        </div>
+        {(DESCUENTOS.enabled && product.category === 'agendas') ||
+        product.category === 'agendas docentes' ? (
+          <>
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm text-muted-foreground">Desde</span>
+
+              <span className="text-sm text-muted-foreground line-through">{formattedPrice}</span>
+              <span className="text-2xl font-bold text-primary">{formattedDiscountedPrice}</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm text-muted-foreground">Desde</span>
+              <span className="text-sm text-muted-foreground">{formattedPrice}</span>
+            </div>
+          </>
+        )}
 
         {/* {twoForOne && (
           <p className="text-xs text-amber-700 mt-1">

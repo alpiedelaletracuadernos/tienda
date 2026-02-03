@@ -12,23 +12,25 @@ export const FeaturedProducts = () => {
         <div className="text-center space-y-4 mb-12">
           <h2 className="text-4xl md:text-5xl font-bold">Productos Destacados</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Descubrí nuestras agendas y cuadernos más populares. Cada uno hecho a mano con amor y atención al detalle.
+            Descubrí nuestras agendas y cuadernos más populares. Cada uno hecho a mano con amor y
+            atención al detalle.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {featured.map(product => (
+          {featured.map((product) => (
             <div key={product.id} className="relative">
-              
               <ProductCard key={product.id} product={product} />
-              {/* Badge pequeño en esquina (refuerzo visual sin invadir) */}
-                    {
-                      product.name.includes('Agenda') && (
-                        <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
-                          DISPONIBLE 2X1
-                        </span>
-                      )
-                    }
+              {
+                // Etiqueta Descuento
+                import.meta.env.VITE_DESCUENTOS === 'true' &&
+                  (product.category === 'agendas' || product.category === 'agendas docentes') && (
+                    <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
+                      Promo {import.meta.env.VITE_PORCENTAJE_DESCUENTO}% OFF
+                    </span>
+                  )
+              }
+
               {/* Descuentos  */}
               {/* <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
                 hasta -30%

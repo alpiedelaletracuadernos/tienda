@@ -12,15 +12,24 @@ import { useCart } from '@/hooks/use-cart';
 
 import { ProductCategory, ProductSize, InteriorType } from '@/types/product';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Info, Sparkles, ShoppingCart } from 'lucide-react';
+import { DESCUENTOS, PROMO_2X1 } from '@/config/promotions';
 
 // ———————————————————————————————————————————————————————————————
 // Escalera de descuentos (comunicación en catálogo)
@@ -68,8 +77,8 @@ const Shop = () => {
 
   // Leer query params y setear filtros iniciales / cuando cambie la URL
   useEffect(() => {
-    const catParam = searchParams.get('cat');      // ej: agendas
-    const sizeParam = searchParams.get('size');    // ej: A5
+    const catParam = searchParams.get('cat'); // ej: agendas
+    const sizeParam = searchParams.get('size'); // ej: A5
     const interiorParam = searchParams.get('interior'); // ej: semanal
 
     // Categoría
@@ -112,17 +121,29 @@ const Shop = () => {
     }
   }, [searchParams]);
 
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = products.filter((product) => {
     const categoryMatch = selectedCategory === 'all' || product.category === selectedCategory;
     const sizeMatch = selectedSize === 'all' || product.sizes.includes(selectedSize as ProductSize);
-    const interiorMatch = selectedInterior === 'all' || product.interiors.includes(selectedInterior as InteriorType);
+    const interiorMatch =
+      selectedInterior === 'all' || product.interiors.includes(selectedInterior as InteriorType);
     return categoryMatch && sizeMatch && interiorMatch;
   });
 
   // Construcción del mensaje de WhatsApp (centralizado)
   const whatsappMessage = useMemo(() => {
-    const filters = { category: selectedCategory, size: selectedSize, interior: selectedInterior } as const;
-    const personalization = { styleId, buyerName, buyerCity, deliveryMethod, deliveryAddress, buyerNotes } as const;
+    const filters = {
+      category: selectedCategory,
+      size: selectedSize,
+      interior: selectedInterior,
+    } as const;
+    const personalization = {
+      styleId,
+      buyerName,
+      buyerCity,
+      deliveryMethod,
+      deliveryAddress,
+      buyerNotes,
+    } as const;
     return buildShopMessage(filters, personalization);
   }, [
     selectedCategory,
@@ -140,7 +161,8 @@ const Shop = () => {
 
   // ——— Helpers de UI ———
   const ladderList = useMemo(
-    () => DISCOUNT_LADDER.map(t => `${t.qty} ${t.qty === 1 ? 'unidad' : 'unidades'} — ${t.off}% OFF`),
+    () =>
+      DISCOUNT_LADDER.map((t) => `${t.qty} ${t.qty === 1 ? 'unidad' : 'unidades'} — ${t.off}% OFF`),
     []
   );
 
@@ -148,15 +170,33 @@ const Shop = () => {
     <div className="min-h-screen overflow-x-clip">
       <Header />
 
-      {/* Barra informativa sticky: 2X1 */}
-      <div className="sticky top-16 z-40 bg-black text-white">
-        <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
-            <span className="text-sm sm:text-base font-semibold">{PROMO_2X1_LABEL}</span>
+      {DESCUENTOS.enabled && (
+        <>
+          {/* Descuentos */}
+          <div className="sticky top-16 z-40 bg-black text-white">
+            <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
+                <span className="text-sm sm:text-base font-semibold">{DESCUENTOS.label}</span>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
+      {PROMO_2X1.enabled && (
+        <>
+          {/* Barra informativa sticky: 2X1 */}
+          <div className="sticky top-16 z-40 bg-black text-white">
+            <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
+                <span className="text-sm sm:text-base font-semibold">{PROMO_2X1_LABEL}</span>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* Barra informativa sticky: escalera de descuentos */}
       {/* <div className="sticky top-16 z-40 bg-black text-white">
         <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
@@ -212,7 +252,6 @@ const Shop = () => {
                   <span className="[text-wrap:balance]">{LADDER_LABEL}</span>
                 </Badge> */}
               </div>
-
             </div>
           </div>
         </section>
@@ -223,7 +262,7 @@ const Shop = () => {
             <div className="flex flex-col sm:flex-row gap-4 w-full max-w-full">
               <Select
                 value={selectedCategory}
-                onValueChange={v => setSelectedCategory(v as ProductCategory | 'all')}
+                onValueChange={(v) => setSelectedCategory(v as ProductCategory | 'all')}
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Categoría" />
@@ -240,7 +279,7 @@ const Shop = () => {
 
               <Select
                 value={selectedSize}
-                onValueChange={v => setSelectedSize(v as ProductSize | 'all')}
+                onValueChange={(v) => setSelectedSize(v as ProductSize | 'all')}
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Tamaño" />
@@ -254,7 +293,7 @@ const Shop = () => {
 
               <Select
                 value={selectedInterior}
-                onValueChange={v => setSelectedInterior(v as InteriorType | 'all')}
+                onValueChange={(v) => setSelectedInterior(v as InteriorType | 'all')}
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Interior" />
@@ -314,22 +353,20 @@ const Shop = () => {
                   <div key={product.id} className="relative">
                     <ProductCard product={product} />
                     {/* Badge pequeño en esquina (refuerzo visual sin invadir) */}
-                    {
-                      product.name.includes('Agenda') && (
-                        <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
-                          DISPONIBLE 2X1
-                        </span>
-                      )
-                    }
+                    {product.name.includes('Agenda') || product.name.includes('Agenda Docente') ? (
+                      <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
+                        Promo 40% OFF
+                      </span>
+                    ) : null}
                     {/* Badge pequeño en esquina (refuerzo visual sin invadir) */}
                     {/* <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
                       hasta -30%
                     </span> */}
                     {/* Insertar una card educativa a mitad de la primera “pantalla” */}
-                    {(
+                    {
                       (idx === 1 && filteredProducts.length > 2) || // mobile 2col
-                      (idx === 3 && filteredProducts.length > 4)    // desktop 4col
-                    )}
+                        (idx === 3 && filteredProducts.length > 4) // desktop 4col
+                    }
                   </div>
                 ))}
               </div>
@@ -347,10 +384,7 @@ const Shop = () => {
       <Footer />
 
       {/* Botón flotante: FINALIZAR COMPRA */}
-      <WhatsAppButton
-        variant="floating"
-        message={whatsappMessage}
-      />
+      <WhatsAppButton variant="floating" message={whatsappMessage} />
     </div>
   );
 };

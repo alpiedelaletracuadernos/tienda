@@ -25,9 +25,14 @@ export default function Cart() {
 
   const pricing = useMemo(() => calculateCartPricing(items), [items]);
 
-  const totalQty = pricing.totalQty;
-  const formattedSubtotal = formatARS(pricing.subtotalList);
-  const formattedTotal = formatARS(pricing.total);
+  const totalQty = pricing.totalQty ?? 0;
+  const formattedSubtotal = formatARS(pricing.subtotalList ?? 0);
+
+  // ✅ CHANGE: el total final YA viene calculado por el motor
+  const formattedTotal = formatARS(pricing.total ?? 0);
+
+  const has2x1 = (pricing.promo?.amount ?? 0) > 0;
+  const hasPercent = (pricing.percent?.amount ?? 0) > 0;
 
   if (items.length === 0) {
     return (
@@ -62,22 +67,26 @@ export default function Cart() {
             <div className="lg:col-span-2 space-y-4">
               {items.map((item) => {
                 const key = getLineKey(item);
-                const line = pricing.lines[key];
+                const line = pricing.lines?.[key];
 
-                const unitPrice = item.product.basePrice; // precio de lista
-                const listLineSubtotal = unitPrice * item.quantity;
+                const unitPrice = item.product?.basePrice ?? 0;
+                const listLineSubtotal = unitPrice * (item.quantity ?? 0);
+
+                // ✅ CHANGE: total final por línea sale del motor
+                const lineFinal = line?.total ?? listLineSubtotal;
 
                 const formattedLineList = formatARS(listLineSubtotal);
-                const formattedLineTotal = formatARS(line?.total ?? listLineSubtotal);
+                const formattedLineFinal = formatARS(lineFinal);
+
+                const hasAnyPromo =
+                  (line?.discount ?? 0) > 0 ||
+                  (line?.freeUnits ?? 0) > 0 ||
+                  (line?.percentDiscount ?? 0) > 0;
 
                 return (
-                  <Card
-                    key={key}
-                    className="overflow-hidden"
-                  >
+                  <Card key={key} className="overflow-hidden">
                     <CardContent className="p-6">
                       <div className="flex gap-6">
-                        {/* Image */}
                         <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted shrink-0">
                           <img
                             src={item.product.images[0]}
@@ -86,13 +95,14 @@ export default function Cart() {
                           />
                         </div>
 
-                        {/* Details */}
                         <div className="flex-1 space-y-2 min-w-0">
                           <div className="flex justify-between items-start gap-3">
                             <div className="min-w-0">
                               <h3 className="font-semibold break-words">{item.product.name}</h3>
                               {item.personalization && (
-                                <p className="text-sm text-primary break-words">"{item.personalization}"</p>
+                                <p className="text-sm text-primary break-words">
+                                  "{item.personalization}"
+                                </p>
                               )}
                             </div>
 
@@ -121,7 +131,6 @@ export default function Cart() {
                           </div>
 
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
-                            {/* Quantity */}
                             <div className="flex items-center gap-2">
                               <Button
                                 variant="outline"
@@ -137,7 +146,6 @@ export default function Cart() {
                                     item.personalization
                                   )
                                 }
-                                aria-label="Restar una unidad"
                               >
                                 <Minus className="h-3 w-3" />
                               </Button>
@@ -158,25 +166,30 @@ export default function Cart() {
                                     item.personalization
                                   )
                                 }
-                                aria-label="Sumar una unidad"
                               >
                                 <Plus className="h-3 w-3" />
                               </Button>
                             </div>
 
-                            {/* Line pricing */}
                             <div className="text-right">
-                              {line?.discount > 0 ? (
+                              {hasAnyPromo ? (
                                 <>
                                   <p className="text-sm text-muted-foreground line-through">
                                     {formattedLineList}
                                   </p>
                                   <p className="text-lg font-bold text-primary">
-                                    {formattedLineTotal}
+                                    {formattedLineFinal}
                                   </p>
-                                  {line.freeUnits > 0 && (
+
+                                  {line?.freeUnits > 0 && (
                                     <p className="text-xs text-muted-foreground">
                                       2x1 aplicado: {line.freeUnits} gratis
+                                    </p>
+                                  )}
+
+                                  {line?.percentDiscount > 0 && (
+                                    <p className="text-xs text-muted-foreground">
+                                      Descuento aplicado: -{formatARS(line.percentDiscount)}
                                     </p>
                                   )}
                                 </>
@@ -213,10 +226,17 @@ export default function Cart() {
                       <span>{formattedSubtotal}</span>
                     </div>
 
-                    {pricing.promo && pricing.promo.amount > 0 && (
+                    {has2x1 && pricing.promo && (
                       <div className="flex justify-between text-muted-foreground">
                         <span>{pricing.promo.label}</span>
                         <span>-{formatARS(pricing.promo.amount)}</span>
+                      </div>
+                    )}
+
+                    {hasPercent && pricing.percent && (
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>{pricing.percent.label}</span>
+                        <span>-{formatARS(pricing.percent.amount)}</span>
                       </div>
                     )}
 

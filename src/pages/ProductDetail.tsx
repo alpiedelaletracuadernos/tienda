@@ -12,10 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/hooks/use-cart';
 import { toast } from 'sonner';
-import {
-  ArrowLeft, ShoppingCart, Wand2, Maximize2,
-  LayoutGrid, Sparkles
-} from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Wand2, Maximize2, LayoutGrid, Sparkles } from 'lucide-react';
 import { ProductSize, InteriorType, CoverType } from '@/types/product';
 import AppVars from '@/data/data';
 import { buildPdpMessage, buildWaLink } from '@/lib/whatsapp';
@@ -24,6 +21,10 @@ import { AgendaModelSelector } from '@/components/products/AgendaModelOption';
 import ProductImageGallery from '@/components/products/ProductImageGallery';
 import FullscreenModelDialog from '@/components/products/FullscreenModelDialog';
 import { safeStorage } from '@/lib/safe-storage';
+
+//PROMOCIONES
+import { PROMO_2X1, DESCUENTOS } from '@/config/promotions';
+import { PROMOTIONS, isCategoryEligible } from '@/config/promotions';
 
 // —— WhatsApp ————————————————————————————————————————
 const WHATSAPP_NUMBER = AppVars.phoneNumber;
@@ -36,20 +37,35 @@ const PERSONALIZATION_STYLES = [
   { id: 'logo', label: 'Logo/Marca' },
 ] as const;
 
-type PersonalizationStyleId = typeof PERSONALIZATION_STYLES[number]['id'];
+type PersonalizationStyleId = (typeof PERSONALIZATION_STYLES)[number]['id'];
 type Mode = 'ready' | 'custom';
 
 const formatARS = (n: number) =>
-  new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 0,
+  }).format(n);
+
+const DISCOUNT_CATEGORIES = new Set(['agendas', 'agendas docentes']);
+
+const normalizeCategory = (c?: string) => (c ?? '').trim().toLowerCase();
+
+const isDiscountEligibleCategory = (category?: string) =>
+  DISCOUNT_CATEGORIES.has(normalizeCategory(category));
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const product = getProductBySlug(slug || '');
   const { addItem } = useCart();
+  const isEligible = PROMOTIONS.DESCUENTO && isCategoryEligible(product.category);
+  const rate = PROMOTIONS.PORCENTAJEDESCUENTO / 100;
 
   // ——— Estado base PDP
   const [selectedSize, setSelectedSize] = useState<ProductSize>(product?.sizes?.[0] || 'A5');
-  const [selectedInterior, setSelectedInterior] = useState<InteriorType>(product?.interiors?.[0] || 'semanal');
+  const [selectedInterior, setSelectedInterior] = useState<InteriorType>(
+    product?.interiors?.[0] || 'semanal'
+  );
   const [selectedCover, setSelectedCover] = useState<CoverType>(product?.coverTypes?.[0] || 'dura');
   const [personalization, setPersonalization] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -77,7 +93,7 @@ const ProductDetail = () => {
   }, [selectedModelId]);
 
   const selectedModelDef = useMemo(
-    () => modeloOptions.find(m => m.id === selectedModelId),
+    () => modeloOptions.find((m) => m.id === selectedModelId),
     [selectedModelId]
   );
   const selectedModelLabel = selectedModelDef?.modelo ?? 'a confirmar';
@@ -85,19 +101,21 @@ const ProductDetail = () => {
 
   // ——— Colecciones
   const collections = useMemo(
-    () => Array.from(new Set(modeloOptions.map(m => m.collection ?? 'otras'))),
+    () => Array.from(new Set(modeloOptions.map((m) => m.collection ?? 'otras'))),
     []
   );
   const [selectedCollection, setSelectedCollection] = useState<string>(collections[0] ?? 'todas');
   const filteredModels = useMemo(
     () =>
-      modeloOptions.filter(m =>
-        !selectedCollection || selectedCollection === 'todas' ? true : m.collection === selectedCollection
+      modeloOptions.filter((m) =>
+        !selectedCollection || selectedCollection === 'todas'
+          ? true
+          : m.collection === selectedCollection
       ),
     [selectedCollection]
   );
   const todasCollections = useMemo(
-    () => modeloOptions.filter(m => m.collection === 'Edicion-2026'),
+    () => modeloOptions.filter((m) => m.collection === 'Edicion-2026'),
     []
   );
   const selectedModelImage = selectedModelDef?.image ?? product?.images?.[0] ?? '';
@@ -109,42 +127,93 @@ const ProductDetail = () => {
     if (!product) return '';
     return buildPdpMessage(
       product,
-      { size: selectedSize, interior: selectedInterior, cover: selectedCover, modelLabel: selectedModelLabel, quantity },
-      personalization ? { text: personalization } : undefined,
+      {
+        size: selectedSize,
+        interior: selectedInterior,
+        cover: selectedCover,
+        modelLabel: selectedModelLabel,
+        quantity,
+      },
+      personalization ? { text: personalization } : undefined
     );
-  }, [product, selectedModelLabel, selectedSize, selectedInterior, selectedCover, personalization, quantity]);
+  }, [
+    product,
+    selectedModelLabel,
+    selectedSize,
+    selectedInterior,
+    selectedCover,
+    personalization,
+    quantity,
+  ]);
 
   const waPersonalizationMessage2 = useMemo(() => {
     if (!product) return '';
     return buildPdpMessage(
       product,
-      { size: selectedSize, interior: selectedInterior, cover: selectedCover, modelLabel: selectedModelLabel, quantity },
-      { text: personalization || undefined, styleId },
+      {
+        size: selectedSize,
+        interior: selectedInterior,
+        cover: selectedCover,
+        modelLabel: selectedModelLabel,
+        quantity,
+      },
+      { text: personalization || undefined, styleId }
     );
-  }, [product, selectedModelLabel, selectedSize, selectedInterior, selectedCover, personalization, styleId, quantity]);
+  }, [
+    product,
+    selectedModelLabel,
+    selectedSize,
+    selectedInterior,
+    selectedCover,
+    personalization,
+    styleId,
+    quantity,
+  ]);
 
   const modeSpecificMessage = mode === 'custom' ? waPersonalizationMessage2 : waReadyMessage2;
 
   // ——— Precios (SIN DESCUENTOS) ————————————————————————
-  const basePrice = product?.basePrice ?? 0; // unitario
-  const totalPrice = basePrice * quantity;
+  // const basePrice = product?.basePrice ?? 0; // unitario
+  // const totalPrice = basePrice * quantity;
 
-  const formattedUnit = formatARS(basePrice);
-  const formattedTotal = formatARS(totalPrice);
+  // const formattedUnit = formatARS(basePrice);
+  // const formattedTotal = formatARS(totalPrice);
+
+  //Descuentos
+  // ✅ CHANGE: cálculo de descuento SOLO si el producto es elegible.
+  // Motivo: el descuento debe depender de la categoría del producto,
+  // no de una promo global.
+
+  const discountedUnitPrice = isEligible
+    ? Math.round(product.basePrice * (1 - rate))
+    : product.basePrice;
+  const discountedTotalPrice = discountedUnitPrice * quantity;
+
+  const formattedUnit = formatARS(product.basePrice);
+  const formattedTotal = formatARS(product.basePrice * quantity);
+  const formattedDiscountedUnit = formatARS(discountedUnitPrice);
+  const formattedDiscountedTotal = formatARS(discountedTotalPrice);
 
   // ——— Agregar al carrito (SIN DESCUENTOS) ——————————————
+  // ✅ CHANGE: al carrito se guarda SIEMPRE precio de lista.
+  // Motivo: evita que el precio quede “cocinado” si cambia la promo.
+  // El carrito decide si aplica descuento según categoría.
   const handleAddToCart = () => {
     if (!product) return;
+
+    // ✅ promo por ítem (solo si es elegible)
+    const promoEligible = DESCUENTOS.enabled && isDiscountEligibleCategory(product.category);
+
     addItem({
       product: {
         id: product.id,
         name: product.name,
-        basePrice: basePrice, // unitario sin descuento
+        basePrice: product.basePrice,
         images: product.images,
-        category: product.category,
+        category: product.category, // ✅ importante: el carrito necesita la categoría para decidir
       },
       quantity,
-      price: basePrice, // unitario sin descuento
+      price: product.basePrice, // ✅ siempre lista
       selectedSize,
       selectedInterior,
       selectedCover,
@@ -162,7 +231,9 @@ const ProductDetail = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold">Producto no encontrado</h1>
-          <Button asChild><Link to="/catalogo">Volver al catálogo</Link></Button>
+          <Button asChild>
+            <Link to="/catalogo">Volver al catálogo</Link>
+          </Button>
         </div>
       </div>
     );
@@ -177,15 +248,32 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen overflow-x-clip">
       <Header />
-      {/* Barra informativa sticky: 2X1 */}
-            <div className="sticky top-16 z-40 bg-black text-white">
-              <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-amber-400 text-black hover:bg-amber-400">2X1</Badge>
-                  <span className="text-sm sm:text-base font-semibold">{PROMO_2X1_LABEL_DETAIL}</span>
-                </div>
+      {PROMO_2X1.enabled && (
+        <>
+          {/* Barra informativa sticky: 2X1 */}
+          <div className="sticky top-16 z-40 bg-black text-white">
+            <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-amber-400 text-black hover:bg-amber-400">2X1</Badge>
+                <span className="text-sm sm:text-base font-semibold">{PROMO_2X1_LABEL_DETAIL}</span>
               </div>
             </div>
+          </div>
+        </>
+      )}
+      {DESCUENTOS.enabled && (
+        <>
+          {/* Descuentos */}
+          <div className="sticky top-16 z-40 bg-black text-white">
+            <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
+                <span className="text-sm sm:text-base font-semibold">{DESCUENTOS.label}</span>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       <main className="py-8 w-full max-w-full">
         <div className="container px-4">
@@ -214,24 +302,50 @@ const ProductDetail = () => {
                 <div className="flex items-start justify-between gap-4 mb-2">
                   <h1 className="text-3xl sm:text-4xl font-bold break-words">{product.name}</h1>
                   {product.remainingQuota <= 5 && (
-                    <Badge variant="destructive" className="shrink-0">¡Solo {product.remainingQuota} disponibles!</Badge>
+                    <Badge variant="destructive" className="shrink-0">
+                      ¡Solo {product.remainingQuota} disponibles!
+                    </Badge>
                   )}
                 </div>
 
-                {/* Precio (SIN DESCUENTOS) */}
-                <div className="mt-3 sm:mt-4 space-y-1">
-                  <div className="flex items-baseline gap-3 flex-wrap">
-                    <span className="text-2xl sm:text-3xl font-bold text-primary">
-                      {formattedUnit}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      por unidad
-                    </span>
+                {/* ✅ CHANGE: UI consistente con formato ARS y solo muestra descuento si es elegible */}
+                {isEligible ? (
+                  <div className="mt-3 sm:mt-4 space-y-1">
+                    <div className="flex items-baseline gap-3 flex-wrap">
+                      <span className="text-sm text-muted-foreground line-through">
+                        {formattedUnit}
+                      </span>
+                      <span className="text-2xl sm:text-3xl font-bold text-primary">
+                        {formattedDiscountedUnit}
+                      </span>
+                      <Badge variant="outline" className="font-semibold">
+                        -{PROMOTIONS.PORCENTAJEDESCUENTO}%
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">por unidad</span>
+                    </div>
+
+                    <p className="text-sm text-muted-foreground">
+                      Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:{' '}
+                      <span className="font-semibold text-slate-900">
+                        {formattedDiscountedTotal}
+                      </span>
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Total por {quantity} unidad{quantity > 1 ? 'es' : ''}: <span className="font-semibold text-slate-900">{formattedTotal}</span>
-                  </p>
-                </div>
+                ) : (
+                  <div className="mt-3 sm:mt-4 space-y-1">
+                    <div className="flex items-baseline gap-3 flex-wrap">
+                      <span className="text-2xl sm:text-3xl font-bold text-primary">
+                        {formattedUnit}
+                      </span>
+                      <span className="text-sm text-muted-foreground">por unidad</span>
+                    </div>
+
+                    <p className="text-sm text-muted-foreground">
+                      Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:{' '}
+                      <span className="font-semibold text-slate-900">{formattedTotal}</span>
+                    </p>
+                  </div>
+                )}
 
                 <p className="text-muted-foreground mt-3 break-words">{product.description}</p>
               </div>
@@ -248,9 +362,11 @@ const ProductDetail = () => {
                     aria-selected={mode === 'ready'}
                     onClick={() => setMode('ready')}
                     className={[
-                      "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition",
-                      mode === 'ready' ? "bg-primary text-primary-foreground shadow" : "text-slate-700 hover:bg-slate-50"
-                    ].join(" ")}
+                      'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition',
+                      mode === 'ready'
+                        ? 'bg-primary text-primary-foreground shadow'
+                        : 'text-slate-700 hover:bg-slate-50',
+                    ].join(' ')}
                   >
                     <LayoutGrid className="h-4 w-4" />
                     Modelos listos
@@ -260,16 +376,19 @@ const ProductDetail = () => {
                     aria-selected={mode === 'custom'}
                     onClick={() => setMode('custom')}
                     className={[
-                      "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition",
-                      mode === 'custom' ? "bg-primary text-primary-foreground shadow" : "text-slate-700 hover:bg-slate-50"
-                    ].join(" ")}
+                      'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition',
+                      mode === 'custom'
+                        ? 'bg-primary text-primary-foreground shadow'
+                        : 'text-slate-700 hover:bg-slate-50',
+                    ].join(' ')}
                   >
                     <Sparkles className="h-4 w-4" />
                     Personalizar
                   </button>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  ¿Querés nombre, foto o frase? Tocá <strong>Personalizar</strong>. Si preferís un diseño ya listo, quedate en <strong>Modelos listos</strong>.
+                  ¿Querés nombre, foto o frase? Tocá <strong>Personalizar</strong>. Si preferís un
+                  diseño ya listo, quedate en <strong>Modelos listos</strong>.
                 </p>
               </div>
 
@@ -279,7 +398,11 @@ const ProductDetail = () => {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label>Modelo de Agenda</Label>
-                      <Button variant="link" className="px-0 text-xs" onClick={() => setMode('custom')}>
+                      <Button
+                        variant="link"
+                        className="px-0 text-xs"
+                        onClick={() => setMode('custom')}
+                      >
                         ¿Querés personalizar? Ver opciones →
                       </Button>
                     </div>
@@ -294,9 +417,11 @@ const ProductDetail = () => {
                             type="button"
                             onClick={() => setSelectedCollection(col)}
                             className={[
-                              "px-3 py-1.5 rounded-full text-sm transition-colors",
-                              isActive ? "bg-primary text-primary-foreground" : "bg-slate-100 text-slate-800 hover:bg-slate-200"
-                            ].join(" ")}
+                              'px-3 py-1.5 rounded-full text-sm transition-colors',
+                              isActive
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-slate-100 text-slate-800 hover:bg-slate-200',
+                            ].join(' ')}
                           >
                             {col === 'todas' ? 'Todas' : col.charAt(0).toUpperCase() + col.slice(1)}
                           </button>
@@ -395,7 +520,11 @@ const ProductDetail = () => {
                       Agregar al Carrito
                     </Button>
                     <Button asChild variant="outline" className="w-full">
-                      <a href={buildWaLink(WHATSAPP_NUMBER, waReadyMessage2)} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={buildWaLink(WHATSAPP_NUMBER, waReadyMessage2)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         Consultar por WhatsApp
                       </a>
                     </Button>
@@ -412,16 +541,26 @@ const ProductDetail = () => {
                         <Wand2 className="h-5 w-5 text-primary" />
                         <h3 className="font-semibold text-lg">Personalizá tu agenda</h3>
                       </div>
-                      <Button variant="link" className="px-0 text-xs" onClick={() => setMode('ready')}>
+                      <Button
+                        variant="link"
+                        className="px-0 text-xs"
+                        onClick={() => setMode('ready')}
+                      >
                         Ver modelos listos →
                       </Button>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Portada o interior: <strong>foto</strong>, <strong>frase</strong>, <strong>nombre</strong> o <strong>trama</strong>. Lo definimos por WhatsApp con <em>boceto previo</em>.
+                      Portada o interior: <strong>foto</strong>, <strong>frase</strong>,{' '}
+                      <strong>nombre</strong> o <strong>trama</strong>. Lo definimos por WhatsApp
+                      con <em>boceto previo</em>.
                     </p>
 
                     {/* Estilos */}
-                    <div role="radiogroup" aria-label="Estilos de personalización" className="flex flex-wrap gap-2">
+                    <div
+                      role="radiogroup"
+                      aria-label="Estilos de personalización"
+                      className="flex flex-wrap gap-2"
+                    >
                       {PERSONALIZATION_STYLES.map((s) => {
                         const selected = styleId === s.id;
                         return (
@@ -431,10 +570,12 @@ const ProductDetail = () => {
                             aria-checked={selected}
                             onClick={() => setStyleId(s.id)}
                             className={[
-                              "px-3 py-1.5 rounded-full text-sm transition-colors",
-                              "ring-1 ring-slate-300/60",
-                              selected ? "bg-primary text-primary-foreground ring-primary" : "bg-white hover:bg-slate-50"
-                            ].join(" ")}
+                              'px-3 py-1.5 rounded-full text-sm transition-colors',
+                              'ring-1 ring-slate-300/60',
+                              selected
+                                ? 'bg-primary text-primary-foreground ring-primary'
+                                : 'bg-white hover:bg-slate-50',
+                            ].join(' ')}
                           >
                             {s.label}
                           </button>
@@ -460,7 +601,11 @@ const ProductDetail = () => {
                     {/* CTA principal custom */}
                     <div className="grid sm:grid-cols-2 gap-3">
                       <Button asChild className="w-full">
-                        <a href={buildWaLink(WHATSAPP_NUMBER, waPersonalizationMessage2)} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={buildWaLink(WHATSAPP_NUMBER, waPersonalizationMessage2)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           Definir personalización por WhatsApp
                         </a>
                       </Button>
@@ -470,7 +615,10 @@ const ProductDetail = () => {
                     </div>
 
                     <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• Boceto incluido (1 revisión). Producción: 8–10 h. Entrega rápida 24–48 h (con recargo).</li>
+                      <li>
+                        • Boceto incluido (1 revisión). Producción: 8–10 h. Entrega rápida 24–48 h
+                        (con recargo).
+                      </li>
                       <li>• Para fotos: luz natural y al menos ~1500 px del lado más corto.</li>
                     </ul>
                   </div>
@@ -478,7 +626,11 @@ const ProductDetail = () => {
                   {/* Base para custom */}
                   <div className="space-y-3">
                     <Label>Elegí una base para personalizar</Label>
-                    <AgendaModelSelector options={todasCollections} value={selectedModelId} onChange={setSelectedModelId} />
+                    <AgendaModelSelector
+                      options={todasCollections}
+                      value={selectedModelId}
+                      onChange={setSelectedModelId}
+                    />
                     <FullscreenModelDialog
                       src={fsImage || selectedModelImage}
                       alt={product.name}
@@ -544,7 +696,11 @@ const ProductDetail = () => {
                   {/* CTA secundaria */}
                   <div className="space-y-3">
                     <Button asChild variant="outline" className="w-full">
-                      <a href={buildWaLink(WHATSAPP_NUMBER, waPersonalizationMessage2)} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={buildWaLink(WHATSAPP_NUMBER, waPersonalizationMessage2)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         Enviar detalles por WhatsApp
                       </a>
                     </Button>
@@ -574,12 +730,17 @@ const ProductDetail = () => {
                   "
                   aria-label="Ejemplos de personalización"
                 >
-                  {productoImagenes["personalizados"].map((src, i) => (
+                  {productoImagenes['personalizados'].map((src, i) => (
                     <div
                       key={i}
                       className="snap-center flex-none w-32 h-32 sm:w-36 sm:h-36 rounded-xl overflow-hidden ring-1 ring-slate-200 bg-white"
                     >
-                      <img src={src} alt={`Ejemplo ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                      <img
+                        src={src}
+                        alt={`Ejemplo ${i + 1}`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                     </div>
                   ))}
                 </div>

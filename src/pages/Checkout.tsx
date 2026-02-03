@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -16,11 +15,30 @@ import { formatARS } from '@/lib/currency';
 import { buildCheckoutMessage, buildWaLink } from '@/lib/whatsapp';
 import type { BuyerInfo } from '@/types/cart';
 
+// ✅ CHANGE: Checkout ya no debe recalcular descuentos.
+// Motivo: evitamos solapes. Todo sale del motor.
+import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
+
 type DeliveryMethod = 'retiro' | 'envio';
+
+// ✅ CHANGE: misma key que Cart y calc-cart-pricing para mapear líneas
+function getLineKey(it: any) {
+  return [
+    it.product?.id ?? '',
+    it.selectedSize ?? '',
+    it.selectedInterior ?? '',
+    it.selectedCover ?? '',
+    it.personalization ?? '',
+  ].join('|');
+}
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { items, getTotalPrice, clearCart } = useCart();
+  const { items, clearCart } = useCart();
+
+  // ✅ CHANGE: usamos el motor para total + breakdown
+  // Motivo: total consistente con Cart y sin doble descuento.
+  const pricing = useMemo(() => calculateCartPricing(items), [items]);
 
   // Datos del comprador
   const [buyerName, setBuyerName] = useState('');
@@ -30,7 +48,9 @@ const Checkout = () => {
   const [buyerNotes, setBuyerNotes] = useState('');
 
   // (Opcional) método de pago para informar en el mensaje
-  const [paymentMethod, setPaymentMethod] = useState<'efectivo' | 'transferencia' | 'mercado-pago'>('efectivo');
+  const [paymentMethod, setPaymentMethod] = useState<'efectivo' | 'transferencia' | 'mercado-pago'>(
+    'efectivo'
+  );
 
   const whatsappMessage = useMemo(() => {
     const buyer: BuyerInfo = {
@@ -44,14 +64,23 @@ const Checkout = () => {
     return buildCheckoutMessage(items, buyer);
   }, [items, buyerName, buyerCity, deliveryMethod, deliveryAddress, buyerNotes, paymentMethod]);
 
-  const phoneNumber = AppVars.phoneNumber; // ej.: 549336XXXXXXX
+  const phoneNumber = AppVars.phoneNumber;
   const waHref = buildWaLink(phoneNumber, whatsappMessage);
 
   const canContinue =
     (items?.length ?? 0) > 0 &&
     buyerName.trim().length > 1 &&
     buyerCity.trim().length > 1 &&
-    (deliveryMethod === 'retiro' || (deliveryMethod === 'envio' && deliveryAddress.trim().length > 3));
+    (deliveryMethod === 'retiro' ||
+      (deliveryMethod === 'envio' && deliveryAddress.trim().length > 3));
+
+  // ✅ CHANGE: totales salen del motor
+  const totalQty = pricing.totalQty ?? 0;
+  const subtotalList = pricing.subtotalList ?? 0;
+  const totalFinal = pricing.total ?? 0;
+
+  const has2x1 = (pricing.promo?.amount ?? 0) > 0;
+  const hasPercent = (pricing.percent?.amount ?? 0) > 0;
 
   return (
     <div className="min-h-screen overflow-x-clip">
@@ -72,7 +101,8 @@ const Checkout = () => {
               <div className="space-y-2">
                 <h1 className="text-2xl sm:text-3xl font-bold">Finalizar compra</h1>
                 <p className="text-sm text-muted-foreground">
-                  Completá tus datos para enviarnos el pedido por WhatsApp y coordinar el pago/envío.
+                  Completá tus datos para enviarnos el pedido por WhatsApp y coordinar el
+                  pago/envío.
                 </p>
               </div>
 
@@ -141,7 +171,9 @@ const Checkout = () => {
                   <Label>Método de pago preferido</Label>
                   <RadioGroup
                     value={paymentMethod}
-                    onValueChange={(v) => setPaymentMethod(v as 'efectivo' | 'transferencia' | 'mercado-pago')}
+                    onValueChange={(v) =>
+                      setPaymentMethod(v as 'efectivo' | 'transferencia' | 'mercado-pago')
+                    }
                     className="flex flex-wrap gap-6"
                   >
                     <div className="flex items-center space-x-2">
@@ -166,26 +198,46 @@ const Checkout = () => {
               <div className="rounded-2xl border p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-semibold">Tu carrito</h2>
-                  <Badge variant="outline">{items?.length ?? 0} ítems</Badge>
+
+                  {/* ✅ CHANGE: mostramos cantidad real de unidades */}
+                  <Badge variant="outline">{totalQty} u</Badge>
                 </div>
 
-                <div className="space-y-3 max-h-[40svh] overflow-auto pr-1
+                <div
+                  className="space-y-3 max-h-[40svh] overflow-auto pr-1
                   [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.400)_transparent]
                   [&::-webkit-scrollbar]:w-2
                   [&::-webkit-scrollbar-track]:bg-transparent
                   [&::-webkit-scrollbar-thumb]:bg-slate-400/60
                   hover:[&::-webkit-scrollbar-thumb]:bg-slate-500/70
-                  [&::-webkit-scrollbar-thumb]:rounded-full">
+                  [&::-webkit-scrollbar-thumb]:rounded-full"
+                >
                   {(!items || items.length === 0) && (
                     <p className="text-sm text-muted-foreground">Tu carrito está vacío.</p>
                   )}
+
                   {items?.map((it, i) => {
-                    const unit = it.price ?? it.product?.basePrice ?? 0;
+                    const key = getLineKey(it);
+                    const line = pricing.lines?.[key];
+
+                    // ✅ CHANGE: unitario “de lista” (lo que guardás en basePrice)
+                    // Motivo: it.price puede venir “cargado” por implementaciones anteriores.
+                    const unitList = it.product?.basePrice ?? 0;
+                    const listLineSubtotal = unitList * (it.quantity ?? 0);
+
+                    const lineFinal = line?.total ?? listLineSubtotal;
+                    const hasAnyPromo =
+                      (line?.discount ?? 0) > 0 ||
+                      (line?.freeUnits ?? 0) > 0 ||
+                      (line?.percentDiscount ?? 0) > 0;
+
                     return (
                       <div key={i} className="border rounded-xl p-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="font-medium break-words">{it.product?.name ?? 'Producto'}</p>
+                            <p className="font-medium break-words">
+                              {it.product?.name ?? 'Producto'}
+                            </p>
                             <div className="text-xs text-muted-foreground space-y-0.5 mt-1">
                               {it.selectedModel && <p>Modelo: {it.selectedModel}</p>}
                               {it.selectedSize && <p>Tamaño: {it.selectedSize}</p>}
@@ -193,10 +245,41 @@ const Checkout = () => {
                               {it.selectedCover && <p>Tapa: {it.selectedCover}</p>}
                               {it.personalization && <p>Personalización: “{it.personalization}”</p>}
                             </div>
+
+                            {/* ✅ opcional: mostrar notas promo por ítem */}
+                            {line?.freeUnits > 0 && (
+                              <p className="text-[11px] text-muted-foreground mt-1">
+                                2x1: {line.freeUnits} gratis
+                              </p>
+                            )}
+                            {line?.percentDiscount > 0 && (
+                              <p className="text-[11px] text-muted-foreground">
+                                Descuento: -{formatARS(line.percentDiscount)}
+                              </p>
+                            )}
                           </div>
+
                           <div className="text-right shrink-0">
                             <p className="text-sm">x{it.quantity ?? 1}</p>
-                            <p className="text-sm text-muted-foreground">{formatARS(unit)}</p>
+
+                            {/* ✅ CHANGE: mostramos “lista” y “final” si hubo promos */}
+                            {hasAnyPromo ? (
+                              <>
+                                <p className="text-xs text-muted-foreground line-through">
+                                  {formatARS(listLineSubtotal)}
+                                </p>
+                                <p className="text-sm font-semibold">{formatARS(lineFinal)}</p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="text-sm text-muted-foreground">
+                                  {formatARS(unitList)} c/u
+                                </p>
+                                <p className="text-sm font-semibold">
+                                  {formatARS(listLineSubtotal)}
+                                </p>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -204,11 +287,32 @@ const Checkout = () => {
                   })}
                 </div>
 
-                <div className="flex items-center justify-between mt-4">
-                  <p className="font-semibold">Total</p>
-                  <p className="font-semibold">{formatARS(getTotalPrice())}</p>
-                </div>
+                {/* ✅ CHANGE: resumen económico coherente con Cart */}
+                <div className="mt-4 space-y-2 text-sm">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span>Subtotal (lista)</span>
+                    <span>{formatARS(subtotalList)}</span>
+                  </div>
 
+                  {has2x1 && pricing.promo && (
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span>{pricing.promo.label}</span>
+                      <span>-{formatARS(pricing.promo.amount)}</span>
+                    </div>
+                  )}
+
+                  {hasPercent && pricing.percent && (
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span>{pricing.percent.label}</span>
+                      <span>-{formatARS(pricing.percent.amount)}</span>
+                    </div>
+                  )}
+
+                  <div className="border-t pt-2 flex items-center justify-between font-semibold">
+                    <span>Total</span>
+                    <span>{formatARS(totalFinal)}</span>
+                  </div>
+                </div>
 
                 {/* Continuar al pago -> WhatsApp + limpiar carrito + gracias */}
                 <Button
@@ -216,10 +320,8 @@ const Checkout = () => {
                   className="w-full mt-4"
                   disabled={!canContinue}
                   onClick={() => {
-                    const href = buildWaLink(AppVars.phoneNumber, whatsappMessage);
-                    // Abrir WhatsApp en nueva pestaña
-                    window.open(href, '_blank', 'noopener,noreferrer');
-                    // Limpiar carrito y redirigir
+                    // ✅ usamos el mismo mensaje, pero el total mostrado en UI ya es el correcto
+                    window.open(waHref, '_blank', 'noopener,noreferrer');
                     clearCart();
                     navigate('/gracias');
                   }}
@@ -228,10 +330,10 @@ const Checkout = () => {
                   Continuar al pago por WhatsApp
                 </Button>
 
-
                 {!canContinue && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    Completá nombre, ciudad y {deliveryMethod === 'envio' ? 'dirección' : 'método de entrega'} para continuar.
+                    Completá nombre, ciudad y{' '}
+                    {deliveryMethod === 'envio' ? 'dirección' : 'método de entrega'} para continuar.
                   </p>
                 )}
 

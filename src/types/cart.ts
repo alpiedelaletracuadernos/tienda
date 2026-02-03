@@ -10,6 +10,11 @@ export interface CartItem {
   selectedSize?: ProductSize;
   selectedInterior?: InteriorType;
   selectedCover?: CoverType;
+  discountApplied?: boolean;
+  discountAmount?: number;
+  discountPercentage?: number;
+  promo?: boolean;
+  promoDiscount?: number;
 }
 
 export interface BuyerInfo {
@@ -20,4 +25,3 @@ export interface BuyerInfo {
   notes?: string;
   paymentMethod?: 'efectivo' | 'transferencia' | 'mercado-pago';
 }
-

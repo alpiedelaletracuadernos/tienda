@@ -2,6 +2,7 @@
 import type { Product, ProductSize, InteriorType, CoverType } from '@/types/product';
 import type { CartItem, BuyerInfo } from '@/types/cart';
 import { formatARS } from '@/lib/currency';
+import { DESCUENTOS } from '@/config/promotions';
 
 export type PersonalizationStyleId = 'nombre' | 'frase' | 'foto' | 'trama' | 'logo';
 
@@ -26,7 +27,10 @@ export type ShopPersonalization = {
   buyerNotes?: string;
 };
 
-export function buildShopMessage(filters: CatalogFilters, personalization: ShopPersonalization): string {
+export function buildShopMessage(
+  filters: CatalogFilters,
+  personalization: ShopPersonalization
+): string {
   const lines: string[] = [];
   lines.push('¡Hola! Quiero consultar y/o finalizar la compra desde la tienda.');
   lines.push('');
@@ -43,11 +47,17 @@ export function buildShopMessage(filters: CatalogFilters, personalization: ShopP
 
   if (personalization?.styleId) {
     const styleLabel =
-      personalization.styleId === 'nombre' ? 'Nombre/Iniciales' :
-      personalization.styleId === 'frase' ? 'Frase/Versículo' :
-      personalization.styleId === 'foto' ? 'Foto/Imagen' :
-      personalization.styleId === 'trama' ? 'Trama/Patrón' :
-      personalization.styleId === 'logo' ? 'Logo/Marca' : 'A definir';
+      personalization.styleId === 'nombre'
+        ? 'Nombre/Iniciales'
+        : personalization.styleId === 'frase'
+          ? 'Frase/Versículo'
+          : personalization.styleId === 'foto'
+            ? 'Foto/Imagen'
+            : personalization.styleId === 'trama'
+              ? 'Trama/Patrón'
+              : personalization.styleId === 'logo'
+                ? 'Logo/Marca'
+                : 'A definir';
     lines.push(`Preferencia de personalización: ${styleLabel}`);
     lines.push('');
   }
@@ -57,7 +67,9 @@ export function buildShopMessage(filters: CatalogFilters, personalization: ShopP
     if (personalization.buyerName) lines.push(`• Nombre: ${personalization.buyerName}`);
     if (personalization.buyerCity) lines.push(`• Ciudad/Localidad: ${personalization.buyerCity}`);
     if (personalization.deliveryMethod)
-      lines.push(`• Entrega: ${personalization.deliveryMethod === 'envio' ? 'Envío a domicilio' : 'Retiro en punto'}`);
+      lines.push(
+        `• Entrega: ${personalization.deliveryMethod === 'envio' ? 'Envío a domicilio' : 'Retiro en punto'}`
+      );
     if (personalization.deliveryMethod === 'envio' && personalization.deliveryAddress)
       lines.push(`• Dirección: ${personalization.deliveryAddress}`);
     if (personalization.buyerNotes) lines.push(`• Notas: ${personalization.buyerNotes}`);
@@ -85,7 +97,7 @@ export type PdpPersonalization = {
 export function buildPdpMessage(
   product: Product,
   selections: PdpSelections,
-  personalization?: PdpPersonalization,
+  personalization?: PdpPersonalization
 ): string {
   const qty = selections.quantity ?? 1;
   const lines: string[] = [];
@@ -138,20 +150,35 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
       lines.push('');
     });
 
-    const total = cartItems.reduce((acc, it) => acc + (it.price ?? it.product?.basePrice ?? 0) * (it.quantity ?? 1), 0);
-    lines.push(`*Total estimado:* ${formatARS(total)}`);
+    const total = cartItems.reduce(
+      (acc, it) => acc + (it.price ?? it.product?.basePrice ?? 0) * (it.quantity ?? 1),
+      0
+    );
+    const totalWithDiscount =
+      DESCUENTOS.eligible && DESCUENTOS.percentage
+        ? total - (total * DESCUENTOS.percentage) / 100
+        : total;
+    if (DESCUENTOS.eligible && DESCUENTOS.percentage) {
+      lines.push(`*Descuento aplicado:* -${DESCUENTOS.percentage}%`);
+      lines.push(`*Total estimado:* ${formatARS(totalWithDiscount)}`);
+    } else {
+      lines.push(`*Total estimado:* ${formatARS(total)}`);
+    }
     lines.push('');
   }
 
   lines.push('*Datos del comprador:*');
   lines.push(`• Nombre: ${buyer.name || 'A completar'}`);
   lines.push(`• Ciudad/Localidad: ${buyer.city || 'A completar'}`);
-  lines.push(`• Entrega: ${buyer.deliveryMethod === 'envio' ? 'Envío a domicilio' : 'Retiro en punto de entrega'}`);
-  if (buyer.deliveryMethod === 'envio') lines.push(`• Dirección: ${buyer.address || 'A completar'}`);
+  lines.push(
+    `• Entrega: ${buyer.deliveryMethod === 'envio' ? 'Envío a domicilio' : 'Retiro en punto de entrega'}`
+  );
+  if (buyer.deliveryMethod === 'envio')
+    lines.push(`• Dirección: ${buyer.address || 'A completar'}`);
   if (buyer.notes) lines.push(`• Notas: ${buyer.notes}`);
-  if (buyer.paymentMethod) lines.push(`• Método de pago preferido: ${buyer.paymentMethod.replace('-', ' ')}`);
+  if (buyer.paymentMethod)
+    lines.push(`• Método de pago preferido: ${buyer.paymentMethod.replace('-', ' ')}`);
   lines.push('');
   lines.push('¿Me confirmás disponibilidad y próximos pasos? ¡Gracias!');
   return lines.join('\n');
 }
-

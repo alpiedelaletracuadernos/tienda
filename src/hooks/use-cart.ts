@@ -8,8 +8,21 @@ interface CartStore {
   items: CartItem[];
 
   addItem: (item: CartItem) => void;
-  removeItem: (productId: string, size: string, interior: string, cover: string, personalization?: string) => void;
-  updateQuantity: (productId: string, size: string, interior: string, cover: string, quantity: number, personalization?: string) => void;
+  removeItem: (
+    productId: string,
+    size: string,
+    interior: string,
+    cover: string,
+    personalization?: string
+  ) => void;
+  updateQuantity: (
+    productId: string,
+    size: string,
+    interior: string,
+    cover: string,
+    quantity: number,
+    personalization?: string
+  ) => void;
   clearCart: () => void;
 
   // derived
@@ -25,55 +38,58 @@ export const useCart = create<CartStore>()(
     (set, get) => ({
       items: [],
 
-      addItem: (newItem) => set((state) => {
-        const normalizedItem: CartItem = {
-          ...newItem,
-          price: newItem.product?.basePrice ?? newItem.price,
-        };
+      addItem: (newItem) =>
+        set((state) => {
+          const normalizedItem: CartItem = {
+            ...newItem,
+            price: newItem.product?.basePrice ?? newItem.price,
+          };
 
-        const idx = state.items.findIndex(
-          item =>
-            item.product.id === normalizedItem.product.id &&
-            item.selectedSize === normalizedItem.selectedSize &&
-            item.selectedInterior === normalizedItem.selectedInterior &&
-            item.selectedCover === normalizedItem.selectedCover &&
-            (item.personalization ?? '') === (normalizedItem.personalization ?? '')
-        );
+          const idx = state.items.findIndex(
+            (item) =>
+              item.product.id === normalizedItem.product.id &&
+              item.selectedSize === normalizedItem.selectedSize &&
+              item.selectedInterior === normalizedItem.selectedInterior &&
+              item.selectedCover === normalizedItem.selectedCover &&
+              (item.personalization ?? '') === (normalizedItem.personalization ?? '')
+          );
 
-        if (idx > -1) {
-          const updated = [...state.items];
-          updated[idx].quantity += normalizedItem.quantity;
-          updated[idx].price = normalizedItem.product.basePrice;
-          return { items: updated };
-        }
+          if (idx > -1) {
+            const updated = [...state.items];
+            updated[idx].quantity += normalizedItem.quantity;
+            updated[idx].price = normalizedItem.product.basePrice;
+            return { items: updated };
+          }
 
-        return { items: [...state.items, normalizedItem] };
-      }),
+          return { items: [...state.items, normalizedItem] };
+        }),
 
-      removeItem: (productId, size, interior, cover, personalization) => set((state) => ({
-        items: state.items.filter(
-          item =>
-            !(
-              item.product.id === productId &&
-              item.selectedSize === size &&
-              item.selectedInterior === interior &&
-              item.selectedCover === cover &&
-              (item.personalization ?? '') === (personalization ?? '')
-            )
-        ),
-      })),
+      removeItem: (productId, size, interior, cover, personalization) =>
+        set((state) => ({
+          items: state.items.filter(
+            (item) =>
+              !(
+                item.product.id === productId &&
+                item.selectedSize === size &&
+                item.selectedInterior === interior &&
+                item.selectedCover === cover &&
+                (item.personalization ?? '') === (personalization ?? '')
+              )
+          ),
+        })),
 
-      updateQuantity: (productId, size, interior, cover, quantity, personalization) => set((state) => ({
-        items: state.items.map(item =>
-          item.product.id === productId &&
-          item.selectedSize === size &&
-          item.selectedInterior === interior &&
-          item.selectedCover === cover &&
-          (item.personalization ?? '') === (personalization ?? '')
-            ? { ...item, quantity: Math.max(1, quantity), price: item.product.basePrice }
-            : item
-        ),
-      })),
+      updateQuantity: (productId, size, interior, cover, quantity, personalization) =>
+        set((state) => ({
+          items: state.items.map((item) =>
+            item.product.id === productId &&
+            item.selectedSize === size &&
+            item.selectedInterior === interior &&
+            item.selectedCover === cover &&
+            (item.personalization ?? '') === (personalization ?? '')
+              ? { ...item, quantity: Math.max(1, quantity), price: item.product.basePrice }
+              : item
+          ),
+        })),
 
       clearCart: () => set({ items: [] }),
 
