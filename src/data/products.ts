@@ -464,7 +464,7 @@ export const products: Product[] = [
     id: '7',
     name: 'Cuaderno con planner perpetuo',
     slug: 'cuaderno-con-planner-perpetuo',
-    category: 'cuadernos',
+    category: 'planners',
     description:
       'Un cuaderno que te organiza sencillamente: planner perpetuo de 12 meses+ hojas rayadas para ideas y tareas. Tapa personalizada, bolsillo interno y stickers. Hecha a mano por pedido, con tapa dura y en papel de 80gr con anillado doble alambre. Entrega rápida. Envíos a todo el país y retiro en zona centro de San Nicolás de los Arroyos. ',
     basePrice: 24000,
@@ -593,7 +593,7 @@ export const products: Product[] = [
     id: '12',
     name: 'Planner semanal perpetuo con horarios',
     slug: 'planner-semanal-perpetuo-con-horarios',
-    category: 'agendas',
+    category: 'planners',
     description:
       'Semana a la vista con franjas horarias para agendar reuniones, clases o turnos. Formato perpetuo (arrancas cuando quieras) y tapa personalizada a elección. Hecha a mano por pedido, con tapa dura y en papel de 80gr con anillado doble alambre. Entrega rápida. Envíos a todo el país y retiro en zona centro de San Nicolás de los Arroyos. ',
     basePrice: 31000,
