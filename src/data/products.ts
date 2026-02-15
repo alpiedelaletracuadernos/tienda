@@ -467,7 +467,7 @@ export const products: Product[] = [
     category: 'cuadernos',
     description:
       'Un cuaderno que te organiza sencillamente: planner perpetuo de 12 meses+ hojas rayadas para ideas y tareas. Tapa personalizada, bolsillo interno y stickers. Hecha a mano por pedido, con tapa dura y en papel de 80gr con anillado doble alambre. Entrega rápida. Envíos a todo el país y retiro en zona centro de San Nicolás de los Arroyos. ',
-    basePrice: 32670,
+    basePrice: 24000,
     sizes: ['A5'],
     interiors: ['Cuaderno con planner'],
     coverTypes: ['dura'],
@@ -520,7 +520,7 @@ export const products: Product[] = [
     category: 'cuadernos',
     description:
       'Resistente y portable: tapa dura A5 con interior a elección (rayado/liso/cuadriculado/puntillado). Personalizá la tapa y llevá tus ideas a todos lados. Entrega 8–10 h hábiles. Envíos a todo el país / retiro en San Nicolás.',
-    basePrice: 29040,
+    basePrice: 21990,
     sizes: ['A5', 'A4'],
     interiors: [
       'Cuaderno hojas rayadas',
@@ -577,7 +577,7 @@ export const products: Product[] = [
     category: 'cuadernos',
     description:
       'Registrá cada venta sin perder nada: elegí 2, 3 o 6 pedidos por hoja. Portada personalizada y 100 hojas para que tu control rinda más. Entrega 8–10 h hábiles. Envíos a todo el país / retiro en San Nicolás.',
-    basePrice: 30250,
+    basePrice: 25000,
     sizes: ['A5'],
     interiors: ['2 pedidos por hoja', '3 pedidos por hoja', '6 pedidos por hoja'],
     coverTypes: [],
@@ -596,7 +596,7 @@ export const products: Product[] = [
     category: 'agendas',
     description:
       'Semana a la vista con franjas horarias para agendar reuniones, clases o turnos. Formato perpetuo (arrancas cuando quieras) y tapa personalizada a elección. Hecha a mano por pedido, con tapa dura y en papel de 80gr con anillado doble alambre. Entrega rápida. Envíos a todo el país y retiro en zona centro de San Nicolás de los Arroyos. ',
-    basePrice: 42350,
+    basePrice: 31000,
     sizes: ['A5'],
     interiors: ['Planner semanal perpetuo con horarios'],
     coverTypes: [],
@@ -621,7 +621,7 @@ export const products: Product[] = [
     category: 'especiales',
     description:
       'Guardá tus recetas favoritas en un recetario resistente y personalizado. Índice y espacio para 200 recetas (dulces y saladas). Regalo ideal para quienes aman cocinar rico. Entrega 8–10 h hábiles. Envíos a todo el país / retiro en San Nicolás.',
-    basePrice: 28000,
+    basePrice: 25000,
     sizes: ['A5'],
     interiors: ['recetas'],
     coverTypes: [],
@@ -640,7 +640,7 @@ export const products: Product[] = [
     category: 'cuadernos',
     description:
       'Seguimiento completo para 8 cursos en formato perpetuo: planificación anual, asistencias, calificaciones, evaluaciones, contenidos y reuniones. Portada personalizada. Hecho a mano con papel 80 g. Entrega 12–24 h hábiles. Envíos a todo el país / retiro en San Nicolás.',
-    basePrice: 50600,
+    basePrice: 37000,
     sizes: ['A5'],
     interiors: ['Cuaderno docente secundaria perpetuo'],
     coverTypes: [],

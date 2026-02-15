@@ -24,7 +24,7 @@ export const PROMO_2X1 = {
 
 export const DESCUENTOS = {
   enabled: import.meta.env.VITE_DESCUENTOS === 'true',
-  label: `Descuento del ${import.meta.env.VITE_PORCENTAJE_DESCUENTO}% en la unidad`,
+  label: `Descuento del ${import.meta.env.VITE_PORCENTAJE_DESCUENTO}% en la unidad(diseños stock)`,
   percentage: import.meta.env.VITE_PORCENTAJE_DESCUENTO
     ? parseInt(import.meta.env.VITE_PORCENTAJE_DESCUENTO)
     : undefined,
