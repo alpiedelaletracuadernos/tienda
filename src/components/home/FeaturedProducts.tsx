@@ -2,6 +2,7 @@ import { products } from '@/data/products';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import vars from '@/data/data';
 
 export const FeaturedProducts = () => {
   const featured = products.slice(0, 4);
@@ -23,10 +24,10 @@ export const FeaturedProducts = () => {
               <ProductCard key={product.id} product={product} />
               {
                 // Etiqueta Descuento
-                import.meta.env.VITE_DESCUENTOS === 'true' &&
+                vars.promotions.discount.enabled &&
                   (product.category === 'agendas' || product.category === 'agendas docentes') && (
                     <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
-                      Promo {import.meta.env.VITE_PORCENTAJE_DESCUENTO}% OFF
+                      Promo {vars.promotions.discount.percentage}% OFF
                     </span>
                   )
               }

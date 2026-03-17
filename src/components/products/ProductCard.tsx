@@ -4,23 +4,29 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
-import { DESCUENTOS } from '@/config/promotions';
+import { isEligibleForDiscount } from '@/config/promotions';
+import vars from '@/data/data';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
-  const twoForOne = true;
   const formattedPrice = new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency: 'ARS',
     minimumFractionDigits: 0,
   }).format(product.basePrice);
 
+  const mockCartItemCheck = {
+    product: { category: product.category },
+    personalization: undefined
+  };
+  const eligibleForDiscount = isEligibleForDiscount(mockCartItemCheck as any);
+
   let formattedDiscountedPrice = null;
-  if (DESCUENTOS.enabled) {
-    const discountPercentage = parseInt(import.meta.env.VITE_PORCENTAJE_DESCUENTO) || 0;
+  if (eligibleForDiscount) {
+    const discountPercentage = vars.promotions.discount.percentage || 0;
     const discountedPrice = product.basePrice * (1 - discountPercentage / 100);
     formattedDiscountedPrice = new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -57,8 +63,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
         <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
 
-        {(DESCUENTOS.enabled && product.category === 'agendas') ||
-        product.category === 'agendas docentes' ? (
+        {eligibleForDiscount ? (
           <>
             <div className="flex items-baseline gap-1">
               <span className="text-sm text-muted-foreground">Desde</span>

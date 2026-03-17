@@ -1,12 +1,7 @@
 // src/lib/pricing/calc-cart-pricing.ts
 import type { CartItem } from '@/types/cart';
-import { PROMO_2X1, DESCUENTOS } from '@/config/promotions';
-
-// ✅ mismas categorías para % descuento (no hardcode en Cart.tsx)
-const DISCOUNT_CATEGORIES = new Set(['agendas', 'agendas docentes']);
-const normalizeCategory = (c?: string) => (c ?? '').trim().toLowerCase();
-const isDiscountEligibleCategory = (category?: string) =>
-  DISCOUNT_CATEGORIES.has(normalizeCategory(category));
+import { isEligibleFor2x1, isEligibleForDiscount } from '@/config/promotions';
+import vars from '@/data/data';
 
 type Unit = { price: number; key: string };
 
@@ -57,11 +52,11 @@ export function calculateCartPricing(items: CartItem[]) {
   // =====================
   let promo2x1Discount = 0;
 
-  if (PROMO_2X1.enabled) {
+  if (vars.promotions.twoForOne.enabled) {
     const eligibleUnits: Unit[] = [];
 
     for (const it of items) {
-      if (!PROMO_2X1.eligible(it)) continue;
+      if (!isEligibleFor2x1(it)) continue;
       const key = lineKey(it);
       const price = it.product.basePrice ?? 0;
       for (let i = 0; i < (it.quantity ?? 0); i++) eligibleUnits.push({ price, key });
@@ -91,12 +86,13 @@ export function calculateCartPricing(items: CartItem[]) {
   // =====================
   let percentDiscountTotal = 0;
 
-  const discountPct = DESCUENTOS.enabled ? (DESCUENTOS.percentage ?? 0) : 0;
+  const discountSettings = vars.promotions.discount;
+  const discountPct = discountSettings.enabled ? discountSettings.percentage : 0;
   const rate = discountPct / 100;
 
-  if (DESCUENTOS.enabled && rate > 0) {
+  if (discountSettings.enabled && rate > 0) {
     for (const it of items) {
-      if (!isDiscountEligibleCategory(it.product?.category)) continue;
+      if (!isEligibleForDiscount(it)) continue;
 
       const key = lineKey(it);
 
@@ -123,7 +119,7 @@ export function calculateCartPricing(items: CartItem[]) {
     totalQty,
     total,
     lines,
-    promo: PROMO_2X1.enabled ? { label: PROMO_2X1.label, amount: promo2x1Discount } : null,
-    percent: DESCUENTOS.enabled ? { label: DESCUENTOS.label, amount: percentDiscountTotal } : null,
+    promo: vars.promotions.twoForOne.enabled ? { label: 'Promo 2x1', amount: promo2x1Discount } : null,
+    percent: vars.promotions.discount.enabled ? { label: `Descuento del ${discountSettings.percentage}% en la unidad`, amount: percentDiscountTotal } : null,
   };
 }

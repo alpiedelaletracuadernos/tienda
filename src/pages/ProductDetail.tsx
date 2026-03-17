@@ -23,8 +23,7 @@ import FullscreenModelDialog from '@/components/products/FullscreenModelDialog';
 import { safeStorage } from '@/lib/safe-storage';
 
 //PROMOCIONES
-import { PROMO_2X1, DESCUENTOS } from '@/config/promotions';
-import { PROMOTIONS, isCategoryEligible } from '@/config/promotions';
+import { isEligibleForDiscount, isEligibleFor2x1 } from '@/config/promotions';
 
 // —— WhatsApp ————————————————————————————————————————
 const WHATSAPP_NUMBER = AppVars.phoneNumber;
@@ -58,8 +57,8 @@ const ProductDetail = () => {
   const { slug } = useParams();
   const product = getProductBySlug(slug || '');
   const { addItem } = useCart();
-  const isEligible = PROMOTIONS.DESCUENTO && isCategoryEligible(product.category);
-  const rate = PROMOTIONS.PORCENTAJEDESCUENTO / 100;
+  const isEligible = isEligibleForDiscount({ product: { category: product?.category || '' }, personalization: undefined } as any);
+  const rate = AppVars.promotions.discount.percentage / 100;
 
   // ——— Estado base PDP
   const [selectedSize, setSelectedSize] = useState<ProductSize>(product?.sizes?.[0] || 'A5');
@@ -184,13 +183,18 @@ const ProductDetail = () => {
   // Motivo: el descuento debe depender de la categoría del producto,
   // no de una promo global.
 
-  const discountedUnitPrice = isEligible
-    ? Math.round(product.basePrice * (1 - rate))
-    : product.basePrice;
+  const currentUnitPrice =
+    mode === 'custom' ? product.basePrice + AppVars.personalizationSurcharge : product.basePrice;
+
+  const isElegibleForDiscount = isEligibleForDiscount({ product: { category: product.category }, personalization: mode === 'custom' ? 'yes' : undefined } as any);
+
+  const discountedUnitPrice = isElegibleForDiscount
+    ? Math.round(currentUnitPrice * (1 - rate))
+    : currentUnitPrice;
   const discountedTotalPrice = discountedUnitPrice * quantity;
 
-  const formattedUnit = formatARS(product.basePrice);
-  const formattedTotal = formatARS(product.basePrice * quantity);
+  const formattedUnit = formatARS(currentUnitPrice);
+  const formattedTotal = formatARS(currentUnitPrice * quantity);
   const formattedDiscountedUnit = formatARS(discountedUnitPrice);
   const formattedDiscountedTotal = formatARS(discountedTotalPrice);
 
@@ -202,18 +206,18 @@ const ProductDetail = () => {
     if (!product) return;
 
     // ✅ promo por ítem (solo si es elegible)
-    const promoEligible = DESCUENTOS.enabled && isDiscountEligibleCategory(product.category);
+    const promoEligible = isEligibleForDiscount({ product: { category: product.category } } as any);
 
     addItem({
       product: {
         id: product.id,
         name: product.name,
-        basePrice: product.basePrice,
+        basePrice: currentUnitPrice, // ✅ guardamos con el recargo ya sumado si aplica
         images: product.images,
         category: product.category, // ✅ importante: el carrito necesita la categoría para decidir
       },
       quantity,
-      price: product.basePrice, // ✅ siempre lista
+      price: currentUnitPrice, // ✅ siempre lista
       selectedSize,
       selectedInterior,
       selectedCover,
@@ -248,7 +252,7 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen overflow-x-clip">
       <Header />
-      {PROMO_2X1.enabled && (
+      {AppVars.promotions.twoForOne.enabled && (
         <>
           {/* Barra informativa sticky: 2X1 */}
           <div className="sticky top-16 z-40 bg-black text-white">
@@ -261,14 +265,14 @@ const ProductDetail = () => {
           </div>
         </>
       )}
-      {DESCUENTOS.enabled && (
+      {AppVars.promotions.discount.enabled && (
         <>
           {/* Descuentos */}
           <div className="sticky top-16 z-40 bg-black text-white">
             <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
-                <span className="text-sm sm:text-base font-semibold">{DESCUENTOS.label}</span>
+                <span className="text-sm sm:text-base font-semibold">Descuento del {AppVars.promotions.discount.percentage}% en diseños seleccionados</span>
               </div>
             </div>
           </div>
@@ -309,7 +313,7 @@ const ProductDetail = () => {
                 </div>
 
                 {/* ✅ CHANGE: UI consistente con formato ARS y solo muestra descuento si es elegible */}
-                {isEligible ? (
+                {isElegibleForDiscount ? (
                   <div className="mt-3 sm:mt-4 space-y-1">
                     <div className="flex items-baseline gap-3 flex-wrap">
                       <span className="text-sm text-muted-foreground line-through">
@@ -319,7 +323,7 @@ const ProductDetail = () => {
                         {formattedDiscountedUnit}
                       </span>
                       <Badge variant="outline" className="font-semibold">
-                        -{PROMOTIONS.PORCENTAJEDESCUENTO}%
+                        -{AppVars.promotions.discount.percentage}%
                       </Badge>
                       <span className="text-sm text-muted-foreground">por unidad</span>
                     </div>
@@ -695,18 +699,24 @@ const ProductDetail = () => {
 
                   {/* CTA secundaria */}
                   <div className="space-y-3">
-                    <Button asChild variant="outline" className="w-full">
-                      <a
-                        href={buildWaLink(WHATSAPP_NUMBER, waPersonalizationMessage2)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Enviar detalles por WhatsApp
-                      </a>
+                    <Button size="lg" className="w-full" onClick={handleAddToCart}>
+                      <ShoppingCart className="mr-2 h-5 w-5" />
+                      Agregar al Carrito
                     </Button>
-                    <Button className="w-full" onClick={() => setMode('ready')}>
-                      Ver modelos listos
-                    </Button>
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <Button asChild variant="outline" className="w-full">
+                        <a
+                          href={buildWaLink(WHATSAPP_NUMBER, waPersonalizationMessage2)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Enviar detalles por WhatsApp
+                        </a>
+                      </Button>
+                      <Button variant="outline" className="w-full" onClick={() => setMode('ready')}>
+                        Ver modelos listos
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}

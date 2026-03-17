@@ -21,6 +21,20 @@ export interface AppVars {
     };
     maxUploadSizeBytes?: number;
     dateFormat?: string;
+    personalizationSurcharge: number; // Recargo por personalizar producto
+    promotions: {
+        discount: {
+            enabled: boolean;
+            percentage: number;
+            applyToPersonalized: boolean;
+            eligibleCategories: string[];
+        };
+        twoForOne: {
+            enabled: boolean;
+            applyToPersonalized: boolean;
+            eligibleCategories: string[];
+        };
+    };
 }
 
 export const vars: AppVars = {
@@ -41,7 +55,21 @@ export const vars: AppVars = {
         secondary: '#1a1a1a'
     },
     maxUploadSizeBytes: 5 * 1024 * 1024, // 5 MB
-    dateFormat: 'dd/MM/yyyy'
+    dateFormat: 'dd/MM/yyyy',
+    personalizationSurcharge: 5000, // Recargo $5000 inicial
+    promotions: {
+        discount: {
+            enabled: true,
+            percentage: 40,
+            applyToPersonalized: true,
+            eligibleCategories: ['agendas', 'agendas docentes']
+        },
+        twoForOne: {
+            enabled: true,
+            applyToPersonalized: false,
+            eligibleCategories: ['agendas', 'agendas docentes']
+        }
+    }
 };
 
 export default vars;

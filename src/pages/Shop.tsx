@@ -29,7 +29,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Info, Sparkles, ShoppingCart } from 'lucide-react';
-import { DESCUENTOS, PROMO_2X1 } from '@/config/promotions';
 
 // ———————————————————————————————————————————————————————————————
 // Escalera de descuentos (comunicación en catálogo)
@@ -170,20 +169,20 @@ const Shop = () => {
     <div className="min-h-screen overflow-x-clip">
       <Header />
 
-      {DESCUENTOS.enabled && (
+      {AppVars.promotions.discount.enabled && (
         <>
           {/* Descuentos */}
           <div className="sticky top-16 z-40 bg-black text-white">
             <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
-                <span className="text-sm sm:text-base font-semibold">{DESCUENTOS.label}</span>
+                <span className="text-sm sm:text-base font-semibold">Descuento del {AppVars.promotions.discount.percentage}% en diseños seleccionados</span>
               </div>
             </div>
           </div>
         </>
       )}
-      {PROMO_2X1.enabled && (
+      {AppVars.promotions.twoForOne.enabled && (
         <>
           {/* Barra informativa sticky: 2X1 */}
           <div className="sticky top-16 z-40 bg-black text-white">
@@ -353,9 +352,9 @@ const Shop = () => {
                   <div key={product.id} className="relative">
                     <ProductCard product={product} />
                     {/* Badge pequeño en esquina (refuerzo visual sin invadir) */}
-                    {product.name.includes('Agenda') || product.name.includes('Agenda Docente') ? (
+                    {AppVars.promotions.discount.enabled && (product.name.includes('Agenda') || product.name.includes('Agenda Docente')) ? (
                       <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
-                        Promo 40% OFF
+                        Promo {AppVars.promotions.discount.percentage}% OFF
                       </span>
                     ) : null}
                     {/* Badge pequeño en esquina (refuerzo visual sin invadir) */}

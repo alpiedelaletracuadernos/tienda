@@ -13,7 +13,7 @@ import Promo2x1Modal from '@/components/promos/Promo2x1';
 import AppVars from '../data/data';
 
 //promociones
-import { PROMO_2X1, DESCUENTOS } from '@/config/promotions';
+import vars from '@/data/data';
 
 const LADDER_LABEL = '15% en 1u • 20% en 2u • 30% en 3+u';
 
@@ -22,7 +22,7 @@ const BLACK_FRIDAY_ACTIVE = false;
 const Index = () => {
   return (
     <div className="min-h-screen w-full overflow-x-clip">
-      {PROMO_2X1.enabled && (
+      {vars.promotions.twoForOne.enabled && (
         <>
           {/* ——— Barra de anuncio 2x1 ——— */}
           <div className="sticky top-16 z-40 w-full bg-amber-50/90 backdrop-blur supports-[backdrop-filter]:backdrop-blur border-b border-amber-100">
@@ -50,7 +50,7 @@ const Index = () => {
           />
         </>
       )}
-      {DESCUENTOS.enabled && (
+      {vars.promotions.discount.enabled && (
         <>
           {/* ——— Barra de anuncio 2x1 ——— */}
           <div className="sticky top-16 z-40 w-full bg-amber-50/90 backdrop-blur supports-[backdrop-filter]:backdrop-blur border-b border-amber-100">
@@ -64,7 +64,7 @@ const Index = () => {
                   href="/catalogo"
                   className=" inline text-sm font-medium text-amber-800 underline underline-offset-4 hover:no-underline"
                 >
-                  {DESCUENTOS.label}
+                  Descuento del {vars.promotions.discount.percentage}% en diseños seleccionados
                 </a>
               </div>
             </div>

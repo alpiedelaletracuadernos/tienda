@@ -2,7 +2,7 @@
 import type { Product, ProductSize, InteriorType, CoverType } from '@/types/product';
 import type { CartItem, BuyerInfo } from '@/types/cart';
 import { formatARS } from '@/lib/currency';
-import { DESCUENTOS } from '@/config/promotions';
+import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
 
 export type PersonalizationStyleId = 'nombre' | 'frase' | 'foto' | 'trama' | 'logo';
 
@@ -150,20 +150,16 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
       lines.push('');
     });
 
-    const total = cartItems.reduce(
-      (acc, it) => acc + (it.price ?? it.product?.basePrice ?? 0) * (it.quantity ?? 1),
-      0
-    );
-    const totalWithDiscount =
-      DESCUENTOS.eligible && DESCUENTOS.percentage
-        ? total - (total * DESCUENTOS.percentage) / 100
-        : total;
-    if (DESCUENTOS.eligible && DESCUENTOS.percentage) {
-      lines.push(`*Descuento aplicado:* -${DESCUENTOS.percentage}%`);
-      lines.push(`*Total estimado:* ${formatARS(totalWithDiscount)}`);
-    } else {
-      lines.push(`*Total estimado:* ${formatARS(total)}`);
+    const pricing = calculateCartPricing(cartItems);
+
+    if (pricing.promo) {
+      lines.push(`*Promo aplicada:* ${pricing.promo.label} (-${formatARS(pricing.promo.amount)})`);
     }
+    if (pricing.percent) {
+      lines.push(`*Descuento aplicado:* ${pricing.percent.label} (-${formatARS(pricing.percent.amount)})`);
+    }
+
+    lines.push(`*Total estimado:* ${formatARS(pricing.total)}`);
     lines.push('');
   }
 

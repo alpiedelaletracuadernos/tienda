@@ -40,7 +40,7 @@ export default function Hero() {
           preload="metadata"
           aria-hidden="true"
         >
-          <source src="assets/hero/heroLoop.mp4" type="video/mp4" />
+          <source src="assets/hero/heroLoopBetter.avif" type="video/mp4" />
         </video>
 
         {/* Overlay para contraste WCAG */}
