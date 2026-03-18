@@ -65,7 +65,7 @@ export const vars: AppVars = {
             eligibleCategories: ['agendas', 'agendas docentes']
         },
         twoForOne: {
-            enabled: true,
+            enabled: false,
             applyToPersonalized: false,
             eligibleCategories: ['agendas', 'agendas docentes']
         }
