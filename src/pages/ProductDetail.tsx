@@ -23,7 +23,7 @@ import FullscreenModelDialog from '@/components/products/FullscreenModelDialog';
 import { safeStorage } from '@/lib/safe-storage';
 
 //PROMOCIONES
-import { isEligibleForDiscount, isEligibleFor2x1 } from '@/config/promotions';
+import { isEligibleForDiscount, isEligibleFor2x1, isHotSaleActive, isEligibleForHotSale } from '@/config/promotions';
 
 // —— WhatsApp ————————————————————————————————————————
 const WHATSAPP_NUMBER = AppVars.phoneNumber;
@@ -198,6 +198,18 @@ const ProductDetail = () => {
   const formattedDiscountedUnit = formatARS(discountedUnitPrice);
   const formattedDiscountedTotal = formatARS(discountedTotalPrice);
 
+  // Hot Sale
+  const hotSaleActive = isHotSaleActive();
+  const hsEligiblePDP = hotSaleActive && isEligibleForHotSale({
+    product: { category: product.category },
+    personalization: mode === 'custom' ? 'yes' : undefined,
+  } as any);
+  const hsRate = AppVars.promotions.hotSale.percentage / 100;
+  const hotSaleUnitPrice = hsEligiblePDP ? Math.round(currentUnitPrice * (1 - hsRate)) : currentUnitPrice;
+  const hotSaleTotalPrice = hotSaleUnitPrice * quantity;
+  const formattedHotSaleUnit = formatARS(hotSaleUnitPrice);
+  const formattedHotSaleTotal = formatARS(hotSaleTotalPrice);
+
   // ——— Agregar al carrito (SIN DESCUENTOS) ——————————————
   // ✅ CHANGE: al carrito se guarda SIEMPRE precio de lista.
   // Motivo: evita que el precio quede “cocinado” si cambia la promo.
@@ -252,6 +264,16 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen overflow-x-clip">
       <Header />
+      {hotSaleActive && (
+        <div className="sticky top-16 z-40 bg-accent text-accent-foreground">
+          <div className="container px-4 py-2 flex flex-wrap items-center gap-2">
+            <Badge className="bg-white text-accent font-bold hover:bg-white/90">HOT SALE</Badge>
+            <span className="text-sm font-semibold">
+              {AppVars.promotions.hotSale.percentage}% OFF en toda la tienda · 11, 12 y 13 de mayo
+            </span>
+          </div>
+        </div>
+      )}
       {AppVars.promotions.twoForOne.enabled && (
         <>
           {/* Barra informativa sticky: 2X1 */}
@@ -312,8 +334,27 @@ const ProductDetail = () => {
                   )}
                 </div>
 
-                {/* ✅ CHANGE: UI consistente con formato ARS y solo muestra descuento si es elegible */}
-                {isElegibleForDiscount ? (
+                {/* Precios: Hot Sale > descuento genérico > precio normal */}
+                {hsEligiblePDP ? (
+                  <div className="mt-3 sm:mt-4 space-y-1">
+                    <div className="flex items-baseline gap-3 flex-wrap">
+                      <span className="text-sm text-muted-foreground line-through">
+                        {formattedUnit}
+                      </span>
+                      <span className="text-2xl sm:text-3xl font-bold text-accent">
+                        {formattedHotSaleUnit}
+                      </span>
+                      <Badge className="bg-accent text-accent-foreground font-semibold">
+                        -{AppVars.promotions.hotSale.percentage}%
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">por unidad</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:{' '}
+                      <span className="font-semibold text-slate-900">{formattedHotSaleTotal}</span>
+                    </p>
+                  </div>
+                ) : isElegibleForDiscount ? (
                   <div className="mt-3 sm:mt-4 space-y-1">
                     <div className="flex items-baseline gap-3 flex-wrap">
                       <span className="text-sm text-muted-foreground line-through">

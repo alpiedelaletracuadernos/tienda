@@ -9,6 +9,8 @@ import { products } from '@/data/products';
 import AppVars from '@/data/data';
 import { buildShopMessage } from '@/lib/whatsapp';
 import { useCart } from '@/hooks/use-cart';
+import HotSaleBanner from '@/components/promos/HotSaleBanner';
+import { isHotSaleActive } from '@/config/promotions';
 
 import { ProductCategory, ProductSize, InteriorType } from '@/types/product';
 import {
@@ -168,6 +170,7 @@ const Shop = () => {
   return (
     <div className="min-h-screen overflow-x-clip">
       <Header />
+      <HotSaleBanner />
 
       {AppVars.promotions.discount.enabled && (
         <>
@@ -351,8 +354,12 @@ const Shop = () => {
                 {filteredProducts.map((product, idx) => (
                   <div key={product.id} className="relative">
                     <ProductCard product={product} />
-                    {/* Badge pequeño en esquina (refuerzo visual sin invadir) */}
-                    {AppVars.promotions.discount.enabled && (product.name.includes('Agenda') || product.name.includes('Agenda Docente')) ? (
+                    {/* Badge promocional: Hot Sale tiene prioridad sobre descuento genérico */}
+                    {isHotSaleActive() ? (
+                      <span className="absolute left-2 top-2 rounded-full bg-accent text-accent-foreground text-[11px] font-bold px-2.5 py-0.5 shadow">
+                        HOT SALE -{AppVars.promotions.hotSale.percentage}%
+                      </span>
+                    ) : AppVars.promotions.discount.enabled && (product.name.includes('Agenda') || product.name.includes('Agenda Docente')) ? (
                       <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
                         Promo {AppVars.promotions.discount.percentage}% OFF
                       </span>

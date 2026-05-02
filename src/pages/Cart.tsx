@@ -33,6 +33,7 @@ export default function Cart() {
 
   const has2x1 = (pricing.promo?.amount ?? 0) > 0;
   const hasPercent = (pricing.percent?.amount ?? 0) > 0;
+  const hasHotSale = (pricing.hotSale?.amount ?? 0) > 0;
 
   if (items.length === 0) {
     return (
@@ -237,6 +238,13 @@ export default function Cart() {
                       <div className="flex justify-between text-muted-foreground">
                         <span>{pricing.percent.label}</span>
                         <span>-{formatARS(pricing.percent.amount)}</span>
+                      </div>
+                    )}
+
+                    {hasHotSale && pricing.hotSale && (
+                      <div className="flex justify-between text-accent font-medium">
+                        <span>{pricing.hotSale.label}</span>
+                        <span>-{formatARS(pricing.hotSale.amount)}</span>
                       </div>
                     )}
 

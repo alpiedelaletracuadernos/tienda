@@ -158,6 +158,9 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
     if (pricing.percent) {
       lines.push(`*Descuento aplicado:* ${pricing.percent.label} (-${formatARS(pricing.percent.amount)})`);
     }
+    if (pricing.hotSale) {
+      lines.push(`*${pricing.hotSale.label}:* -${formatARS(pricing.hotSale.amount)}`);
+    }
 
     lines.push(`*Total estimado:* ${formatARS(pricing.total)}`);
     lines.push('');

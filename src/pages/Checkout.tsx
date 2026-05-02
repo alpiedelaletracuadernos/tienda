@@ -81,6 +81,7 @@ const Checkout = () => {
 
   const has2x1 = (pricing.promo?.amount ?? 0) > 0;
   const hasPercent = (pricing.percent?.amount ?? 0) > 0;
+  const hasHotSale = (pricing.hotSale?.amount ?? 0) > 0;
 
   return (
     <div className="min-h-screen overflow-x-clip">
@@ -305,6 +306,13 @@ const Checkout = () => {
                     <div className="flex items-center justify-between text-muted-foreground">
                       <span>{pricing.percent.label}</span>
                       <span>-{formatARS(pricing.percent.amount)}</span>
+                    </div>
+                  )}
+
+                  {hasHotSale && pricing.hotSale && (
+                    <div className="flex items-center justify-between text-accent font-medium">
+                      <span>{pricing.hotSale.label}</span>
+                      <span>-{formatARS(pricing.hotSale.amount)}</span>
                     </div>
                   )}
 

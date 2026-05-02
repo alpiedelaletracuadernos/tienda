@@ -26,6 +26,29 @@ export const isEligibleForDiscount = (item: CartItem | { product: { category: st
 };
 
 /**
+ * Returns true only when today falls within the configured Hot Sale date window
+ * AND the master switch is enabled.
+ */
+export const isHotSaleActive = (): boolean => {
+  const hs = vars.promotions.hotSale;
+  if (!hs.enabled) return false;
+  const now   = new Date();
+  const start = new Date(hs.startDate + 'T00:00:00');
+  const end   = new Date(hs.endDate   + 'T23:59:59');
+  return now >= start && now <= end;
+};
+
+/**
+ * Returns true when Hot Sale is active. Applies to ALL categories.
+ */
+export const isEligibleForHotSale = (item: CartItem | { product: { category: string }, personalization?: string }): boolean => {
+  if (!isHotSaleActive()) return false;
+  const hs = vars.promotions.hotSale;
+  if (item.personalization && !hs.applyToPersonalized) return false;
+  return true;
+};
+
+/**
  * Validates if an item is eligible for the 2x1 promotion
  */
 export const isEligibleFor2x1 = (item: CartItem | { product: { category: string }, personalization?: string }): boolean => {

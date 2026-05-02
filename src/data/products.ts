@@ -233,7 +233,7 @@ export const products: Product[] = [
     category: 'agendas',
     description:
       'Empeza el año ordenada: vista semanal, personalización de tapa incluida y papel de 80gr que no traspasa. Ideal para planificar rutinas y agendar actividades. Entrega rápida. Envíos a todo el país y retiro por zona centro de  San Nicolás de los Arroyos .',
-    basePrice: 35090,
+    basePrice: 21054,
     sizes: ['A5'],
     interiors: ['semanal'],
     coverTypes: [],
@@ -268,7 +268,7 @@ export const products: Product[] = [
     category: 'agendas',
     description:
       'Más espacio por día para anotar TODO! Formato de 2 días por cada hoja con bloques amplios para escribir. Personaliza la tapa con tu nombre o lo que más te guste. Hecha a mano por pedido, con tapa dura y en papel de 80gr con anillado doble alambre. Entrega rápida. Envíos a todo el país y retiro en zona centro de San Nicolás de los Arroyos.',
-    basePrice: 39930,
+    basePrice: 23958,
     sizes: ['A5'],
     interiors: ['dos-por-hoja'],
     coverTypes: [],
@@ -303,7 +303,7 @@ export const products: Product[] = [
     category: 'agendas',
     description:
       'Tu cuatrimestre bajo control: secciones para plan de estudios, parciales, finales, trabajos, gastos + vista semanal para planificar cursadas. Personaliza la tapa como más te guste. Hecha a mano por pedido, con tapa dura y en papel de 80gr con anillado doble alambre. Entrega rápida. Envíos a todo el país y retiro en zona centro de San Nicolás de los Arroyos. ',
-    basePrice: 42350,
+    basePrice: 25410,
     sizes: ['A5'],
     interiors: ['universitaria'],
     coverTypes: [],
@@ -339,7 +339,7 @@ export const products: Product[] = [
     category: 'agendas docentes',
     description:
       'Planifica tu ciclo lectivo con plantillas listas para su sala. Diseño perpetuo para comenzar cuando quieras. Podes elegir cómo personalizar la tapa. Hecha a mano por pedido, con tapa dura y en papel de 80gr con anillado doble alambre. Entrega rápida. Envíos a todo el país y retiro en zona centro de San Nicolás de los Arroyos.',
-    basePrice: 38720,
+    basePrice: 23232,
     sizes: ['A5'],
     interiors: ['Docente nivel inicial'],
     coverTypes: [],
@@ -381,7 +381,7 @@ export const products: Product[] = [
     category: 'agendas docentes',
     description:
       'Una sola agenda para todo el curso: asistencia, calificaciones, tareas, reuniones y más. Formato perpetuo, portada personalizada y papel 80 g. Pensada para uso intensivo en aula. Entrega 12–24 h hábiles. Envíos a todo el país / retiro en San Nicolás.',
-    basePrice: 38720,
+    basePrice: 23232,
     sizes: ['A5'],
     interiors: ['Docente nivel primario'],
     coverTypes: [],
@@ -426,7 +426,7 @@ export const products: Product[] = [
     category: 'agendas docentes',
     description:
       'Gestiona varios cursos/cátedras en un solo lugar: sección para reuniones, licencias, evaluaciones, asistencias y calificaciones. Formato perpetuo para que inicies cuando quieras. Personalización de tapa incluida. Hecha a mano por pedido, con tapa dura y en papel de 80gr con anillado doble alambre. Entrega rápida. Envíos a todo el país y retiro en zona centro de San Nicolás de los Arroyos. ',
-    basePrice: 38720,
+    basePrice: 23232,
     sizes: ['A5'],
     interiors: ['Docente nivel secundario/universitario'],
     coverTypes: [],

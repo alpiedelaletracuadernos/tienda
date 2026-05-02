@@ -34,6 +34,15 @@ export interface AppVars {
             applyToPersonalized: boolean;
             eligibleCategories: string[];
         };
+        hotSale: {
+            enabled: boolean;
+            percentage: number;
+            applyToPersonalized: boolean;
+            startDate: string;   // 'YYYY-MM-DD'
+            endDate: string;     // 'YYYY-MM-DD' (inclusive)
+            label: string;
+            storageKey: string;  // clave localStorage para cooldown del modal
+        };
     };
 }
 
@@ -59,8 +68,8 @@ export const vars: AppVars = {
     personalizationSurcharge: 5000, // Recargo $5000 inicial
     promotions: {
         discount: {
-            enabled: true,
-            percentage: 40,
+            enabled: false,
+            percentage: 0,
             applyToPersonalized: true,
             eligibleCategories: ['agendas', 'agendas docentes']
         },
@@ -68,6 +77,15 @@ export const vars: AppVars = {
             enabled: false,
             applyToPersonalized: false,
             eligibleCategories: ['agendas', 'agendas docentes']
+        },
+        hotSale: {
+            enabled: true,
+            percentage: 25,
+            applyToPersonalized: true,
+            startDate: '2026-05-11',
+            endDate:   '2026-05-13',
+            label:     'Hot Sale',
+            storageKey: 'hs26_modal_seen',
         }
     }
 };

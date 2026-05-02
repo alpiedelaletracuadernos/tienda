@@ -1,6 +1,6 @@
 // src/lib/pricing/calc-cart-pricing.ts
 import type { CartItem } from '@/types/cart';
-import { isEligibleFor2x1, isEligibleForDiscount } from '@/config/promotions';
+import { isEligibleFor2x1, isEligibleForDiscount, isHotSaleActive, isEligibleForHotSale } from '@/config/promotions';
 import vars from '@/data/data';
 
 type Unit = { price: number; key: string };
@@ -28,10 +28,11 @@ export function calculateCartPricing(items: CartItem[]) {
     string,
     {
       listSubtotal: number;
-      discount: number; // descuento total (2x1 + %)
+      discount: number; // descuento total (2x1 + % + hotSale)
       total: number; // total final de la línea
       freeUnits: number; // gratis por 2x1
       percentDiscount: number; // descuento por % (solo categorías)
+      hotSaleDiscount: number; // descuento por Hot Sale
     }
   > = {};
 
@@ -44,6 +45,7 @@ export function calculateCartPricing(items: CartItem[]) {
       total: listSubtotal,
       freeUnits: 0,
       percentDiscount: 0,
+      hotSaleDiscount: 0,
     };
   }
 
@@ -112,7 +114,33 @@ export function calculateCartPricing(items: CartItem[]) {
     }
   }
 
-  const total = Math.max(0, subtotalList - promo2x1Discount - percentDiscountTotal);
+  // =====================
+  // 3) HOT SALE % (si activo) — aplica a TODOS los productos
+  // =====================
+  let hotSaleDiscountTotal = 0;
+  const hotSaleSettings = vars.promotions.hotSale;
+
+  if (isHotSaleActive()) {
+    const hsRate = hotSaleSettings.percentage / 100;
+
+    for (const it of items) {
+      if (!isEligibleForHotSale(it)) continue;
+      const key = lineKey(it);
+      const baseAfterPrev = lines[key].total;
+      const d = Math.round(baseAfterPrev * hsRate);
+      if (d > 0) {
+        hotSaleDiscountTotal += d;
+        lines[key].hotSaleDiscount += d;
+        lines[key].discount += d;
+      }
+    }
+
+    for (const k of Object.keys(lines)) {
+      lines[k].total = Math.max(0, lines[k].listSubtotal - lines[k].discount);
+    }
+  }
+
+  const total = Math.max(0, subtotalList - promo2x1Discount - percentDiscountTotal - hotSaleDiscountTotal);
 
   return {
     subtotalList,
@@ -121,5 +149,6 @@ export function calculateCartPricing(items: CartItem[]) {
     lines,
     promo: vars.promotions.twoForOne.enabled ? { label: 'Promo 2x1', amount: promo2x1Discount } : null,
     percent: vars.promotions.discount.enabled ? { label: `Descuento del ${discountSettings.percentage}% en la unidad`, amount: percentDiscountTotal } : null,
+    hotSale: isHotSaleActive() ? { label: `${hotSaleSettings.label} ${hotSaleSettings.percentage}% OFF`, amount: hotSaleDiscountTotal } : null,
   };
 }

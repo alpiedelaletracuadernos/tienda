@@ -4,35 +4,36 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
-import { isEligibleForDiscount } from '@/config/promotions';
+import { isEligibleForDiscount, isHotSaleActive, isEligibleForHotSale } from '@/config/promotions';
 import vars from '@/data/data';
+import { formatARS } from '@/lib/currency';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
-  const formattedPrice = new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 0,
-  }).format(product.basePrice);
+  const formattedPrice = formatARS(product.basePrice);
 
   const mockCartItemCheck = {
     product: { category: product.category },
     personalization: undefined
   };
-  const eligibleForDiscount = isEligibleForDiscount(mockCartItemCheck as any);
+
+  // Hot Sale tiene prioridad sobre el descuento genérico
+  const hsActive = isHotSaleActive();
+  const hsEligible = hsActive && isEligibleForHotSale(mockCartItemCheck as any);
+  const hotSalePrice = hsEligible
+    ? Math.round(product.basePrice * (1 - vars.promotions.hotSale.percentage / 100))
+    : null;
+
+  const eligibleForDiscount = !hsEligible && isEligibleForDiscount(mockCartItemCheck as any);
 
   let formattedDiscountedPrice = null;
   if (eligibleForDiscount) {
     const discountPercentage = vars.promotions.discount.percentage || 0;
     const discountedPrice = product.basePrice * (1 - discountPercentage / 100);
-    formattedDiscountedPrice = new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0,
-    }).format(discountedPrice);
+    formattedDiscountedPrice = formatARS(discountedPrice);
   }
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
@@ -44,6 +45,11 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
+          {hsEligible && (
+            <span className="absolute left-2 top-2 rounded-full bg-accent text-accent-foreground text-[11px] font-bold px-2.5 py-0.5 shadow-sm">
+              HOT SALE -{vars.promotions.hotSale.percentage}%
+            </span>
+          )}
         </div>
       </Link>
 
@@ -63,22 +69,23 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
         <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
 
-        {eligibleForDiscount ? (
-          <>
-            <div className="flex items-baseline gap-1">
-              <span className="text-sm text-muted-foreground">Desde</span>
-
-              <span className="text-sm text-muted-foreground line-through">{formattedPrice}</span>
-              <span className="text-2xl font-bold text-primary">{formattedDiscountedPrice}</span>
-            </div>
-          </>
+        {hotSalePrice != null ? (
+          <div className="flex items-baseline gap-1 flex-wrap">
+            <span className="text-sm text-muted-foreground">Desde</span>
+            <span className="text-sm text-muted-foreground line-through">{formattedPrice}</span>
+            <span className="text-2xl font-bold text-accent">{formatARS(hotSalePrice)}</span>
+          </div>
+        ) : eligibleForDiscount ? (
+          <div className="flex items-baseline gap-1">
+            <span className="text-sm text-muted-foreground">Desde</span>
+            <span className="text-sm text-muted-foreground line-through">{formattedPrice}</span>
+            <span className="text-2xl font-bold text-primary">{formattedDiscountedPrice}</span>
+          </div>
         ) : (
-          <>
-            <div className="flex items-baseline gap-1">
-              <span className="text-sm text-muted-foreground">Desde</span>
-              <span className="text-sm text-muted-foreground">{formattedPrice}</span>
-            </div>
-          </>
+          <div className="flex items-baseline gap-1">
+            <span className="text-sm text-muted-foreground">Desde</span>
+            <span className="text-sm text-muted-foreground">{formattedPrice}</span>
+          </div>
         )}
 
         {/* {twoForOne && (

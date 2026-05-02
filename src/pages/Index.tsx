@@ -9,7 +9,8 @@ import { ShippingInfo } from '@/components/home/ShippingInfo';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import MobileUSPs from '@/components/home/MobileUSPs';
 import Promo2x1Modal from '@/components/promos/Promo2x1';
-// import Promo2x1Modal from '@/components/promos/Promo2x1';
+import HotSaleBanner from '@/components/promos/HotSaleBanner';
+import HotSaleModal from '@/components/promos/HotSaleModal';
 import AppVars from '../data/data';
 
 //promociones
@@ -22,6 +23,8 @@ const BLACK_FRIDAY_ACTIVE = false;
 const Index = () => {
   return (
     <div className="min-h-screen w-full overflow-x-clip">
+      <HotSaleBanner />
+      <HotSaleModal />
       {vars.promotions.twoForOne.enabled && (
         <>
           {/* ——— Barra de anuncio 2x1 ——— */}
