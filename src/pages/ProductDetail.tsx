@@ -47,6 +47,7 @@ const formatARS = (n: number) =>
   }).format(n);
 
 const DISCOUNT_CATEGORIES = new Set(['agendas', 'agendas docentes']);
+const MODEL_CATEGORIES = new Set(['agendas', 'agendas docentes', 'cuadernos']);
 
 const normalizeCategory = (c?: string) => (c ?? '').trim().toLowerCase();
 
@@ -59,6 +60,7 @@ const ProductDetail = () => {
   const { addItem } = useCart();
   const isEligible = isEligibleForDiscount({ product: { category: product?.category || '' }, personalization: undefined } as any);
   const rate = AppVars.promotions.discount.percentage / 100;
+  const hasModels = MODEL_CATEGORIES.has(normalizeCategory(product?.category));
 
   // ——— Estado base PDP
   const [selectedSize, setSelectedSize] = useState<ProductSize>(product?.sizes?.[0] || 'A5');
@@ -71,7 +73,7 @@ const ProductDetail = () => {
   const PROMO_2X1_LABEL_DETAIL = 'Consultá diseños en stock por WhatsApp'; // usado en varios lados
 
   // ——— Modo (modelos listos | personalizar)
-  const [mode, setMode] = useState<Mode>('ready');
+  const [mode, setMode] = useState<Mode>(() => (hasModels ? 'ready' : 'custom'));
 
   // ——— Modelo (unificado por ID)
   const [selectedModelId, setSelectedModelId] = useState<string>(modeloOptions[0]?.id ?? '');
@@ -130,13 +132,14 @@ const ProductDetail = () => {
         size: selectedSize,
         interior: selectedInterior,
         cover: selectedCover,
-        modelLabel: selectedModelLabel,
+        modelLabel: hasModels ? selectedModelLabel : undefined,
         quantity,
       },
       personalization ? { text: personalization } : undefined
     );
   }, [
     product,
+    hasModels,
     selectedModelLabel,
     selectedSize,
     selectedInterior,
@@ -153,13 +156,14 @@ const ProductDetail = () => {
         size: selectedSize,
         interior: selectedInterior,
         cover: selectedCover,
-        modelLabel: selectedModelLabel,
+        modelLabel: hasModels ? selectedModelLabel : undefined,
         quantity,
       },
       { text: personalization || undefined, styleId }
     );
   }, [
     product,
+    hasModels,
     selectedModelLabel,
     selectedSize,
     selectedInterior,
@@ -396,46 +400,48 @@ const ProductDetail = () => {
               </div>
 
               {/* —— Segmented Control —— */}
-              <div className="w-full">
-                <div
-                  className="inline-flex rounded-xl border bg-white p-1 shadow-sm"
-                  role="tablist"
-                  aria-label="Modo de compra"
-                >
-                  <button
-                    role="tab"
-                    aria-selected={mode === 'ready'}
-                    onClick={() => setMode('ready')}
-                    className={[
-                      'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition',
-                      mode === 'ready'
-                        ? 'bg-primary text-primary-foreground shadow'
-                        : 'text-slate-700 hover:bg-slate-50',
-                    ].join(' ')}
+              {hasModels && (
+                <div className="w-full">
+                  <div
+                    className="inline-flex rounded-xl border bg-white p-1 shadow-sm"
+                    role="tablist"
+                    aria-label="Modo de compra"
                   >
-                    <LayoutGrid className="h-4 w-4" />
-                    Modelos listos
-                  </button>
-                  <button
-                    role="tab"
-                    aria-selected={mode === 'custom'}
-                    onClick={() => setMode('custom')}
-                    className={[
-                      'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition',
-                      mode === 'custom'
-                        ? 'bg-primary text-primary-foreground shadow'
-                        : 'text-slate-700 hover:bg-slate-50',
-                    ].join(' ')}
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    Personalizar
-                  </button>
+                    <button
+                      role="tab"
+                      aria-selected={mode === 'ready'}
+                      onClick={() => setMode('ready')}
+                      className={[
+                        'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition',
+                        mode === 'ready'
+                          ? 'bg-primary text-primary-foreground shadow'
+                          : 'text-slate-700 hover:bg-slate-50',
+                      ].join(' ')}
+                    >
+                      <LayoutGrid className="h-4 w-4" />
+                      Modelos listos
+                    </button>
+                    <button
+                      role="tab"
+                      aria-selected={mode === 'custom'}
+                      onClick={() => setMode('custom')}
+                      className={[
+                        'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition',
+                        mode === 'custom'
+                          ? 'bg-primary text-primary-foreground shadow'
+                          : 'text-slate-700 hover:bg-slate-50',
+                      ].join(' ')}
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      Personalizar
+                    </button>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    ¿Querés nombre, foto o frase? Tocá <strong>Personalizar</strong>. Si preferís un
+                    diseño ya listo, quedate en <strong>Modelos listos</strong>.
+                  </p>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  ¿Querés nombre, foto o frase? Tocá <strong>Personalizar</strong>. Si preferís un
-                  diseño ya listo, quedate en <strong>Modelos listos</strong>.
-                </p>
-              </div>
+              )}
 
               {/* ——— Vista: Modelos listos ——— */}
               {mode === 'ready' && (
@@ -586,13 +592,15 @@ const ProductDetail = () => {
                         <Wand2 className="h-5 w-5 text-primary" />
                         <h3 className="font-semibold text-lg">Personalizá tu agenda</h3>
                       </div>
-                      <Button
-                        variant="link"
-                        className="px-0 text-xs"
-                        onClick={() => setMode('ready')}
-                      >
-                        Ver modelos listos →
-                      </Button>
+                      {hasModels && (
+                        <Button
+                          variant="link"
+                          className="px-0 text-xs"
+                          onClick={() => setMode('ready')}
+                        >
+                          Ver modelos listos →
+                        </Button>
+                      )}
                     </div>
                     <p className="text-sm text-muted-foreground">
                       Portada o interior: <strong>foto</strong>, <strong>frase</strong>,{' '}
