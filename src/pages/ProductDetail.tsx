@@ -99,6 +99,7 @@ const ProductDetail = () => {
   );
   const selectedModelLabel = selectedModelDef?.modelo ?? 'a confirmar';
   const [fsImage, setFsImage] = useState<string | null>(null);
+  const [fsModelOpen, setFsModelOpen] = useState(false);
 
   // ——— Colecciones
   const collections = useMemo(
@@ -484,13 +485,15 @@ const ProductDetail = () => {
                       options={filteredModels}
                       value={selectedModelId}
                       onChange={setSelectedModelId}
+                      onExpand={() => setFsModelOpen(true)}
                     />
                   </div>
 
                   <FullscreenModelDialog
                     src={fsImage || selectedModelImage}
                     alt={product.name}
-                    openModel={selectedModelId}
+                    open={fsModelOpen}
+                    onOpenChange={setFsModelOpen}
                     trigger={
                       <Button variant="outline" className="w-full">
                         <Maximize2 className="w-4 h-4 mr-2" />
@@ -683,11 +686,13 @@ const ProductDetail = () => {
                       options={todasCollections}
                       value={selectedModelId}
                       onChange={setSelectedModelId}
+                      onExpand={() => setFsModelOpen(true)}
                     />
                     <FullscreenModelDialog
                       src={fsImage || selectedModelImage}
                       alt={product.name}
-                      openModel={selectedModelId}
+                      open={fsModelOpen}
+                      onOpenChange={setFsModelOpen}
                       trigger={
                         <Button variant="outline" className="w-full">
                           <Maximize2 className="w-4 h-4 mr-2" />

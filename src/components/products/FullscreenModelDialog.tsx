@@ -1,28 +1,18 @@
 // src/components/product/FullscreenModelDialog.tsx
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import { Maximize2, X } from "lucide-react";
 
 type Props = {
   src: string;
   alt?: string;
   trigger?: React.ReactNode;
-  openModel: string;
-   // botón o thumbnail que abre el modal
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 };
 
-export default function FullscreenModelDialog({ src, alt = "Modelo", trigger, openModel}: Props) {
-  const [open, setOpen] = useState(false);
+export default function FullscreenModelDialog({ src, alt = "Modelo", trigger, open, onOpenChange }: Props) {
   const boxRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    setOpen(!open);
-  }, [openModel]);
-  
-  useEffect(() => {
-    setOpen(false)
-    }, []);
   const enterFullscreen = async () => {
     // Fullscreen API
     if (boxRef.current && boxRef.current.requestFullscreen) {
@@ -31,7 +21,7 @@ export default function FullscreenModelDialog({ src, alt = "Modelo", trigger, op
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         {trigger ?? (
           <button

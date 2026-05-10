@@ -14,6 +14,7 @@ type Props = {
   options: AgendaModelOption[];
   value?: string | null; // modelo seleccionado
   onChange?: (id: string) => void;
+  onExpand?: (id: string) => void;
   className?: string;
 };
 
@@ -22,6 +23,7 @@ export function AgendaModelSelector({
   options,
   value,
   onChange,
+  onExpand,
   className,
 }: Props) {
   const groupId = useId();
@@ -88,7 +90,7 @@ export function AgendaModelSelector({
                 role="radio"
                 aria-checked={checked}
                 aria-label={opt.id}
-                onClick={() => setSelected(opt.id)}
+                onClick={() => { setSelected(opt.id); onExpand?.(opt.id); }}
                 className={clsx(
                   "group relative overflow-hidden rounded-xl",
                     "w-28 sm:w-32 md:w-36 aspect-[3/4]", // tamaño fijo y apreciable
