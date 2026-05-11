@@ -139,7 +139,7 @@ export default function HotSaleModal({ forceOpen }: Props) {
               size="lg"
               className="w-full bg-white text-accent hover:bg-white/90 font-bold"
             >
-              <a href="/catalogo">Ver toda la tienda →</a>
+              <a href="/tienda/#/catalogo">Ver toda la tienda →</a>
             </Button>
             <Button
               asChild
