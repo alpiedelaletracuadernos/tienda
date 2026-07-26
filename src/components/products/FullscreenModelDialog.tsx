@@ -1,6 +1,6 @@
 // src/components/product/FullscreenModelDialog.tsx
 import { useRef } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 type Props = {
@@ -22,16 +22,7 @@ export default function FullscreenModelDialog({ src, alt = "Modelo", trigger, op
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <button
-            className="w-full rounded-xl ring-1 ring-muted-foreground/20 overflow-hidden"
-            aria-label="Ver modelo en grande"
-          >
-            <img src={src} alt={alt} className="h-full w-auto object-cover" />
-          </button>
-        )}
-      </DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
         className="
           p-0 gap-0 bg-black overflow-hidden
@@ -40,6 +31,7 @@ export default function FullscreenModelDialog({ src, alt = "Modelo", trigger, op
         "
         aria-label="Vista ampliada del modelo"
       >
+        <DialogTitle className="sr-only">{alt}</DialogTitle>
         <div className="relative w-full h-full min-h-0"> {/* min-h-0 evita overflow en flex/grid */}
           <TransformWrapper
             initialScale={1}

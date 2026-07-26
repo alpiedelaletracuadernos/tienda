@@ -1,5 +1,5 @@
 // src/pages/ProductDetail.tsx
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -10,16 +10,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { useCart } from '@/hooks/use-cart';
 import { toast } from 'sonner';
-import { ArrowLeft, ShoppingCart, Wand2, Maximize2, LayoutGrid, Sparkles } from 'lucide-react';
-import { ProductSize, InteriorType, CoverType } from '@/types/product';
+import { ArrowLeft, ShoppingCart, Minus, Plus } from 'lucide-react';
+import { Product, ProductSize, InteriorType, CoverType, ProductColor } from '@/types/product';
 import AppVars from '@/data/data';
 import { buildPdpMessage, buildWaLink } from '@/lib/whatsapp';
 
-import { AgendaModelSelector } from '@/components/products/AgendaModelOption';
+import { DesignPicker } from '@/components/products/DesignPicker';
 import ProductImageGallery from '@/components/products/ProductImageGallery';
 import FullscreenModelDialog from '@/components/products/FullscreenModelDialog';
+import { VariantSelector } from '@/components/products/VariantSelector';
+import { ColorSwatchSelector } from '@/components/products/ColorSwatchSelector';
+import { StepSection } from '@/components/products/StepSection';
+import { StickyBuyBar } from '@/components/products/StickyBuyBar';
 import { safeStorage } from '@/lib/safe-storage';
 
 //PROMOCIONES
@@ -37,7 +42,6 @@ const PERSONALIZATION_STYLES = [
 ] as const;
 
 type PersonalizationStyleId = (typeof PERSONALIZATION_STYLES)[number]['id'];
-type Mode = 'ready' | 'custom';
 
 const formatARS = (n: number) =>
   new Intl.NumberFormat('es-AR', {
@@ -54,94 +58,177 @@ const normalizeCategory = (c?: string) => (c ?? '').trim().toLowerCase();
 const isDiscountEligibleCategory = (category?: string) =>
   DISCOUNT_CATEGORIES.has(normalizeCategory(category));
 
+// ——— Componente exterior: SIN hooks más allá de useParams. ———————————
+// Motivo (B1): garantiza que el guard de "producto no encontrado" pueda
+// ejecutarse antes de cualquier cálculo derivado de `product`, sin violar
+// las reglas de hooks (que exigen que nunca haya un return condicional
+// antes de un hook). Todos los hooks viven en ProductDetailContent, que
+// solo se monta cuando `product` ya está garantizado no-nulo.
 const ProductDetail = () => {
   const { slug } = useParams();
-  const product = getProductBySlug(slug || '');
+  const product = getProductBySlug(slug ?? '');
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold">Producto no encontrado</h1>
+          <Button asChild>
+            <Link to="/catalogo">Volver al catálogo</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // `key` por slug: sin esto React reusa la misma instancia al navegar de un
+  // producto a otro sin recargar, y el estado del PDP (diseño elegido, toggle
+  // de personalización, cantidad) se arrastra al producto siguiente.
+  return <ProductDetailContent key={product.slug} product={product} />;
+};
+
+const ProductDetailContent = ({ product }: { product: Product }) => {
   const { addItem } = useCart();
-  const isEligible = isEligibleForDiscount({ product: { category: product?.category || '' }, personalization: undefined } as any);
+  const isEligible = isEligibleForDiscount({
+    product: { category: product.category },
+    personalization: undefined,
+  });
   const rate = AppVars.promotions.discount.percentage / 100;
-  const hasModels = MODEL_CATEGORIES.has(normalizeCategory(product?.category));
+  const hasModels = MODEL_CATEGORIES.has(normalizeCategory(product.category));
+  // Decisión del dueño de la tienda: los productos con `colors` definido
+  // (hoy el Box premium regalo) no usan los diseños de tapa del catálogo de
+  // agendas; se eligen por color. Es una decisión por datos, no por categoría.
+  const usesColors = !!product.colors?.length;
+  // El diseño de tapa sólo viaja al pedido si su selector estuvo a la vista.
+  const usesModels = hasModels && !usesColors;
 
   // ——— Estado base PDP
-  const [selectedSize, setSelectedSize] = useState<ProductSize>(product?.sizes?.[0] || 'A5');
-  const [selectedInterior, setSelectedInterior] = useState<InteriorType>(
-    product?.interiors?.[0] || 'semanal'
+  // B2: sin fallbacks inventados — si el producto no tiene tamaños/interiores/
+  // tapas (arrays vacíos), el estado queda undefined y esos bloques no se
+  // renderizan ni se envían al pedido.
+  const [selectedSize, setSelectedSize] = useState<ProductSize | undefined>(product.sizes[0]);
+  const [selectedInterior, setSelectedInterior] = useState<InteriorType | undefined>(
+    product.interiors[0]
   );
-  const [selectedCover, setSelectedCover] = useState<CoverType>(product?.coverTypes?.[0] || 'dura');
+  const [selectedCover, setSelectedCover] = useState<CoverType | undefined>(
+    product.coverTypes[0]
+  );
   const [personalization, setPersonalization] = useState('');
   const [quantity, setQuantity] = useState(1);
   const PROMO_2X1_LABEL_DETAIL = 'Consultá diseños en stock por WhatsApp'; // usado en varios lados
 
-  // ——— Modo (modelos listos | personalizar)
-  const [mode, setMode] = useState<Mode>(() => (hasModels ? 'ready' : 'custom'));
+  // ——— Personalización (paso ③): flujo único, un solo camino de JSX.
+  // Reemplaza al viejo estado `mode` ('ready' | 'custom'); ya no hay dos
+  // ramas de render que puedan divergir ni quedar "pisadas" al navegar
+  // entre productos sin recargar.
+  const [isCustom, setIsCustom] = useState(false);
+
+  // Cantidad: stepper con tope real de 10 (antes sólo se clampaba el mínimo).
+  const incrementQuantity = () => setQuantity((q) => Math.min(10, q + 1));
+  const decrementQuantity = () => setQuantity((q) => Math.max(1, q - 1));
+
+  // Qué se elige en el paso ①, decidido por datos:
+  //  · con `colors`  → círculos de color (hoy: Box premium regalo)
+  //  · con modelos   → grilla de diseños de tapa (agendas, agendas docentes, cuadernos)
+  //  · ninguno       → no hay paso ① (las libretas no tienen selector de tapa;
+  //                    sus diseños se ven en la galería)
+  const showDesignStep = usesColors || hasModels;
+
+  const hasRealChoices = [product.sizes, product.interiors, product.coverTypes].some(
+    (a) => a.length >= 2
+  );
+
+  // Numeración corrida: los pasos que no se muestran no dejan un hueco.
+  let stepCounter = 0;
+  const designStepNumber = showDesignStep ? ++stepCounter : 0;
+  const configStepNumber = hasRealChoices ? ++stepCounter : 0;
+  const personalizationStepNumber = ++stepCounter;
 
   // ——— Modelo (unificado por ID)
+  // B9: la clave de persistencia se namespacea por producto (`pdp:selectedModelId:${slug}`)
+  // para que el diseño elegido en un producto no se filtre a otro.
+  const modelStorageKey = `pdp:selectedModelId:${product.slug}`;
   const [selectedModelId, setSelectedModelId] = useState<string>(modeloOptions[0]?.id ?? '');
+  const [previewModelImage, setPreviewModelImage] = useState<string | null>(null);
+  const [fsModelOpen, setFsModelOpen] = useState(false);
+
+  // ——— Color (Box premium y futuros productos que se eligen por color)
+  const [selectedColor, setSelectedColor] = useState<ProductColor | undefined>(
+    product.colors?.[0]
+  );
+
   useEffect(() => {
     try {
-      const saved = safeStorage.get<string>('pdp:selectedModelId', null);
-      if (saved) setSelectedModelId(saved);
+      const saved = safeStorage.get<string>(modelStorageKey, null);
+      if (!saved) return;
+      // B9: sólo restauramos si el id sigue existiendo en las opciones vigentes;
+      // si es un dato viejo de una colección retirada, lo ignoramos.
+      // La colección a mostrar la resuelve DesignPicker (regla de "el
+      // seleccionado siempre visible" en la grilla colapsada, y el sheet abre
+      // en la colección del diseño elegido).
+      const match = modeloOptions.find((m) => m.id === saved);
+      if (match) {
+        setSelectedModelId(saved);
+      }
     } catch {
       /* no-op */
     }
-  }, []);
+  }, [modelStorageKey]);
   useEffect(() => {
     try {
-      safeStorage.set('pdp:selectedModelId', selectedModelId);
+      safeStorage.set(modelStorageKey, selectedModelId);
     } catch {
       /* no-op */
     }
-  }, [selectedModelId]);
+  }, [modelStorageKey, selectedModelId]);
 
   const selectedModelDef = useMemo(
     () => modeloOptions.find((m) => m.id === selectedModelId),
     [selectedModelId]
   );
   const selectedModelLabel = selectedModelDef?.modelo ?? 'a confirmar';
-  const [fsImage, setFsImage] = useState<string | null>(null);
-  const [fsModelOpen, setFsModelOpen] = useState(false);
 
-  // ——— Colecciones
-  const collections = useMemo(
-    () => Array.from(new Set(modeloOptions.map((m) => m.collection ?? 'otras'))),
-    []
-  );
-  const [selectedCollection, setSelectedCollection] = useState<string>(collections[0] ?? 'todas');
-  const filteredModels = useMemo(
-    () =>
-      modeloOptions.filter((m) =>
-        !selectedCollection || selectedCollection === 'todas'
-          ? true
-          : m.collection === selectedCollection
-      ),
-    [selectedCollection]
-  );
-  const todasCollections = useMemo(
-    () => modeloOptions.filter((m) => m.collection === 'Edicion-2026'),
-    []
-  );
-  const selectedModelImage = selectedModelDef?.image ?? product?.images?.[0] ?? '';
+  const selectedModelImage = selectedModelDef?.image ?? product.images?.[0] ?? '';
+
+  // B6: la galería principal debe reflejar el diseño elegido. Si el producto
+  // tiene modelos, la imagen del modelo seleccionado va primero; el resto de
+  // las imágenes del producto siguen después, sin duplicar.
+  const galleryImages = useMemo(() => {
+    if (!hasModels || !selectedModelImage) return product.images ?? [];
+    const rest = (product.images ?? []).filter((src) => src !== selectedModelImage);
+    return [selectedModelImage, ...rest];
+  }, [hasModels, selectedModelImage, product.images]);
+
+  // B5: la lupa de una miniatura abre ESE diseño en pantalla completa,
+  // no necesariamente el seleccionado.
+  const openModelPreview = useCallback((id: string) => {
+    const found = modeloOptions.find((m) => m.id === id);
+    setPreviewModelImage(found?.image ?? null);
+    setFsModelOpen(true);
+  }, []);
 
   // ——— Mensajes WA
   const [styleId, setStyleId] = useState<PersonalizationStyleId>('nombre');
 
   const waReadyMessage2 = useMemo(() => {
-    if (!product) return '';
     return buildPdpMessage(
       product,
       {
         size: selectedSize,
         interior: selectedInterior,
         cover: selectedCover,
-        modelLabel: hasModels ? selectedModelLabel : undefined,
+        modelLabel: usesModels ? selectedModelLabel : undefined,
+        color: usesColors ? selectedColor?.name : undefined,
         quantity,
       },
       personalization ? { text: personalization } : undefined
     );
   }, [
     product,
-    hasModels,
+    usesModels,
+    usesColors,
     selectedModelLabel,
+    selectedColor,
     selectedSize,
     selectedInterior,
     selectedCover,
@@ -150,22 +237,24 @@ const ProductDetail = () => {
   ]);
 
   const waPersonalizationMessage2 = useMemo(() => {
-    if (!product) return '';
     return buildPdpMessage(
       product,
       {
         size: selectedSize,
         interior: selectedInterior,
         cover: selectedCover,
-        modelLabel: hasModels ? selectedModelLabel : undefined,
+        modelLabel: usesModels ? selectedModelLabel : undefined,
+        color: usesColors ? selectedColor?.name : undefined,
         quantity,
       },
       { text: personalization || undefined, styleId }
     );
   }, [
     product,
-    hasModels,
+    usesModels,
+    usesColors,
     selectedModelLabel,
+    selectedColor,
     selectedSize,
     selectedInterior,
     selectedCover,
@@ -174,7 +263,7 @@ const ProductDetail = () => {
     quantity,
   ]);
 
-  const modeSpecificMessage = mode === 'custom' ? waPersonalizationMessage2 : waReadyMessage2;
+  const modeSpecificMessage = isCustom ? waPersonalizationMessage2 : waReadyMessage2;
 
   // ——— Precios (SIN DESCUENTOS) ————————————————————————
   // const basePrice = product?.basePrice ?? 0; // unitario
@@ -188,10 +277,14 @@ const ProductDetail = () => {
   // Motivo: el descuento debe depender de la categoría del producto,
   // no de una promo global.
 
-  const currentUnitPrice =
-    mode === 'custom' ? product.basePrice + AppVars.personalizationSurcharge : product.basePrice;
+  const currentUnitPrice = isCustom
+    ? product.basePrice + AppVars.personalizationSurcharge
+    : product.basePrice;
 
-  const isElegibleForDiscount = isEligibleForDiscount({ product: { category: product.category }, personalization: mode === 'custom' ? 'yes' : undefined } as any);
+  const isElegibleForDiscount = isEligibleForDiscount({
+    product: { category: product.category },
+    personalization: isCustom ? 'yes' : undefined,
+  });
 
   const discountedUnitPrice = isElegibleForDiscount
     ? Math.round(currentUnitPrice * (1 - rate))
@@ -205,10 +298,12 @@ const ProductDetail = () => {
 
   // Hot Sale
   const hotSaleActive = isHotSaleActive();
-  const hsEligiblePDP = hotSaleActive && isEligibleForHotSale({
-    product: { category: product.category },
-    personalization: mode === 'custom' ? 'yes' : undefined,
-  } as any);
+  const hsEligiblePDP =
+    hotSaleActive &&
+    isEligibleForHotSale({
+      product: { category: product.category },
+      personalization: isCustom ? 'yes' : undefined,
+    });
   const hsRate = AppVars.promotions.hotSale.percentage / 100;
   const hotSaleUnitPrice = hsEligiblePDP ? Math.round(currentUnitPrice * (1 - hsRate)) : currentUnitPrice;
   const hotSaleTotalPrice = hotSaleUnitPrice * quantity;
@@ -220,10 +315,8 @@ const ProductDetail = () => {
   // Motivo: evita que el precio quede “cocinado” si cambia la promo.
   // El carrito decide si aplica descuento según categoría.
   const handleAddToCart = () => {
-    if (!product) return;
-
     // ✅ promo por ítem (solo si es elegible)
-    const promoEligible = isEligibleForDiscount({ product: { category: product.category } } as any);
+    const promoEligible = isEligibleForDiscount({ product: { category: product.category } });
 
     addItem({
       product: {
@@ -239,7 +332,13 @@ const ProductDetail = () => {
       selectedInterior,
       selectedCover,
       personalization: personalization || undefined,
-      selectedModel: selectedModelLabel,
+      // El selector de diseño (paso ①) se muestra siempre salvo que el
+      // producto use colores (libretas), en cuyo caso el modelo no aplica
+      // y viaja el color elegido en su lugar.
+      selectedModel: usesModels ? selectedModelLabel : undefined,
+      selectedColor: usesColors ? selectedColor?.name : undefined,
+      // B4: distingue la personalización del estándar aunque el texto quede vacío.
+      isCustom,
     });
 
     toast.success('¡Producto agregado al carrito!', {
@@ -247,66 +346,85 @@ const ProductDetail = () => {
     });
   };
 
-  if (!product) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold">Producto no encontrado</h1>
-          <Button asChild>
-            <Link to="/catalogo">Volver al catálogo</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // ——— Barra sticky de compra (sólo mobile) ——————————————
+  // Aparece recién cuando el botón principal "Agregar al carrito" sale de
+  // viewport, para no duplicar la CTA mientras está a la vista.
+  const addToCartRef = useRef<HTMLButtonElement | null>(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
 
-  // Scroll suave al bloque “inspirate”
-  const handleScrollToInspire = () => {
-    const el = document.getElementById('inspirate');
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  useEffect(() => {
+    const el = addToCartRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setShowStickyBar(!entry.isIntersecting), {
+      threshold: 0,
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const stickyUnitPrice = hsEligiblePDP
+    ? formattedHotSaleUnit
+    : isElegibleForDiscount
+      ? formattedDiscountedUnit
+      : formattedUnit;
+  const stickyOriginalPrice = hsEligiblePDP || isElegibleForDiscount ? formattedUnit : undefined;
+  // "48" solo no dice nada al cliente; con diseño se antepone "Diseño".
+  // Con colores, el summary usa el nombre del color en su lugar.
+  const stickySummary = [
+    usesColors ? selectedColor?.name : usesModels ? `Diseño ${selectedModelLabel}` : null,
+    selectedSize,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <div className="min-h-screen overflow-x-clip">
       <Header />
-      {hotSaleActive && (
-        <div className="sticky top-16 z-40 bg-accent text-accent-foreground">
-          <div className="container px-4 py-2 flex flex-wrap items-center gap-2">
-            <Badge className="bg-white text-accent font-bold hover:bg-white/90">HOT SALE</Badge>
-            <span className="text-sm font-semibold">
-              {AppVars.promotions.hotSale.percentage}% OFF en toda la tienda · 11, 12 y 13 de mayo
-            </span>
-          </div>
+      {(hotSaleActive || AppVars.promotions.twoForOne.enabled || AppVars.promotions.discount.enabled) && (
+        // Item 6 (Fase 2a): las tres barras de promo comparten un único
+        // contenedor sticky en vez de tener `sticky top-16 z-40` cada una,
+        // así se apilan en vez de pisarse cuando hay más de una activa.
+        <div className="sticky top-16 z-40">
+          {hotSaleActive && (
+            <div className="bg-accent text-accent-foreground">
+              <div className="container px-4 py-2 flex flex-wrap items-center gap-2">
+                <Badge className="bg-white text-accent font-bold hover:bg-white/90">HOT SALE</Badge>
+                <span className="text-sm font-semibold">
+                  {AppVars.promotions.hotSale.percentage}% OFF en toda la tienda · 11, 12 y 13 de
+                  mayo
+                </span>
+              </div>
+            </div>
+          )}
+          {AppVars.promotions.twoForOne.enabled && (
+            <div className="bg-black text-white">
+              <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-amber-400 text-black hover:bg-amber-400">2X1</Badge>
+                  <span className="text-sm sm:text-base font-semibold">
+                    {PROMO_2X1_LABEL_DETAIL}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+          {AppVars.promotions.discount.enabled && (
+            <div className="bg-black text-white">
+              <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
+                  <span className="text-sm sm:text-base font-semibold">
+                    Descuento del {AppVars.promotions.discount.percentage}% en diseños
+                    seleccionados
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
-      {AppVars.promotions.twoForOne.enabled && (
-        <>
-          {/* Barra informativa sticky: 2X1 */}
-          <div className="sticky top-16 z-40 bg-black text-white">
-            <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Badge className="bg-amber-400 text-black hover:bg-amber-400">2X1</Badge>
-                <span className="text-sm sm:text-base font-semibold">{PROMO_2X1_LABEL_DETAIL}</span>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-      {AppVars.promotions.discount.enabled && (
-        <>
-          {/* Descuentos */}
-          <div className="sticky top-16 z-40 bg-black text-white">
-            <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
-                <span className="text-sm sm:text-base font-semibold">Descuento del {AppVars.promotions.discount.percentage}% en diseños seleccionados</span>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
 
-      <main className="py-8 w-full max-w-full">
+      <main className="py-8 w-full max-w-full pb-24 lg:pb-0">
         <div className="container px-4">
           {/* Breadcrumb */}
           <Button variant="ghost" asChild className="mb-6">
@@ -320,9 +438,10 @@ const ProductDetail = () => {
             {/* Galería */}
             <div className="space-y-4 min-w-0">
               <ProductImageGallery
-                images={product?.images ?? []}
+                key={selectedModelImage}
+                images={galleryImages}
                 altBase={product?.name ?? 'Producto'}
-                onOpenFullscreen={(src) => setFsImage(src)}
+                onOpenFullscreen={(src) => setPreviewModelImage(src)}
               />
             </div>
 
@@ -400,380 +519,218 @@ const ProductDetail = () => {
                 <p className="text-muted-foreground mt-3 break-words">{product.description}</p>
               </div>
 
-              {/* —— Segmented Control —— */}
-              {hasModels && (
-                <div className="w-full">
-                  <div
-                    className="inline-flex rounded-xl border bg-white p-1 shadow-sm"
-                    role="tablist"
-                    aria-label="Modo de compra"
-                  >
-                    <button
-                      role="tab"
-                      aria-selected={mode === 'ready'}
-                      onClick={() => setMode('ready')}
-                      className={[
-                        'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition',
-                        mode === 'ready'
-                          ? 'bg-primary text-primary-foreground shadow'
-                          : 'text-slate-700 hover:bg-slate-50',
-                      ].join(' ')}
-                    >
-                      <LayoutGrid className="h-4 w-4" />
-                      Modelos listos
-                    </button>
-                    <button
-                      role="tab"
-                      aria-selected={mode === 'custom'}
-                      onClick={() => setMode('custom')}
-                      className={[
-                        'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition',
-                        mode === 'custom'
-                          ? 'bg-primary text-primary-foreground shadow'
-                          : 'text-slate-700 hover:bg-slate-50',
-                      ].join(' ')}
-                    >
-                      <Sparkles className="h-4 w-4" />
-                      Personalizar
-                    </button>
-                  </div>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    ¿Querés nombre, foto o frase? Tocá <strong>Personalizar</strong>. Si preferís un
-                    diseño ya listo, quedate en <strong>Modelos listos</strong>.
-                  </p>
-                </div>
-              )}
-
-              {/* ——— Vista: Modelos listos ——— */}
-              {mode === 'ready' && (
-                <div className="space-y-6 border-y py-6 w-full max-w-full">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label>Modelo de Agenda</Label>
-                      <Button
-                        variant="link"
-                        className="px-0 text-xs"
-                        onClick={() => setMode('custom')}
-                      >
-                        ¿Querés personalizar? Ver opciones →
-                      </Button>
-                    </div>
-
-                    {/* Filtros colección */}
-                    <div className="flex flex-wrap gap-2">
-                      {['todas', ...collections].map((col) => {
-                        const isActive = selectedCollection === col;
-                        return (
-                          <button
-                            key={col}
-                            type="button"
-                            onClick={() => setSelectedCollection(col)}
-                            className={[
-                              'px-3 py-1.5 rounded-full text-sm transition-colors',
-                              isActive
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-slate-100 text-slate-800 hover:bg-slate-200',
-                            ].join(' ')}
-                          >
-                            {col === 'todas' ? 'Todas' : col.charAt(0).toUpperCase() + col.slice(1)}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <AgendaModelSelector
-                      options={filteredModels}
-                      value={selectedModelId}
-                      onChange={setSelectedModelId}
-                      onExpand={() => setFsModelOpen(true)}
-                    />
-                  </div>
+              {/* ——— Paso ①: Elegí tu diseño / color ——— */}
+              {usesColors ? (
+                <StepSection step={designStepNumber} title="Elegí el color">
+                  <ColorSwatchSelector
+                    options={product.colors ?? []}
+                    value={selectedColor?.id}
+                    onChange={(id) =>
+                      setSelectedColor(product.colors?.find((c) => c.id === id))
+                    }
+                  />
+                </StepSection>
+              ) : hasModels ? (
+                <StepSection step={designStepNumber} title="Elegí tu diseño">
+                  <DesignPicker
+                    options={modeloOptions}
+                    value={selectedModelId}
+                    onChange={setSelectedModelId}
+                    onExpand={openModelPreview}
+                  />
 
                   <FullscreenModelDialog
-                    src={fsImage || selectedModelImage}
+                    src={previewModelImage || selectedModelImage}
                     alt={product.name}
                     open={fsModelOpen}
                     onOpenChange={setFsModelOpen}
-                    trigger={
-                      <Button variant="outline" className="w-full">
-                        <Maximize2 className="w-4 h-4 mr-2" />
-                        Ver modelo en pantalla completa
-                      </Button>
-                    }
+                  />
+                </StepSection>
+              ) : null}
+
+              {/* ——— Paso ②: Configurá (sólo si hay variantes reales) ——— */}
+              {hasRealChoices ? (
+                <StepSection step={configStepNumber} title="Configurá">
+                  <div className="space-y-4">
+                    <VariantSelector
+                      label="Tamaño"
+                      options={product.sizes}
+                      value={selectedSize}
+                      onChange={setSelectedSize}
+                    />
+
+                    <VariantSelector
+                      label="Tipo de Interior"
+                      options={product.interiors}
+                      value={selectedInterior}
+                      onChange={setSelectedInterior}
+                    />
+
+                    <VariantSelector
+                      label="Tipo de Tapa"
+                      options={product.coverTypes}
+                      value={selectedCover}
+                      onChange={setSelectedCover}
+                      formatOption={(cover) => `Tapa ${cover}`}
+                    />
+                  </div>
+                </StepSection>
+              ) : (
+                <div className="space-y-1">
+                  <VariantSelector
+                    label="Tamaño"
+                    options={product.sizes}
+                    value={selectedSize}
+                    onChange={setSelectedSize}
                   />
 
-                  {/* Tamaño / Interior / Tapa / Cantidad */}
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Tamaño</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {product.sizes.map((size) => (
-                          <Button
-                            key={size}
-                            variant={selectedSize === size ? 'default' : 'outline'}
-                            onClick={() => setSelectedSize(size)}
-                          >
-                            {size}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
+                  <VariantSelector
+                    label="Tipo de Interior"
+                    options={product.interiors}
+                    value={selectedInterior}
+                    onChange={setSelectedInterior}
+                  />
 
-                    <div className="space-y-2">
-                      <Label>Tipo de Interior</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {product.interiors.map((interior) => (
-                          <Button
-                            key={interior}
-                            variant={selectedInterior === interior ? 'default' : 'outline'}
-                            onClick={() => setSelectedInterior(interior)}
-                            className="capitalize"
-                          >
-                            {interior}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Tipo de Tapa</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {product.coverTypes.map((cover) => (
-                          <Button
-                            key={cover}
-                            variant={selectedCover === cover ? 'default' : 'outline'}
-                            onClick={() => setSelectedCover(cover)}
-                            className="capitalize"
-                          >
-                            Tapa {cover}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="quantity">Cantidad</Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          id="quantity"
-                          type="number"
-                          min="1"
-                          max="10"
-                          value={quantity}
-                          onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                          className="w-24"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CTAs modo ready */}
-                  <div className="space-y-3">
-                    <Button size="lg" className="w-full" onClick={handleAddToCart}>
-                      <ShoppingCart className="mr-2 h-5 w-5" />
-                      Agregar al Carrito
-                    </Button>
-                    <Button asChild variant="outline" className="w-full">
-                      <a
-                        href={buildWaLink(WHATSAPP_NUMBER, waReadyMessage2)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Consultar por WhatsApp
-                      </a>
-                    </Button>
-                  </div>
+                  <VariantSelector
+                    label="Tipo de Tapa"
+                    options={product.coverTypes}
+                    value={selectedCover}
+                    onChange={setSelectedCover}
+                    formatOption={(cover) => `Tapa ${cover}`}
+                  />
                 </div>
               )}
 
-              {/* ——— Vista: Personalizar ——— */}
-              {mode === 'custom' && (
-                <div className="space-y-6 border-y py-6 w-full max-w-full">
-                  <div className="space-y-4 rounded-2xl border p-4 sm:p-5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Wand2 className="h-5 w-5 text-primary" />
-                        <h3 className="font-semibold text-lg">Personalizá tu agenda</h3>
-                      </div>
-                      {hasModels && (
-                        <Button
-                          variant="link"
-                          className="px-0 text-xs"
-                          onClick={() => setMode('ready')}
-                        >
-                          Ver modelos listos →
-                        </Button>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Portada o interior: <strong>foto</strong>, <strong>frase</strong>,{' '}
-                      <strong>nombre</strong> o <strong>trama</strong>. Lo definimos por WhatsApp
-                      con <em>boceto previo</em>.
-                    </p>
+              {/* ——— Paso ③ (o ②): ¿Lo querés personalizado? ——— */}
+              <StepSection
+                step={personalizationStepNumber}
+                title="¿Lo querés personalizado?"
+                hint={`+${formatARS(AppVars.personalizationSurcharge)} sobre el precio de lista`}
+              >
+                <div className="space-y-4 rounded-2xl border p-4 sm:p-5">
+                  <div className="flex items-center justify-between gap-4">
+                    <Label htmlFor="isCustom" className="cursor-pointer">
+                      Personalizar con nombre, foto, frase o trama
+                    </Label>
+                    <Switch id="isCustom" checked={isCustom} onCheckedChange={setIsCustom} />
+                  </div>
 
-                    {/* Estilos */}
-                    <div
-                      role="radiogroup"
-                      aria-label="Estilos de personalización"
-                      className="flex flex-wrap gap-2"
-                    >
-                      {PERSONALIZATION_STYLES.map((s) => {
-                        const selected = styleId === s.id;
-                        return (
-                          <button
-                            key={s.id}
-                            role="radio"
-                            aria-checked={selected}
-                            onClick={() => setStyleId(s.id)}
-                            className={[
-                              'px-3 py-1.5 rounded-full text-sm transition-colors',
-                              'ring-1 ring-slate-300/60',
-                              selected
-                                ? 'bg-primary text-primary-foreground ring-primary'
-                                : 'bg-white hover:bg-slate-50',
-                            ].join(' ')}
-                          >
-                            {s.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Texto opcional */}
-                    <div className="space-y-2">
-                      <Label htmlFor="personalization">Texto (opcional)</Label>
-                      <Input
-                        id="personalization"
-                        placeholder='Ej.: "María" o "¡Vamos por más!"'
-                        value={personalization}
-                        onChange={(e) => setPersonalization(e.target.value)}
-                        maxLength={40}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Si elegís “Foto/Logo”, te pediremos el archivo por WhatsApp.
+                  {isCustom && (
+                    <div className="space-y-4 border-t pt-4">
+                      <p className="text-sm text-muted-foreground">
+                        Portada o interior: <strong>foto</strong>, <strong>frase</strong>,{' '}
+                        <strong>nombre</strong> o <strong>trama</strong>. Lo definimos por WhatsApp
+                        con <em>boceto previo</em>.
                       </p>
-                    </div>
 
-                    {/* CTA principal custom */}
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      <Button asChild className="w-full">
-                        <a
-                          href={buildWaLink(WHATSAPP_NUMBER, waPersonalizationMessage2)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Definir personalización por WhatsApp
-                        </a>
-                      </Button>
-                      <Button variant="outline" className="w-full" onClick={handleScrollToInspire}>
-                        Ver ideas e inspiración
-                      </Button>
-                    </div>
-
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>
-                        • Boceto incluido (1 revisión). Producción: 8–10 h. Entrega rápida 24–48 h
-                        (con recargo).
-                      </li>
-                      <li>• Para fotos: luz natural y al menos ~1500 px del lado más corto.</li>
-                    </ul>
-                  </div>
-
-                  {/* Base para custom */}
-                  <div className="space-y-3">
-                    <Label>Elegí una base para personalizar</Label>
-                    <AgendaModelSelector
-                      options={todasCollections}
-                      value={selectedModelId}
-                      onChange={setSelectedModelId}
-                      onExpand={() => setFsModelOpen(true)}
-                    />
-                    <FullscreenModelDialog
-                      src={fsImage || selectedModelImage}
-                      alt={product.name}
-                      open={fsModelOpen}
-                      onOpenChange={setFsModelOpen}
-                      trigger={
-                        <Button variant="outline" className="w-full">
-                          <Maximize2 className="w-4 h-4 mr-2" />
-                          Ver base en pantalla completa
-                        </Button>
-                      }
-                    />
-                  </div>
-
-                  <div className="grid sm:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label>Tamaño</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {product.sizes.map((size) => (
-                          <Button
-                            key={size}
-                            variant={selectedSize === size ? 'default' : 'outline'}
-                            onClick={() => setSelectedSize(size)}
-                          >
-                            {size}
-                          </Button>
-                        ))}
+                      {/* Estilos */}
+                      <div
+                        role="radiogroup"
+                        aria-label="Estilos de personalización"
+                        className="flex flex-wrap gap-2"
+                      >
+                        {PERSONALIZATION_STYLES.map((s) => {
+                          const selected = styleId === s.id;
+                          return (
+                            <button
+                              key={s.id}
+                              role="radio"
+                              aria-checked={selected}
+                              onClick={() => setStyleId(s.id)}
+                              className={[
+                                'px-3 py-1.5 rounded-full text-sm transition-colors',
+                                'ring-1 ring-slate-300/60',
+                                selected
+                                  ? 'bg-primary text-primary-foreground ring-primary'
+                                  : 'bg-white hover:bg-slate-50',
+                              ].join(' ')}
+                            >
+                              {s.label}
+                            </button>
+                          );
+                        })}
                       </div>
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label>Interior</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {product.interiors.map((interior) => (
-                          <Button
-                            key={interior}
-                            variant={selectedInterior === interior ? 'default' : 'outline'}
-                            onClick={() => setSelectedInterior(interior)}
-                            className="capitalize"
-                          >
-                            {interior}
-                          </Button>
-                        ))}
+                      {/* Texto opcional */}
+                      <div className="space-y-2">
+                        <Label htmlFor="personalization">Texto (opcional)</Label>
+                        <Input
+                          id="personalization"
+                          placeholder='Ej.: "María" o "¡Vamos por más!"'
+                          value={personalization}
+                          onChange={(e) => setPersonalization(e.target.value)}
+                          maxLength={40}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Si elegís “Foto/Logo”, te pediremos el archivo por WhatsApp.
+                        </p>
                       </div>
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label>Tapa</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {product.coverTypes.map((cover) => (
-                          <Button
-                            key={cover}
-                            variant={selectedCover === cover ? 'default' : 'outline'}
-                            onClick={() => setSelectedCover(cover)}
-                            className="capitalize"
-                          >
-                            Tapa {cover}
-                          </Button>
-                        ))}
-                      </div>
+                      <ul className="text-xs text-muted-foreground space-y-1">
+                        <li>
+                          • Boceto incluido (1 revisión). Producción: 8–10 h. Entrega rápida 24–48 h
+                          (con recargo).
+                        </li>
+                        <li>• Para fotos: luz natural y al menos ~1500 px del lado más corto.</li>
+                      </ul>
                     </div>
-                  </div>
-
-                  {/* CTA secundaria */}
-                  <div className="space-y-3">
-                    <Button size="lg" className="w-full" onClick={handleAddToCart}>
-                      <ShoppingCart className="mr-2 h-5 w-5" />
-                      Agregar al Carrito
-                    </Button>
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      <Button asChild variant="outline" className="w-full">
-                        <a
-                          href={buildWaLink(WHATSAPP_NUMBER, waPersonalizationMessage2)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Enviar detalles por WhatsApp
-                        </a>
-                      </Button>
-                      <Button variant="outline" className="w-full" onClick={() => setMode('ready')}>
-                        Ver modelos listos
-                      </Button>
-                    </div>
-                  </div>
+                  )}
                 </div>
-              )}
+              </StepSection>
+
+              {/* Cantidad */}
+              <div className="space-y-2">
+                <Label id="quantity-label">Cantidad</Label>
+                <div className="flex items-center gap-2" role="group" aria-labelledby="quantity-label">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={decrementQuantity}
+                    disabled={quantity <= 1}
+                    aria-label="Restar cantidad"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="w-8 text-center font-medium" aria-live="polite">
+                    {quantity}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={incrementQuantity}
+                    disabled={quantity >= 10}
+                    aria-label="Sumar cantidad"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* CTAs: "Agregar al carrito" es la primaria (habilita el 2x1,
+                  que poolea unidades entre líneas del carrito); WhatsApp
+                  queda secundario salvo cuando la personalización está
+                  activa, donde la consulta previa es indispensable. */}
+              <div className="space-y-3">
+                <Button ref={addToCartRef} size="lg" className="w-full" onClick={handleAddToCart}>
+                  <ShoppingCart className="mr-2 h-5 w-5" />
+                  Agregar al Carrito
+                </Button>
+                <Button
+                  asChild
+                  variant={isCustom ? 'outline' : 'ghost'}
+                  className="w-full"
+                >
+                  <a
+                    href={buildWaLink(WHATSAPP_NUMBER, modeSpecificMessage)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {isCustom ? 'Definir personalización por WhatsApp' : 'Consultar por WhatsApp'}
+                  </a>
+                </Button>
+              </div>
 
               {/* Inspirate */}
               <div id="inspirate" className="space-y-3 w-full max-w-full scroll-mt-24">
@@ -819,8 +776,22 @@ const ProductDetail = () => {
 
       <Footer />
 
-      {/* Botón flotante con mensaje acorde al modo activo */}
-      <WhatsAppButton message={modeSpecificMessage} variant="floating" />
+      {/* Botón flotante con mensaje acorde al modo activo. Se corre hacia
+          arriba en mobile cuando la barra sticky de compra está visible,
+          para no superponerse con ella. */}
+      <WhatsAppButton
+        message={modeSpecificMessage}
+        variant="floating"
+        className={showStickyBar ? 'bottom-24 lg:bottom-6' : undefined}
+      />
+
+      <StickyBuyBar
+        visible={showStickyBar}
+        price={stickyUnitPrice}
+        originalPrice={stickyOriginalPrice}
+        summary={stickySummary}
+        onAddToCart={handleAddToCart}
+      />
     </div>
   );
 };
