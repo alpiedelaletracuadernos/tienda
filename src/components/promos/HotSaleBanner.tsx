@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { isHotSaleActive } from '@/config/promotions';
+import { isHotSaleActive, formatHotSaleDateRange } from '@/config/promotions';
 import vars from '@/data/data';
 
 function useCountdown(targetIso: string) {
@@ -39,7 +39,7 @@ export default function HotSaleBanner() {
             <span className="inline-flex items-center rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-bold tracking-wide uppercase">
               HOT SALE
             </span>
-            <span>{hs.percentage}% OFF en toda la tienda · Del 11 al 13 de mayo</span>
+            <span>{hs.percentage}% OFF en toda la tienda · {formatHotSaleDateRange()}</span>
           </div>
 
           {/* Centro: countdown */}

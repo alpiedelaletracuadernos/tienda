@@ -28,7 +28,8 @@ import { StickyBuyBar } from '@/components/products/StickyBuyBar';
 import { safeStorage } from '@/lib/safe-storage';
 
 //PROMOCIONES
-import { isEligibleForDiscount, isEligibleFor2x1, isHotSaleActive, isEligibleForHotSale } from '@/config/promotions';
+import { isHotSaleActive, formatHotSaleDateRange } from '@/config/promotions';
+import { calculateProductPricing } from '@/lib/pricing/calc-product-pricing';
 
 // —— WhatsApp ————————————————————————————————————————
 const WHATSAPP_NUMBER = AppVars.phoneNumber;
@@ -89,11 +90,6 @@ const ProductDetail = () => {
 
 const ProductDetailContent = ({ product }: { product: Product }) => {
   const { addItem } = useCart();
-  const isEligible = isEligibleForDiscount({
-    product: { category: product.category },
-    personalization: undefined,
-  });
-  const rate = AppVars.promotions.discount.percentage / 100;
   const hasModels = MODEL_CATEGORIES.has(normalizeCategory(product.category));
   // Decisión del dueño de la tienda: los productos con `colors` definido
   // (hoy el Box premium regalo) no usan los diseños de tapa del catálogo de
@@ -265,69 +261,36 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
 
   const modeSpecificMessage = isCustom ? waPersonalizationMessage2 : waReadyMessage2;
 
-  // ——— Precios (SIN DESCUENTOS) ————————————————————————
-  // const basePrice = product?.basePrice ?? 0; // unitario
-  // const totalPrice = basePrice * quantity;
-
-  // const formattedUnit = formatARS(basePrice);
-  // const formattedTotal = formatARS(totalPrice);
-
-  //Descuentos
-  // ✅ CHANGE: cálculo de descuento SOLO si el producto es elegible.
-  // Motivo: el descuento debe depender de la categoría del producto,
-  // no de una promo global.
-
-  const currentUnitPrice = isCustom
-    ? product.basePrice + AppVars.personalizationSurcharge
-    : product.basePrice;
-
-  const isElegibleForDiscount = isEligibleForDiscount({
-    product: { category: product.category },
-    personalization: isCustom ? 'yes' : undefined,
-  });
-
-  const discountedUnitPrice = isElegibleForDiscount
-    ? Math.round(currentUnitPrice * (1 - rate))
-    : currentUnitPrice;
-  const discountedTotalPrice = discountedUnitPrice * quantity;
-
-  const formattedUnit = formatARS(currentUnitPrice);
-  const formattedTotal = formatARS(currentUnitPrice * quantity);
-  const formattedDiscountedUnit = formatARS(discountedUnitPrice);
-  const formattedDiscountedTotal = formatARS(discountedTotalPrice);
-
-  // Hot Sale
+  // ——— Precios ————————————————————————————————————————
+  // Única fuente: calculateProductPricing delega en el motor del carrito
+  // (calc-cart-pricing), así que lo que se muestra acá es exactamente lo
+  // que va a cobrar el carrito para esta misma cantidad/personalización.
   const hotSaleActive = isHotSaleActive();
-  const hsEligiblePDP =
-    hotSaleActive &&
-    isEligibleForHotSale({
-      product: { category: product.category },
-      personalization: isCustom ? 'yes' : undefined,
-    });
-  const hsRate = AppVars.promotions.hotSale.percentage / 100;
-  const hotSaleUnitPrice = hsEligiblePDP ? Math.round(currentUnitPrice * (1 - hsRate)) : currentUnitPrice;
-  const hotSaleTotalPrice = hotSaleUnitPrice * quantity;
-  const formattedHotSaleUnit = formatARS(hotSaleUnitPrice);
-  const formattedHotSaleTotal = formatARS(hotSaleTotalPrice);
+
+  const pricing = useMemo(
+    () => calculateProductPricing({ product, quantity, isCustom }),
+    [product, quantity, isCustom]
+  );
+
+  const formattedListUnit = formatARS(pricing.listUnit);
+  const formattedFinalUnit = formatARS(pricing.finalUnit);
+  const formattedFinalTotal = formatARS(pricing.finalTotal);
 
   // ——— Agregar al carrito (SIN DESCUENTOS) ——————————————
   // ✅ CHANGE: al carrito se guarda SIEMPRE precio de lista.
   // Motivo: evita que el precio quede “cocinado” si cambia la promo.
   // El carrito decide si aplica descuento según categoría.
   const handleAddToCart = () => {
-    // ✅ promo por ítem (solo si es elegible)
-    const promoEligible = isEligibleForDiscount({ product: { category: product.category } });
-
     addItem({
       product: {
         id: product.id,
         name: product.name,
-        basePrice: currentUnitPrice, // ✅ guardamos con el recargo ya sumado si aplica
+        basePrice: pricing.listUnit, // ✅ guardamos con el recargo ya sumado si aplica
         images: product.images,
         category: product.category, // ✅ importante: el carrito necesita la categoría para decidir
       },
       quantity,
-      price: currentUnitPrice, // ✅ siempre lista
+      price: pricing.listUnit, // ✅ siempre lista
       selectedSize,
       selectedInterior,
       selectedCover,
@@ -362,12 +325,8 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
     return () => observer.disconnect();
   }, []);
 
-  const stickyUnitPrice = hsEligiblePDP
-    ? formattedHotSaleUnit
-    : isElegibleForDiscount
-      ? formattedDiscountedUnit
-      : formattedUnit;
-  const stickyOriginalPrice = hsEligiblePDP || isElegibleForDiscount ? formattedUnit : undefined;
+  const stickyUnitPrice = formattedFinalUnit;
+  const stickyOriginalPrice = pricing.hasDiscount ? formattedListUnit : undefined;
   // "48" solo no dice nada al cliente; con diseño se antepone "Diseño".
   // Con colores, el summary usa el nombre del color en su lugar.
   const stickySummary = [
@@ -390,8 +349,8 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
               <div className="container px-4 py-2 flex flex-wrap items-center gap-2">
                 <Badge className="bg-white text-accent font-bold hover:bg-white/90">HOT SALE</Badge>
                 <span className="text-sm font-semibold">
-                  {AppVars.promotions.hotSale.percentage}% OFF en toda la tienda · 11, 12 y 13 de
-                  mayo
+                  {AppVars.promotions.hotSale.percentage}% OFF en toda la tienda ·{' '}
+                  {formatHotSaleDateRange()}
                 </span>
               </div>
             </div>
@@ -458,63 +417,45 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
                   )}
                 </div>
 
-                {/* Precios: Hot Sale > descuento genérico > precio normal */}
-                {hsEligiblePDP ? (
-                  <div className="mt-3 sm:mt-4 space-y-1">
-                    <div className="flex items-baseline gap-3 flex-wrap">
+                {/* Precio: única fuente (calculateProductPricing). Si hay
+                    promos activas se acumulan todas — no es un "o" entre
+                    Hot Sale y descuento, es la suma que aplicaría el motor
+                    del carrito. */}
+                <div className="mt-3 sm:mt-4 space-y-1">
+                  <div className="flex items-baseline gap-3 flex-wrap">
+                    {pricing.hasDiscount && (
                       <span className="text-sm text-muted-foreground line-through">
-                        {formattedUnit}
+                        {formattedListUnit}
                       </span>
-                      <span className="text-2xl sm:text-3xl font-bold text-accent">
-                        {formattedHotSaleUnit}
-                      </span>
-                      <Badge className="bg-accent text-accent-foreground font-semibold">
-                        -{AppVars.promotions.hotSale.percentage}%
-                      </Badge>
-                      <span className="text-sm text-muted-foreground">por unidad</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:{' '}
-                      <span className="font-semibold text-slate-900">{formattedHotSaleTotal}</span>
-                    </p>
+                    )}
+                    <span
+                      className={`text-2xl sm:text-3xl font-bold ${
+                        pricing.hasDiscount ? 'text-accent' : 'text-primary'
+                      }`}
+                    >
+                      {formattedFinalUnit}
+                    </span>
+                    <span className="text-sm text-muted-foreground">por unidad</span>
                   </div>
-                ) : isElegibleForDiscount ? (
-                  <div className="mt-3 sm:mt-4 space-y-1">
-                    <div className="flex items-baseline gap-3 flex-wrap">
-                      <span className="text-sm text-muted-foreground line-through">
-                        {formattedUnit}
-                      </span>
-                      <span className="text-2xl sm:text-3xl font-bold text-primary">
-                        {formattedDiscountedUnit}
-                      </span>
-                      <Badge variant="outline" className="font-semibold">
-                        -{AppVars.promotions.discount.percentage}%
-                      </Badge>
-                      <span className="text-sm text-muted-foreground">por unidad</span>
-                    </div>
 
-                    <p className="text-sm text-muted-foreground">
-                      Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:{' '}
-                      <span className="font-semibold text-slate-900">
-                        {formattedDiscountedTotal}
-                      </span>
-                    </p>
-                  </div>
-                ) : (
-                  <div className="mt-3 sm:mt-4 space-y-1">
-                    <div className="flex items-baseline gap-3 flex-wrap">
-                      <span className="text-2xl sm:text-3xl font-bold text-primary">
-                        {formattedUnit}
-                      </span>
-                      <span className="text-sm text-muted-foreground">por unidad</span>
+                  {pricing.discounts.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {pricing.discounts.map((d) => (
+                        <Badge
+                          key={d.label}
+                          className="bg-accent text-accent-foreground font-semibold"
+                        >
+                          {d.label}
+                        </Badge>
+                      ))}
                     </div>
+                  )}
 
-                    <p className="text-sm text-muted-foreground">
-                      Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:{' '}
-                      <span className="font-semibold text-slate-900">{formattedTotal}</span>
-                    </p>
-                  </div>
-                )}
+                  <p className="text-sm text-muted-foreground">
+                    Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:{' '}
+                    <span className="font-semibold text-slate-900">{formattedFinalTotal}</span>
+                  </p>
+                </div>
 
                 <p className="text-muted-foreground mt-3 break-words">{product.description}</p>
               </div>

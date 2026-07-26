@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import vars from '@/data/data';
-import { isHotSaleActive } from '@/config/promotions';
+import { isHotSaleActive, formatHotSaleDateRange } from '@/config/promotions';
 import { buildWaLink } from '@/lib/whatsapp';
 
 function useCountdown(targetIso: string) {
@@ -103,7 +103,7 @@ export default function HotSaleModal({ forceOpen }: Props) {
           {/* Cabecera */}
           <div className="space-y-1">
             <p className="text-xs uppercase tracking-widest text-white/70 font-semibold">
-              Solo 11, 12 y 13 de mayo
+              Solo {formatHotSaleDateRange()}
             </p>
             <h2 className="text-4xl sm:text-5xl font-black leading-none tracking-tight">
               HOT SALE

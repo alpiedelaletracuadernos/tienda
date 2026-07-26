@@ -4,37 +4,24 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
-import { isEligibleForDiscount, isHotSaleActive, isEligibleForHotSale } from '@/config/promotions';
 import vars from '@/data/data';
 import { formatARS } from '@/lib/currency';
+import { calculateProductPricing } from '@/lib/pricing/calc-product-pricing';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
-  const formattedPrice = formatARS(product.basePrice);
+  const pricing = calculateProductPricing({ product, quantity: 1 });
+  const formattedPrice = formatARS(pricing.listUnit);
+  const formattedFinalPrice = formatARS(pricing.finalUnit);
 
-  const mockCartItemCheck = {
-    product: { category: product.category },
-    personalization: undefined
-  };
+  // El badge Hot Sale es un caso particular pedido por el negocio: se resalta
+  // en la card aunque haya otras promos acumuladas, así que se detecta aparte
+  // de `pricing.discounts` (que trae todas las que aplicaron).
+  const hsEligible = pricing.discounts.some((d) => d.label.startsWith(vars.promotions.hotSale.label));
 
-  // Hot Sale tiene prioridad sobre el descuento genérico
-  const hsActive = isHotSaleActive();
-  const hsEligible = hsActive && isEligibleForHotSale(mockCartItemCheck as any);
-  const hotSalePrice = hsEligible
-    ? Math.round(product.basePrice * (1 - vars.promotions.hotSale.percentage / 100))
-    : null;
-
-  const eligibleForDiscount = !hsEligible && isEligibleForDiscount(mockCartItemCheck as any);
-
-  let formattedDiscountedPrice = null;
-  if (eligibleForDiscount) {
-    const discountPercentage = vars.promotions.discount.percentage || 0;
-    const discountedPrice = product.basePrice * (1 - discountPercentage / 100);
-    formattedDiscountedPrice = formatARS(discountedPrice);
-  }
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
       <Link to={`/producto/${product.slug}`}>
@@ -69,17 +56,13 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
         <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
 
-        {hotSalePrice != null ? (
+        {pricing.hasDiscount ? (
           <div className="flex items-baseline gap-1 flex-wrap">
             <span className="text-sm text-muted-foreground">Desde</span>
             <span className="text-sm text-muted-foreground line-through">{formattedPrice}</span>
-            <span className="text-2xl font-bold text-accent">{formatARS(hotSalePrice)}</span>
-          </div>
-        ) : eligibleForDiscount ? (
-          <div className="flex items-baseline gap-1">
-            <span className="text-sm text-muted-foreground">Desde</span>
-            <span className="text-sm text-muted-foreground line-through">{formattedPrice}</span>
-            <span className="text-2xl font-bold text-primary">{formattedDiscountedPrice}</span>
+            <span className={`text-2xl font-bold ${hsEligible ? 'text-accent' : 'text-primary'}`}>
+              {formattedFinalPrice}
+            </span>
           </div>
         ) : (
           <div className="flex items-baseline gap-1">
