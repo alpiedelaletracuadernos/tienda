@@ -1,6 +1,15 @@
-import { Product, ModelAssets } from '@/types/product';
+import { Product, ModelAssets, ProductColor } from '@/types/product';
 
 const routeBase = 'assets/';
+
+// Paleta de colores del Box premium regalo. Los hex son aproximaciones
+// visuales a confirmar contra el producto real antes de usarlos en
+// materiales impresos.
+export const BOX_COLORS: ProductColor[] = [
+  { id: 'amarillo', name: 'Amarillo', hex: '#F4C430' },
+  { id: 'verde', name: 'Verde', hex: '#5FB87F' },
+  { id: 'magenta', name: 'Magenta', hex: '#C2185B' },
+];
 
 export const productoImagenes: ModelAssets = {
   'agenda-2-dias-por-hoja': [
@@ -750,6 +759,7 @@ export const products: Product[] = [
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['combo-premium'],
+    colors: BOX_COLORS,
   },
    {
     id: '16',

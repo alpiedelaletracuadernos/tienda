@@ -19,6 +19,19 @@ export type ModeloType = {
   modelo: string; // ej: "semanal", "dos-dias", "universitaria", etc.
 };
 
+/**
+ * Un diseño de tapa del catálogo (`src/data/options.tsx`).
+ * Vive acá y no en el componente que lo dibuja porque los datos no deben
+ * depender de la capa de UI: `DesignPicker` es hoy quien lo renderiza, pero
+ * mañana puede ser otro.
+ */
+export type DesignOption = {
+  id: string;
+  image: string; // URL de la miniatura
+  modelo: string; // ej: "48"
+  collection: string; // ej: "Edicion-2026"
+};
+
 export type InteriorType =
   | 'semanal'
   | 'dos-por-hoja'
@@ -48,6 +61,8 @@ export type InteriorType =
 
 export type CoverType = 'dura' | 'blanda';
 
+export type ProductColor = { id: string; name: string; hex: string };
+
 export interface Product {
   id: string;
   name: string;
@@ -65,6 +80,7 @@ export interface Product {
   inStock: boolean;
   weeklyQuota: number;
   remainingQuota: number;
+  colors?: ProductColor[];
 }
 
 export interface CartItem {

@@ -1,6 +1,6 @@
-import { AgendaModelOption } from "@/components/products/AgendaModelOption";
+import { DesignOption } from "@/types/product";
 const routeBase = "assets/";
-export const modeloOptions: AgendaModelOption[] = [
+export const modeloOptions: DesignOption[] = [
   {
     "id": "48",
     "image": `${routeBase}models/edicion-2026_0001.webp`,
