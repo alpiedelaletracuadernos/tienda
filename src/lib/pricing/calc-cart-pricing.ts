@@ -2,18 +2,9 @@
 import type { CartItem } from '@/types/cart';
 import { isEligibleFor2x1, isEligibleForDiscount, isHotSaleActive, isEligibleForHotSale } from '@/config/promotions';
 import vars from '@/data/data';
+import { getCartLineKey } from '@/lib/cart-key';
 
 type Unit = { price: number; key: string };
-
-function lineKey(item: CartItem) {
-  return [
-    item.product.id,
-    item.selectedSize ?? '',
-    item.selectedInterior ?? '',
-    item.selectedCover ?? '',
-    item.personalization ?? '',
-  ].join('|');
-}
 
 export function calculateCartPricing(items: CartItem[]) {
   const totalQty = items.reduce((a, it) => a + (it.quantity ?? 0), 0);
@@ -37,7 +28,7 @@ export function calculateCartPricing(items: CartItem[]) {
   > = {};
 
   for (const it of items) {
-    const key = lineKey(it);
+    const key = getCartLineKey(it);
     const listSubtotal = (it.product.basePrice ?? 0) * (it.quantity ?? 0);
     lines[key] = {
       listSubtotal,
@@ -59,7 +50,7 @@ export function calculateCartPricing(items: CartItem[]) {
 
     for (const it of items) {
       if (!isEligibleFor2x1(it)) continue;
-      const key = lineKey(it);
+      const key = getCartLineKey(it);
       const price = it.product.basePrice ?? 0;
       for (let i = 0; i < (it.quantity ?? 0); i++) eligibleUnits.push({ price, key });
     }
@@ -96,7 +87,7 @@ export function calculateCartPricing(items: CartItem[]) {
     for (const it of items) {
       if (!isEligibleForDiscount(it)) continue;
 
-      const key = lineKey(it);
+      const key = getCartLineKey(it);
 
       const baseAfter2x1 = lines[key].total; // ✅ base correcta
       const d = Math.round(baseAfter2x1 * rate);
@@ -125,7 +116,7 @@ export function calculateCartPricing(items: CartItem[]) {
 
     for (const it of items) {
       if (!isEligibleForHotSale(it)) continue;
-      const key = lineKey(it);
+      const key = getCartLineKey(it);
       const baseAfterPrev = lines[key].total;
       const d = Math.round(baseAfterPrev * hsRate);
       if (d > 0) {

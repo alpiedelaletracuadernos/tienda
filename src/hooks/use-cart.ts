@@ -3,26 +3,14 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartItem } from '@/types/cart';
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
+import { getCartLineKey } from '@/lib/cart-key';
 
 interface CartStore {
   items: CartItem[];
 
   addItem: (item: CartItem) => void;
-  removeItem: (
-    productId: string,
-    size: string,
-    interior: string,
-    cover: string,
-    personalization?: string
-  ) => void;
-  updateQuantity: (
-    productId: string,
-    size: string,
-    interior: string,
-    cover: string,
-    quantity: number,
-    personalization?: string
-  ) => void;
+  removeItem: (key: string) => void;
+  updateQuantity: (key: string, quantity: number) => void;
   clearCart: () => void;
 
   // derived
@@ -45,14 +33,8 @@ export const useCart = create<CartStore>()(
             price: newItem.product?.basePrice ?? newItem.price,
           };
 
-          const idx = state.items.findIndex(
-            (item) =>
-              item.product.id === normalizedItem.product.id &&
-              item.selectedSize === normalizedItem.selectedSize &&
-              item.selectedInterior === normalizedItem.selectedInterior &&
-              item.selectedCover === normalizedItem.selectedCover &&
-              (item.personalization ?? '') === (normalizedItem.personalization ?? '')
-          );
+          const newKey = getCartLineKey(normalizedItem);
+          const idx = state.items.findIndex((item) => getCartLineKey(item) === newKey);
 
           if (idx > -1) {
             const updated = [...state.items];
@@ -64,28 +46,15 @@ export const useCart = create<CartStore>()(
           return { items: [...state.items, normalizedItem] };
         }),
 
-      removeItem: (productId, size, interior, cover, personalization) =>
+      removeItem: (key) =>
         set((state) => ({
-          items: state.items.filter(
-            (item) =>
-              !(
-                item.product.id === productId &&
-                item.selectedSize === size &&
-                item.selectedInterior === interior &&
-                item.selectedCover === cover &&
-                (item.personalization ?? '') === (personalization ?? '')
-              )
-          ),
+          items: state.items.filter((item) => getCartLineKey(item) !== key),
         })),
 
-      updateQuantity: (productId, size, interior, cover, quantity, personalization) =>
+      updateQuantity: (key, quantity) =>
         set((state) => ({
           items: state.items.map((item) =>
-            item.product.id === productId &&
-            item.selectedSize === size &&
-            item.selectedInterior === interior &&
-            item.selectedCover === cover &&
-            (item.personalization ?? '') === (personalization ?? '')
+            getCartLineKey(item) === key
               ? { ...item, quantity: Math.max(1, quantity), price: item.product.basePrice }
               : item
           ),
@@ -100,23 +69,32 @@ export const useCart = create<CartStore>()(
 
       getPricing: () => calculateCartPricing(get().items),
 
-      getPromoDiscount: () => get().getPricing().promoDiscount,
+      getPromoDiscount: () => get().getPricing().promo?.amount ?? 0,
 
       getTotalPrice: () => get().getPricing().total,
     }),
     {
-      name: 'cart:v3',
-      version: 3,
-      migrate: (persistedState: any) => {
-        if (persistedState?.items && Array.isArray(persistedState.items)) {
-          persistedState.items = persistedState.items.map((it: CartItem) => {
+      // ⚠️ `name` es la CLAVE de localStorage, no un número de versión: al
+      // cambiarla de 'cart:v3' a 'cart:v4', zustand deja de leer los datos
+      // viejos y `migrate` NO corre para carritos guardados con la clave
+      // anterior — esos carritos arrancan vacíos. Es intencional: los ítems
+      // v3 no tienen selectedModel/isCustom, así que fusionarlos bajo la
+      // clave de identidad nueva produciría líneas con el diseño equivocado.
+      // Si en el futuro hace falta migrar de verdad, dejá `name` fijo y
+      // subí sólo `version` (que es lo que dispara `migrate`).
+      name: 'cart:v4',
+      version: 4,
+      migrate: (persistedState: unknown) => {
+        const state = persistedState as { items?: CartItem[] } | undefined;
+        if (state?.items && Array.isArray(state.items)) {
+          state.items = state.items.map((it: CartItem) => {
             if (it?.product?.basePrice && it.price !== it.product.basePrice) {
               return { ...it, price: it.product.basePrice };
             }
             return it;
           });
         }
-        return persistedState;
+        return state;
       },
     }
   )

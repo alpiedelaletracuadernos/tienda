@@ -9,16 +9,7 @@ import { Link } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { formatARS } from '@/lib/currency';
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
-
-function getLineKey(item: any) {
-  return [
-    item.product.id,
-    item.selectedSize ?? '',
-    item.selectedInterior ?? '',
-    item.selectedCover ?? '',
-    item.personalization ?? '',
-  ].join('|');
-}
+import { getCartLineKey } from '@/lib/cart-key';
 
 export default function Cart() {
   const { items, removeItem, updateQuantity, clearCart } = useCart();
@@ -67,7 +58,7 @@ export default function Cart() {
             {/* Items */}
             <div className="lg:col-span-2 space-y-4">
               {items.map((item) => {
-                const key = getLineKey(item);
+                const key = getCartLineKey(item);
                 const line = pricing.lines?.[key];
 
                 const unitPrice = item.product?.basePrice ?? 0;
@@ -110,15 +101,7 @@ export default function Cart() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() =>
-                                removeItem(
-                                  item.product.id,
-                                  item.selectedSize,
-                                  item.selectedInterior,
-                                  item.selectedCover,
-                                  item.personalization
-                                )
-                              }
+                              onClick={() => removeItem(key)}
                               aria-label="Eliminar ítem"
                             >
                               <Trash2 className="h-4 w-4 text-destructive" />
@@ -126,9 +109,11 @@ export default function Cart() {
                           </div>
 
                           <div className="text-sm text-muted-foreground space-y-1">
-                            <p>Tamaño: {item.selectedSize}</p>
-                            <p>Interior: {item.selectedInterior}</p>
-                            <p>Tapa: {item.selectedCover}</p>
+                            {item.selectedModel && <p>Modelo: {item.selectedModel}</p>}
+                            {item.selectedColor && <p>Color: {item.selectedColor}</p>}
+                            {item.selectedSize && <p>Tamaño: {item.selectedSize}</p>}
+                            {item.selectedInterior && <p>Interior: {item.selectedInterior}</p>}
+                            {item.selectedCover && <p>Tapa: {item.selectedCover}</p>}
                           </div>
 
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
@@ -137,16 +122,7 @@ export default function Cart() {
                                 variant="outline"
                                 size="icon"
                                 className="h-8 w-8"
-                                onClick={() =>
-                                  updateQuantity(
-                                    item.product.id,
-                                    item.selectedSize,
-                                    item.selectedInterior,
-                                    item.selectedCover,
-                                    Math.max(1, item.quantity - 1),
-                                    item.personalization
-                                  )
-                                }
+                                onClick={() => updateQuantity(key, Math.max(1, item.quantity - 1))}
                               >
                                 <Minus className="h-3 w-3" />
                               </Button>
@@ -157,16 +133,7 @@ export default function Cart() {
                                 variant="outline"
                                 size="icon"
                                 className="h-8 w-8"
-                                onClick={() =>
-                                  updateQuantity(
-                                    item.product.id,
-                                    item.selectedSize,
-                                    item.selectedInterior,
-                                    item.selectedCover,
-                                    item.quantity + 1,
-                                    item.personalization
-                                  )
-                                }
+                                onClick={() => updateQuantity(key, item.quantity + 1)}
                               >
                                 <Plus className="h-3 w-3" />
                               </Button>

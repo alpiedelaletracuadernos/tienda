@@ -82,10 +82,11 @@ export function buildShopMessage(
 
 // PDP (detalle de producto)
 export type PdpSelections = {
-  size: ProductSize;
-  interior: InteriorType;
-  cover: CoverType;
+  size?: ProductSize;
+  interior?: InteriorType;
+  cover?: CoverType;
   modelLabel?: string;
+  color?: string;
   quantity?: number;
 };
 
@@ -105,9 +106,10 @@ export function buildPdpMessage(
   lines.push('');
   lines.push(`*${product?.name ?? 'Producto'}*`);
   if (selections.modelLabel) lines.push(`Modelo: ${selections.modelLabel}`);
-  lines.push(`Tamaño: ${selections.size}`);
-  lines.push(`Interior: ${selections.interior}`);
-  lines.push(`Tapa: ${selections.cover}`);
+  if (selections.color) lines.push(`Color: ${selections.color}`);
+  if (selections.size) lines.push(`Tamaño: ${selections.size}`);
+  if (selections.interior) lines.push(`Interior: ${selections.interior}`);
+  if (selections.cover) lines.push(`Tapa: ${selections.cover}`);
   if (personalization?.text) lines.push(`Personalización: "${personalization.text}"`);
   if (personalization?.styleId) {
     const styleLabel = personalization.styleId
@@ -142,6 +144,7 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
       const subtotal = unit * qty;
       lines.push(`• ${idx + 1}) *${name}* x${qty}`);
       if (it.selectedModel) lines.push(`   Modelo: ${it.selectedModel}`);
+      if (it.selectedColor) lines.push(`   Color: ${it.selectedColor}`);
       if (it.selectedSize) lines.push(`   Tamaño: ${it.selectedSize}`);
       if (it.selectedInterior) lines.push(`   Interior: ${it.selectedInterior}`);
       if (it.selectedCover) lines.push(`   Tapa: ${it.selectedCover}`);

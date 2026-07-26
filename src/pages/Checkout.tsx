@@ -18,19 +18,9 @@ import type { BuyerInfo } from '@/types/cart';
 // ✅ CHANGE: Checkout ya no debe recalcular descuentos.
 // Motivo: evitamos solapes. Todo sale del motor.
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
+import { getCartLineKey } from '@/lib/cart-key';
 
 type DeliveryMethod = 'retiro' | 'envio';
-
-// ✅ CHANGE: misma key que Cart y calc-cart-pricing para mapear líneas
-function getLineKey(it: any) {
-  return [
-    it.product?.id ?? '',
-    it.selectedSize ?? '',
-    it.selectedInterior ?? '',
-    it.selectedCover ?? '',
-    it.personalization ?? '',
-  ].join('|');
-}
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -218,7 +208,7 @@ const Checkout = () => {
                   )}
 
                   {items?.map((it, i) => {
-                    const key = getLineKey(it);
+                    const key = getCartLineKey(it);
                     const line = pricing.lines?.[key];
 
                     // ✅ CHANGE: unitario “de lista” (lo que guardás en basePrice)
@@ -241,6 +231,7 @@ const Checkout = () => {
                             </p>
                             <div className="text-xs text-muted-foreground space-y-0.5 mt-1">
                               {it.selectedModel && <p>Modelo: {it.selectedModel}</p>}
+                              {it.selectedColor && <p>Color: {it.selectedColor}</p>}
                               {it.selectedSize && <p>Tamaño: {it.selectedSize}</p>}
                               {it.selectedInterior && <p>Interior: {it.selectedInterior}</p>}
                               {it.selectedCover && <p>Tapa: {it.selectedCover}</p>}
