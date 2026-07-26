@@ -299,7 +299,7 @@ export const products: Product[] = [
     basePrice: 29000,
     sizes: ['A5'],
     interiors: ['semanal'],
-    coverTypes: [],
+    coverTypes: ['dura'],
     materials: [
       'Tapa dura',
       'hojas Interior 90g',
@@ -334,7 +334,7 @@ export const products: Product[] = [
     basePrice: 33000,
     sizes: ['A5'],
     interiors: ['dos-por-hoja'],
-    coverTypes: [],
+    coverTypes: ['dura'],
     materials: [
       'Tapa dura',
       'hojas Interior 90g',
@@ -369,7 +369,7 @@ export const products: Product[] = [
     basePrice: 33000,
     sizes: ['A5'],
     interiors: ['universitaria'],
-    coverTypes: [],
+    coverTypes: ['dura'],
     materials: [
       'Tapa dura',
       'hojas Interior 90g',
@@ -405,7 +405,7 @@ export const products: Product[] = [
     basePrice: 33000,
     sizes: ['A5'],
     interiors: ['Docente nivel inicial'],
-    coverTypes: [],
+    coverTypes: ['dura'],
     materials: ['Tapa dura', 'hojas Interior 90g', 'Espiral metálico doble alambre'],
     includes: [
       'Personalización de tapa incluida',
@@ -447,7 +447,7 @@ export const products: Product[] = [
     basePrice: 33000,
     sizes: ['A5'],
     interiors: ['Docente nivel primario'],
-    coverTypes: [],
+    coverTypes: ['dura'],
     materials: ['Tapa dura', 'hojas Interior 90g', 'Espiral metálico doble alambre'],
     includes: [
       'Personalización de tapa incluida',
@@ -492,7 +492,7 @@ export const products: Product[] = [
     basePrice: 33000,
     sizes: ['A5'],
     interiors: ['Docente nivel secundario/universitario'],
-    coverTypes: [],
+    coverTypes: ['dura'],
     materials: ['Tapa dura', 'hojas Interior 90g', 'Espiral metálico doble alambre'],
     includes: [
       'Personalización de tapa incluida',
@@ -533,7 +533,7 @@ export const products: Product[] = [
     basePrice: 24000,
     sizes: ['A5'],
     interiors: ['Cuaderno con planner'],
-    coverTypes: ['dura'],
+    coverTypes: ['blanda'],
     materials: ['Tapa dura', 'hojas Interior 90g', 'Espiral metálico doble alambre'],
     includes: [
       'Personalizacion de tapa incluida',
@@ -556,7 +556,7 @@ export const products: Product[] = [
     description:
       'Formato A4 liviano para apuntes grandes. Elegí interior (rayado, cuadriculado, liso o puntillado) y personalizá la tapa. Ideal estudio/trabajo. Entrega 8–10 h hábiles. Envíos a todo el país / retiro en San Nicolás.',
     basePrice: 18000,
-    sizes: ['A5'],
+    sizes: ['A4'],
     interiors: [
       'Cuaderno hojas rayadas',
       'Cuaderno hojas cuadriculadas',
@@ -584,14 +584,14 @@ export const products: Product[] = [
     description:
       'Resistente y portable: tapa dura A5 con interior a elección (rayado/liso/cuadriculado/puntillado). Personalizá la tapa y llevá tus ideas a todos lados. Entrega 8–10 h hábiles. Envíos a todo el país / retiro en San Nicolás.',
     basePrice: 21990,
-    sizes: ['A5', 'A4'],
+    sizes: ['A5'],
     interiors: [
       'Cuaderno hojas rayadas',
       'Cuaderno hojas cuadriculadas',
       'Cuaderno hojas lisas',
       'Cuaderno hojas puntilladas',
     ],
-    coverTypes: ['dura'],
+    coverTypes: ['dura', 'blanda'],
     materials: ['Tapa dura A5', 'Hojas interior 90gr', 'espiral metalico doble alambre'],
     includes: [
       'Tapa a elección',
@@ -643,7 +643,7 @@ export const products: Product[] = [
     basePrice: 25000,
     sizes: ['A5'],
     interiors: ['2 pedidos por hoja', '3 pedidos por hoja', '6 pedidos por hoja'],
-    coverTypes: [],
+    coverTypes: ['dura'],
     materials: ['Tapa dura A5', 'Hojas interior 90gr', 'espiral metalico doble alambre'],
     includes: ['Tapa a elección', '100 hojas interior de 2,3 o 6 pedidos por hoja'],
     productionTime: '8-10 horas hábiles',
@@ -662,7 +662,7 @@ export const products: Product[] = [
     basePrice: 31000,
     sizes: ['A5'],
     interiors: ['Planner semanal perpetuo con horarios'],
-    coverTypes: [],
+    coverTypes: ['blanda'],
     materials: ['Tapa dura A5', 'Hojas interior 90gr', 'espiral metalico doble alambre'],
     includes: [
       'Tapa a elección',
@@ -687,7 +687,7 @@ export const products: Product[] = [
     basePrice: 25000,
     sizes: ['A5'],
     interiors: ['recetas'],
-    coverTypes: [],
+    coverTypes: ['dura'],
     materials: ['Tapa dura A5', 'Hojas interior 90gr', 'espiral metalico doble alambre'],
     includes: ['Tapa dura', 'Espacio para 200 recetas', 'Division de recetas dulces y saladas'],
     productionTime: '8-10 horas hábiles',
@@ -706,7 +706,7 @@ export const products: Product[] = [
     basePrice: 37000,
     sizes: ['A5'],
     interiors: ['Cuaderno docente secundaria perpetuo'],
-    coverTypes: [],
+    coverTypes: ['dura'],
     materials: [
       'Tapa dura',
       'hojas Interior 90g',
@@ -735,7 +735,7 @@ export const products: Product[] = [
     basePrice: 39000,
     sizes: [],
     interiors: [],
-    coverTypes: [],
+    coverTypes: [], // kit: incluye ítems con tapas distintas
     materials: [
       'Tapa dura',
       'Tapa blanda',
@@ -771,7 +771,7 @@ export const products: Product[] = [
     basePrice: 20000,
     sizes: [],
     interiors: [],
-    coverTypes: [],
+    coverTypes: [], // kit: incluye ítems con tapas distintas
     materials: [
       'Tapa blanda',
       'hojas Interior 90g',
@@ -797,7 +797,7 @@ export const products: Product[] = [
     basePrice: 5000,
     sizes: [],
     interiors: [],
-    coverTypes: [],
+    coverTypes: ['dura'],
     materials: [
       'Tapa blanda',
       'hojas Interior 90g',
