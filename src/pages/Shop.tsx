@@ -7,53 +7,94 @@ import { ProductCard } from '@/components/products/ProductCard';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { products } from '@/data/products';
 import AppVars from '@/data/data';
-import { buildShopMessage } from '@/lib/whatsapp';
+import { buildShopMessage, type PersonalizationStyleId } from '@/lib/whatsapp';
 import { useCart } from '@/hooks/use-cart';
 import HotSaleBanner from '@/components/promos/HotSaleBanner';
-import { isHotSaleActive } from '@/config/promotions';
 
 import { ProductCategory, ProductSize, InteriorType } from '@/types/product';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Info, Sparkles, ShoppingCart } from 'lucide-react';
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { ChevronDown, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-// ———————————————————————————————————————————————————————————————
-// Escalera de descuentos (comunicación en catálogo)
-// 1u: -15%  |  2u: -20%  |  3u+: -30%
-const DISCOUNT_LADDER = [
-  { qty: 1, off: 15 },
-  { qty: 2, off: 20 },
-  { qty: 3, off: 30 },
-] as const;
-
-const LADDER_LABEL = '1u -15% · 2u -20% · 3u -30%';
 const PROMO_2X1_LABEL = '2X1 en agendas con diseños en stock, por tiempo limitado'; // usado en varios lados
 
-// (Opcional) mismo set de estilos de personalización para contexto visual
-const PERSONALIZATION_STYLES = [
-  { id: 'nombre', label: 'Nombre/Iniciales' },
-  { id: 'frase', label: 'Frase/Versículo' },
-  { id: 'foto', label: 'Foto/Imagen' },
-  { id: 'trama', label: 'Trama/Patrón' },
-  { id: 'logo', label: 'Logo/Marca' },
-] as const;
-type PersonalizationStyleId = (typeof PERSONALIZATION_STYLES)[number]['id'];
 // ———————————————————————————————————————————————————————————————
+// Etiquetas legibles. Son `Record` exhaustivos sobre los tipos declarados en
+// `types/product.ts`: si se agrega una categoría o un interior nuevo al tipo,
+// TypeScript obliga a agregarle acá una etiqueta, así los filtros del
+// catálogo nunca quedan con un valor sin traducir.
+const CATEGORY_LABELS: Record<ProductCategory, string> = {
+  agendas: 'Agendas',
+  'agendas docentes': 'Agendas Docentes',
+  cuadernos: 'Cuadernos',
+  recetarios: 'Recetarios',
+  libretas: 'Libretas',
+  especiales: 'Especiales',
+  planners: 'Planners',
+};
+
+const INTERIOR_LABELS: Record<InteriorType, string> = {
+  semanal: 'Semanal',
+  'dos-por-hoja': '2 días por hoja',
+  universitaria: 'Universitaria',
+  docente: 'Docente',
+  perpetua: 'Perpetua',
+  rayado: 'Rayado',
+  liso: 'Liso',
+  cuadriculado: 'Cuadriculado',
+  recetas: 'Recetas',
+  'Docente nivel inicial': 'Docente · Inicial',
+  'Docente nivel primario': 'Docente · Primario',
+  'Docente nivel secundario/universitario': 'Docente · Secundario/Universitario',
+  'Cuaderno con planner': 'Con planner',
+  'Cuaderno hojas rayadas': 'Hojas rayadas',
+  'Cuaderno hojas cuadriculadas': 'Hojas cuadriculadas',
+  'Cuaderno hojas lisas': 'Hojas lisas',
+  'Cuaderno hojas puntilladas': 'Hojas puntilladas',
+  'Cuaderno emprendedor': 'Emprendedor',
+  '2 pedidos por hoja': '2 pedidos por hoja',
+  '3 pedidos por hoja': '3 pedidos por hoja',
+  '6 pedidos por hoja': '6 pedidos por hoja',
+  'Cuaderno docente inicial perpetuo': 'Docente inicial perpetuo',
+  'Cuaderno docente primaria perpetuo': 'Docente primaria perpetuo',
+  'Cuaderno docente secundaria perpetuo': 'Docente secundaria perpetuo',
+  'Planner semanal perpetuo con horarios': 'Semanal perpetuo con horarios',
+};
+
+/** Chip de filtro con área táctil ≥44px (Baymard: controles visibles > desplegables). */
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'min-h-[44px] inline-flex items-center px-4 rounded-full text-sm font-medium whitespace-nowrap transition-colors ring-1',
+        active
+          ? 'bg-primary text-primary-foreground ring-primary'
+          : 'bg-background text-foreground ring-border hover:bg-muted'
+      )}
+    >
+      {children}
+    </button>
+  );
+}
 
 const Shop = () => {
   const [searchParams] = useSearchParams();
@@ -62,6 +103,7 @@ const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory | 'all'>('all');
   const [selectedSize, setSelectedSize] = useState<ProductSize | 'all'>('all');
   const [selectedInterior, setSelectedInterior] = useState<InteriorType | 'all'>('all');
+  const [interiorSheetOpen, setInteriorSheetOpen] = useState(false);
 
   // Datos del comprador (para el mensaje final)
   const [buyerName, setBuyerName] = useState('');
@@ -71,56 +113,56 @@ const Shop = () => {
   const [buyerNotes, setBuyerNotes] = useState('');
 
   // (Opcional visual) estilo preferido
-  const [styleId, setStyleId] = useState<PersonalizationStyleId>('nombre');
+  const [styleId] = useState<PersonalizationStyleId>('nombre');
 
   // Carrito
   const { items, getTotalPrice } = useCart();
 
-  // Leer query params y setear filtros iniciales / cuando cambie la URL
+  // Opciones de filtro derivadas del catálogo real (no hardcodeadas): así no
+  // pueden desincronizarse cuando se agregue o saque un producto. Se ordenan
+  // por la etiqueta legible (localeCompare en es) para que la lista quede en
+  // orden alfabético "humano" y no en el orden crudo del valor interno.
+  const categoryOptions = useMemo(() => {
+    const set = new Set<ProductCategory>();
+    products.forEach((p) => set.add(p.category));
+    return Array.from(set).sort((a, b) =>
+      CATEGORY_LABELS[a].localeCompare(CATEGORY_LABELS[b], 'es')
+    );
+  }, []);
+
+  const sizeOptions = useMemo(() => {
+    const set = new Set<ProductSize>();
+    products.forEach((p) => p.sizes.forEach((s) => set.add(s)));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'es'));
+  }, []);
+
+  const interiorOptions = useMemo(() => {
+    const set = new Set<InteriorType>();
+    products.forEach((p) => p.interiors.forEach((i) => set.add(i)));
+    return Array.from(set).sort((a, b) =>
+      INTERIOR_LABELS[a].localeCompare(INTERIOR_LABELS[b], 'es')
+    );
+  }, []);
+
+  // Leer query params y setear filtros iniciales / cuando cambie la URL.
+  // Se valida contra las opciones derivadas del catálogo (arriba), no contra
+  // listas hardcodeadas: un ?interior=... con un valor real del catálogo ya
+  // no se ignora.
   useEffect(() => {
     const catParam = searchParams.get('cat'); // ej: agendas
     const sizeParam = searchParams.get('size'); // ej: A5
     const interiorParam = searchParams.get('interior'); // ej: semanal
 
-    // Categoría
-    if (catParam) {
-      const validCategories: ProductCategory[] = [
-        'agendas',
-        'agendas docentes',
-        'especiales',
-        'cuadernos',
-        'libretas',
-      ];
-      if (validCategories.includes(catParam as ProductCategory)) {
-        setSelectedCategory(catParam as ProductCategory);
-      }
+    if (catParam && categoryOptions.includes(catParam as ProductCategory)) {
+      setSelectedCategory(catParam as ProductCategory);
     }
-
-    // Tamaño
-    if (sizeParam) {
-      const validSizes: ProductSize[] = ['A5', 'A4'];
-      if (validSizes.includes(sizeParam as ProductSize)) {
-        setSelectedSize(sizeParam as ProductSize);
-      }
+    if (sizeParam && sizeOptions.includes(sizeParam as ProductSize)) {
+      setSelectedSize(sizeParam as ProductSize);
     }
-
-    // Interior
-    if (interiorParam) {
-      const validInteriors: InteriorType[] = [
-        'semanal',
-        'dos-por-hoja',
-        'universitaria',
-        'docente',
-        'perpetua',
-        'rayado',
-        'liso',
-        'cuadriculado',
-      ];
-      if (validInteriors.includes(interiorParam as InteriorType)) {
-        setSelectedInterior(interiorParam as InteriorType);
-      }
+    if (interiorParam && interiorOptions.includes(interiorParam as InteriorType)) {
+      setSelectedInterior(interiorParam as InteriorType);
     }
-  }, [searchParams]);
+  }, [searchParams, categoryOptions, sizeOptions, interiorOptions]);
 
   const filteredProducts = products.filter((product) => {
     const categoryMatch = selectedCategory === 'all' || product.category === selectedCategory;
@@ -129,6 +171,35 @@ const Shop = () => {
       selectedInterior === 'all' || product.interiors.includes(selectedInterior as InteriorType);
     return categoryMatch && sizeMatch && interiorMatch;
   });
+
+  const hasActiveFilters =
+    selectedCategory !== 'all' || selectedSize !== 'all' || selectedInterior !== 'all';
+
+  const clearAllFilters = () => {
+    setSelectedCategory('all');
+    setSelectedSize('all');
+    setSelectedInterior('all');
+  };
+
+  // Pills de filtros activos, mostradas sobre la grilla (Baymard: el usuario
+  // necesita ver el resumen de filtros activos mientras navega).
+  const activeFilterPills = [
+    selectedCategory !== 'all' && {
+      key: 'category',
+      label: CATEGORY_LABELS[selectedCategory],
+      onRemove: () => setSelectedCategory('all'),
+    },
+    selectedSize !== 'all' && {
+      key: 'size',
+      label: selectedSize,
+      onRemove: () => setSelectedSize('all'),
+    },
+    selectedInterior !== 'all' && {
+      key: 'interior',
+      label: INTERIOR_LABELS[selectedInterior],
+      onRemove: () => setSelectedInterior('all'),
+    },
+  ].filter((f): f is { key: string; label: string; onRemove: () => void } => !!f);
 
   // Construcción del mensaje de WhatsApp (centralizado)
   const whatsappMessage = useMemo(() => {
@@ -159,13 +230,6 @@ const Shop = () => {
   ]);
 
   const waNumber = AppVars.phoneNumber; // ej.: 549336XXXXXXX
-
-  // ——— Helpers de UI ———
-  const ladderList = useMemo(
-    () =>
-      DISCOUNT_LADDER.map((t) => `${t.qty} ${t.qty === 1 ? 'unidad' : 'unidades'} — ${t.off}% OFF`),
-    []
-  );
 
   return (
     <div className="min-h-screen overflow-x-clip">
@@ -199,38 +263,6 @@ const Shop = () => {
         </>
       )}
 
-      {/* Barra informativa sticky: escalera de descuentos */}
-      {/* <div className="sticky top-16 z-40 bg-black text-white">
-        <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Badge className="bg-amber-400 text-black hover:bg-amber-400">Escalera de Descuentos</Badge>
-            <span className="text-sm sm:text-base font-semibold">{LADDER_LABEL}</span>
-          </div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size="sm" variant="secondary" className="bg-white text-black hover:bg-white/90">
-                <Info className="h-4 w-4 mr-1" />
-                ¿Cómo funciona?
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Cómo funciona la escalera</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3 text-sm">
-                <p>El descuento se aplica automáticamente según la cantidad total de unidades en tu carrito:</p>
-                <ul className="list-disc pl-5 space-y-1">
-                  {ladderList.map((line, i) => <li key={i}>{line}</li>)}
-                </ul>
-                <p className="text-muted-foreground">
-                  Tip: combiná modelos/colores para llegar a 2 o 3 unidades y obtener más descuento.
-                </p>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div> */}
-
       <main>
         {/* Hero Section (catálogo) */}
         <section className="bg-soft/30 py-16">
@@ -247,12 +279,6 @@ const Shop = () => {
                 >
                   ✨ 15 cupos disponibles esta semana
                 </Badge>
-                {/* Escalera de descuentos */}
-                {/* <Badge
-                  className="bg-amber-400 text-black hover:bg-amber-400 px-3 py-1.5 text-xs sm:text-sm whitespace-normal break-words leading-snug max-w-full sm:max-w-[480px]"
-                >
-                  <span className="[text-wrap:balance]">{LADDER_LABEL}</span>
-                </Badge> */}
               </div>
             </div>
           </div>
@@ -260,120 +286,160 @@ const Shop = () => {
 
         {/* Filters */}
         <section className="py-8 border-b bg-background lg:sticky top-16 z-30">
-          <div className="container px-4 w-full max-w-full">
-            <div className="flex flex-col sm:flex-row gap-4 w-full max-w-full">
-              <Select
-                value={selectedCategory}
-                onValueChange={(v) => setSelectedCategory(v as ProductCategory | 'all')}
-              >
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Categoría" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas las categorías</SelectItem>
-                  <SelectItem value="agendas">Agendas</SelectItem>
-                  <SelectItem value="agendas docentes">Agendas Docentes</SelectItem>
-                  <SelectItem value="especiales">Especiales</SelectItem>
-                  <SelectItem value="cuadernos">Cuadernos</SelectItem>
-                  <SelectItem value="libretas">Libretas</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={selectedSize}
-                onValueChange={(v) => setSelectedSize(v as ProductSize | 'all')}
-              >
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Tamaño" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los tamaños</SelectItem>
-                  <SelectItem value="A5">A5</SelectItem>
-                  <SelectItem value="A4">A4</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={selectedInterior}
-                onValueChange={(v) => setSelectedInterior(v as InteriorType | 'all')}
-              >
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Interior" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los interiores</SelectItem>
-                  <SelectItem value="semanal">Semanal</SelectItem>
-                  <SelectItem value="dos-por-hoja">2 días por hoja</SelectItem>
-                  <SelectItem value="universitaria">Universitaria</SelectItem>
-                  <SelectItem value="docente">Docente</SelectItem>
-                  <SelectItem value="perpetua">Perpetua</SelectItem>
-                  <SelectItem value="rayado">Rayado</SelectItem>
-                  <SelectItem value="liso">Liso</SelectItem>
-                  <SelectItem value="cuadriculado">Cuadriculado</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="container px-4 w-full max-w-full space-y-4">
+            {/* Categoría: chips siempre visibles, "Todas" primero */}
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                Categoría
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <FilterChip active={selectedCategory === 'all'} onClick={() => setSelectedCategory('all')}>
+                  Todas
+                </FilterChip>
+                {categoryOptions.map((cat) => (
+                  <FilterChip
+                    key={cat}
+                    active={selectedCategory === cat}
+                    onClick={() => setSelectedCategory(cat)}
+                  >
+                    {CATEGORY_LABELS[cat]}
+                  </FilterChip>
+                ))}
+              </div>
             </div>
 
-            <div className="mt-4 flex flex-col md:flex-row items-center justify-between ">
+            {/* Tamaño: chips */}
+            {sizeOptions.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                  Tamaño
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <FilterChip active={selectedSize === 'all'} onClick={() => setSelectedSize('all')}>
+                    Todos
+                  </FilterChip>
+                  {sizeOptions.map((size) => (
+                    <FilterChip
+                      key={size}
+                      active={selectedSize === size}
+                      onClick={() => setSelectedSize(size)}
+                    >
+                      {size}
+                    </FilterChip>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Interior: son ~25 valores con textos largos (ej. "Docente nivel
+                secundario/universitario"). Un chip por opción no entra en
+                390px, así que en vez de un <Select> (que esconde todo el set
+                hasta tocarlo) usamos un botón que abre un Sheet inferior con
+                la lista completa como opciones grandes y tocables. */}
+            {interiorOptions.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                  Interior
+                </p>
+                <Sheet open={interiorSheetOpen} onOpenChange={setInteriorSheetOpen}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setInteriorSheetOpen(true)}
+                    className="min-h-[44px] w-full sm:w-auto justify-between gap-2"
+                  >
+                    {selectedInterior === 'all' ? 'Interior' : INTERIOR_LABELS[selectedInterior]}
+                    <ChevronDown className="h-4 w-4 opacity-60" />
+                  </Button>
+                  <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto">
+                    <SheetHeader>
+                      <SheetTitle>Elegí el interior</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 pb-4">
+                      <SheetClose asChild>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedInterior('all')}
+                          aria-pressed={selectedInterior === 'all'}
+                          className={cn(
+                            'min-h-[44px] w-full text-left px-4 rounded-lg text-sm font-medium transition-colors ring-1',
+                            selectedInterior === 'all'
+                              ? 'bg-primary text-primary-foreground ring-primary'
+                              : 'bg-background text-foreground ring-border hover:bg-muted'
+                          )}
+                        >
+                          Todos los interiores
+                        </button>
+                      </SheetClose>
+                      {interiorOptions.map((interior) => (
+                        <SheetClose asChild key={interior}>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedInterior(interior)}
+                            aria-pressed={selectedInterior === interior}
+                            className={cn(
+                              'min-h-[44px] w-full text-left px-4 rounded-lg text-sm font-medium transition-colors ring-1',
+                              selectedInterior === interior
+                                ? 'bg-primary text-primary-foreground ring-primary'
+                                : 'bg-background text-foreground ring-border hover:bg-muted'
+                            )}
+                          >
+                            {INTERIOR_LABELS[interior]}
+                          </button>
+                        </SheetClose>
+                      ))}
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            )}
+
+            {/* Filtros activos: pills removibles + limpiar todo */}
+            {hasActiveFilters && (
+              <div className="flex flex-wrap items-center gap-2">
+                {activeFilterPills.map((f) => (
+                  <Badge
+                    key={f.key}
+                    variant="secondary"
+                    className="pl-3 pr-1 py-1 flex items-center gap-1"
+                  >
+                    {f.label}
+                    <button
+                      type="button"
+                      onClick={f.onRemove}
+                      aria-label={`Quitar filtro ${f.label}`}
+                      className="ml-1 rounded-full p-0.5 hover:bg-black/10"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Limpiar filtros
+                </Button>
+              </div>
+            )}
+
+            <div className="flex flex-col md:flex-row items-center justify-between">
               <p className="text-sm text-muted-foreground">
                 Mostrando {filteredProducts.length}{' '}
                 {filteredProducts.length === 1 ? 'producto' : 'productos'}
               </p>
-              {/* Escalera de descuentos */}
-              {/* <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-amber-600 hover:text-amber-700 hover:bg-amber-50">
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    {LADDER_LABEL} — ver detalles
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Descuentos por cantidad</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-3 text-sm">
-                    <ul className="list-disc pl-5 space-y-1">
-                      {DISCOUNT_LADDER.map((t, i) => (
-                        <li key={i}>{t.qty} {t.qty === 1 ? 'unidad' : 'unidades'} — {t.off}% OFF</li>
-                      ))}
-                    </ul>
-                    <p className="text-muted-foreground">
-                      Se calcula automáticamente al avanzar con la compra. Aplica a toda la tienda.
-                    </p>
-                  </div>
-                </DialogContent>
-              </Dialog> */}
             </div>
           </div>
         </section>
-        {/* Products Grid + Card educativa inserta */}
+        {/* Products Grid */}
         <section className="py-12">
           <div className="container px-4">
             {filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredProducts.map((product, idx) => (
-                  <div key={product.id} className="relative">
-                    <ProductCard product={product} />
-                    {/* Badge promocional: Hot Sale tiene prioridad sobre descuento genérico */}
-                    {isHotSaleActive() ? (
-                      <span className="absolute left-2 top-2 rounded-full bg-accent text-accent-foreground text-[11px] font-bold px-2.5 py-0.5 shadow">
-                        HOT SALE -{AppVars.promotions.hotSale.percentage}%
-                      </span>
-                    ) : AppVars.promotions.discount.enabled && (product.name.includes('Agenda') || product.name.includes('Agenda Docente')) ? (
-                      <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
-                        Promo {AppVars.promotions.discount.percentage}% OFF
-                      </span>
-                    ) : null}
-                    {/* Badge pequeño en esquina (refuerzo visual sin invadir) */}
-                    {/* <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow">
-                      hasta -30%
-                    </span> */}
-                    {/* Insertar una card educativa a mitad de la primera “pantalla” */}
-                    {
-                      (idx === 1 && filteredProducts.length > 2) || // mobile 2col
-                        (idx === 3 && filteredProducts.length > 4) // desktop 4col
-                    }
-                  </div>
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
             ) : (

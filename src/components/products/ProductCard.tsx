@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import vars from '@/data/data';
 import { formatARS } from '@/lib/currency';
 import { calculateProductPricing } from '@/lib/pricing/calc-product-pricing';
+import { isEligibleForDiscount } from '@/config/promotions';
 
 interface ProductCardProps {
   product: Product;
@@ -22,6 +23,12 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   // de `pricing.discounts` (que trae todas las que aplicaron).
   const hsEligible = pricing.discounts.some((d) => d.label.startsWith(vars.promotions.hotSale.label));
 
+  // Badge de promo genérica (no Hot Sale): usa la misma función de
+  // elegibilidad que decide el precio (categoría + personalización), no un
+  // match de texto sobre el nombre del producto.
+  const discountEligible =
+    !hsEligible && isEligibleForDiscount({ product: { category: product.category } });
+
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
       <Link to={`/producto/${product.slug}`}>
@@ -32,11 +39,15 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          {hsEligible && (
+          {hsEligible ? (
             <span className="absolute left-2 top-2 rounded-full bg-accent text-accent-foreground text-[11px] font-bold px-2.5 py-0.5 shadow-sm">
               HOT SALE -{vars.promotions.hotSale.percentage}%
             </span>
-          )}
+          ) : discountEligible ? (
+            <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow-sm">
+              Promo {vars.promotions.discount.percentage}% OFF
+            </span>
+          ) : null}
         </div>
       </Link>
 
