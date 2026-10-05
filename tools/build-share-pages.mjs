@@ -7,9 +7,12 @@
 //
 //   dist/p/<slug>/index.html  →  título, descripción e imagen del producto
 //                                 en Open Graph + redirección a la ficha.
+//   dist/p/<slug>/og.jpg      →  imagen de la vista previa, 1200x630 JPG
+//                                 (WhatsApp no siempre muestra webp).
 //
 // La ficha comparte ese link (ver `shareUrlFor` en src/lib/share.ts).
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
+import sharp from 'sharp';
 import { join } from 'node:path';
 import { loadData, root } from './load-data.mjs';
 
@@ -34,9 +37,31 @@ const stillOf = (src) => (VIDEO_RE.test(src) ? src.replace(/\.[a-z0-9]+$/i, '_po
 
 const truncate = (s, n) => (s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s);
 
+// 1200x630 sin recortar el producto: la foto entera (casi siempre cuadrada
+// o vertical) centrada sobre una versión ampliada y desenfocada de sí misma.
+async function writeOgImage(src, dest) {
+  const file = join(root, 'public', src);
+  const background = await sharp(file)
+    .resize(1200, 630, { fit: 'cover' })
+    .blur(40)
+    .modulate({ brightness: 0.85 })
+    .toBuffer();
+  const foreground = await sharp(file).resize(1200, 630, { fit: 'inside' }).toBuffer();
+  await sharp(background)
+    .composite([{ input: foreground, gravity: 'center' }])
+    .jpeg({ quality: 80, mozjpeg: true })
+    .toFile(dest);
+}
+
 for (const p of products) {
   const target = `${site}#/producto/${p.slug}`;
-  const image = p.images[0] ? `${site}${stillOf(p.images[0])}` : `${site}og-image.jpg`;
+  const dir = join(dist, 'p', p.slug);
+  mkdirSync(dir, { recursive: true });
+  let image = `${site}og-image.jpg`;
+  if (p.images[0]) {
+    await writeOgImage(stillOf(p.images[0]), join(dir, 'og.jpg'));
+    image = `${site}p/${p.slug}/og.jpg`;
+  }
   const title = `${p.name} · Al Pie de la Letra`;
   const description = truncate(p.description.replace(/\s+/g, ' ').trim(), 200);
   const html = `<!doctype html>
@@ -54,6 +79,10 @@ for (const p of products) {
 <meta property="og:description" content="${esc(description)}" />
 <meta property="og:url" content="${esc(`${site}p/${p.slug}/`)}" />
 <meta property="og:image" content="${esc(image)}" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="${esc(p.name)}" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta http-equiv="refresh" content="0; url=${esc(target)}" />
 <script>location.replace(${JSON.stringify(target)});</script>
@@ -63,9 +92,7 @@ for (const p of products) {
 </body>
 </html>
 `;
-  const dir = join(dist, 'p', p.slug);
-  mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, 'index.html'), html);
 }
 
-console.log(`✔ ${products.length} páginas para compartir en dist/p/`);
+console.log(`✔ ${products.length} páginas para compartir (con imagen JPG) en dist/p/`);
