@@ -12,37 +12,53 @@ export const BOX_COLORS: ProductColor[] = [
   { id: 'magenta', name: 'Magenta', hex: '#C2185B' },
 ];
 
-// Tapas Edición 2027 (también son las opciones del selector de diseño).
-const tapas2027 = [
-  `${routeBase}models/edicion-2027_0001.webp`,
-  `${routeBase}models/edicion-2027_0002.webp`,
-  `${routeBase}models/edicion-2027_0003.webp`,
-  `${routeBase}models/edicion-2027_0004.webp`,
-  `${routeBase}models/edicion-2027_0005.webp`,
-  `${routeBase}models/edicion-2027_0006.webp`,
-  `${routeBase}models/edicion-2027_0007.webp`,
-  `${routeBase}models/edicion-2027_0008.webp`,
-  `${routeBase}models/edicion-2027_0009.webp`,
-  `${routeBase}models/edicion-2027_0010.webp`,
-  `${routeBase}models/edicion-2027_0011.webp`,
-  `${routeBase}models/edicion-2027_0012.webp`,
-  `${routeBase}models/edicion-2027_0013.webp`,
-  `${routeBase}models/edicion-2027_0014.webp`,
-  `${routeBase}models/edicion-2027_0015.webp`,
-  `${routeBase}models/edicion-2027_0016.webp`,
-];
-
 export const productoImagenes: ModelAssets = {
-  // Fotos 2027: hasta tener fotos del interior 2027 se usan las tapas y, en la
-  // semanal, las fotos del interior 2026 que no muestran el año (el diseño
-  // del interior no cambió).
+  // Fotos de la producción 2027 (WEB_LANZAMIENTO_2027/SEMANAL y /DIARIA), en orden.
   'agenda-semanal-2027': [
-    ...tapas2027.slice(0, 4),
-    ...[3, 4, 5, 6, 9, 10, 11, 12, 13, 14].map(
-      (n) => `${routeBase}productos/agenda-semanal_${String(n).padStart(4, '0')}.webp`
-    ),
+    `${routeBase}productos/agenda-semanal-2027_0001.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0002.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0003.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0004.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0005.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0006.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0007.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0008.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0009.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0010.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0011.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0012.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0013.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0014.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0015.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0016.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0017.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0018.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0019.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0020.webp`,
   ],
-  'agenda-diaria-2027': tapas2027.slice(4, 10),
+  'agenda-diaria-2027': [
+    `${routeBase}productos/agenda-diaria-2027_0001.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0002.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0003.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0004.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0005.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0006.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0007.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0008.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0009.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0010.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0011.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0012.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0013.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0014.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0015.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0016.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0017.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0018.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0019.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0020.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0021.webp`,
+  ],
   'agenda-perpetua-pocket': [
     `${routeBase}productos/agenda-perpetua-pocket_0001.webp`,
     `${routeBase}productos/agenda-perpetua-pocket_0002.webp`,
