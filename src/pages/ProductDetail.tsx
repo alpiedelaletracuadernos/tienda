@@ -28,6 +28,7 @@ import { StickyBuyBar } from '@/components/products/StickyBuyBar';
 import { ProductSpecs } from '@/components/products/ProductSpecs';
 import { ProductComingSoon } from '@/components/products/ProductComingSoon';
 import { isPurchasable } from '@/lib/availability';
+import { thumbOf } from '@/lib/media';
 import { safeStorage } from '@/lib/safe-storage';
 
 //PROMOCIONES
@@ -707,7 +708,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
                       className="snap-center flex-none w-32 h-32 sm:w-36 sm:h-36 rounded-xl overflow-hidden ring-1 ring-slate-200 bg-white"
                     >
                       <img
-                        src={src}
+                        src={thumbOf(src)}
                         alt={`Ejemplo ${i + 1}`}
                         className="w-full h-full object-cover"
                         loading="lazy"

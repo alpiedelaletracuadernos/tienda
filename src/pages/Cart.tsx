@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { formatARS } from '@/lib/currency';
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
+import { thumbOf } from '@/lib/media';
 import { getCartLineKey } from '@/lib/cart-key';
 
 export default function Cart() {
@@ -80,11 +81,13 @@ export default function Cart() {
                     <CardContent className="p-6">
                       <div className="flex gap-6">
                         <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted shrink-0">
-                          <img
-                            src={item.product.images[0]}
-                            alt={item.product.name}
-                            className="w-full h-full object-cover"
-                          />
+                          {item.product.images[0] && (
+                            <img
+                              src={thumbOf(item.product.images[0])}
+                              alt={item.product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
                         </div>
 
                         <div className="flex-1 space-y-2 min-w-0">

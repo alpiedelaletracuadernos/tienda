@@ -2,6 +2,7 @@
 import { useState, useId, useRef, useEffect } from "react";
 import { Maximize2, Play } from "lucide-react";
 import clsx from "clsx";
+import { isVideo, posterOf, thumbOf } from "@/lib/media";
 
 type Props = {
   images: string[];                 // puede contener URLs de imágenes o videos
@@ -10,12 +11,6 @@ type Props = {
   onOpenFullscreen?: (src: string) => void;
 };
 
-const VIDEO_EXT_RE = /\.(mp4|webm|ogg|ogv|mov|m4v)$/i;
-const isVideo = (src: string) => {
-  // Ignora querystrings al evaluar la extensión
-  const clean = src.split("?")[0];
-  return VIDEO_EXT_RE.test(clean);
-};
 
 export default function ProductImageGallery({
   images,
@@ -95,11 +90,11 @@ export default function ProductImageGallery({
               >
                 {video ? (
                   <>
-                    <video
-                      src={src}
-                      preload="metadata"     // no descarga el video completo
-                      muted
-                      playsInline            // iOS: reproducción inline
+                    <img
+                      src={thumbOf(src)}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                     />
                     <span className="absolute inset-0 grid place-items-center">
@@ -110,7 +105,7 @@ export default function ProductImageGallery({
                   </>
                 ) : (
                   <img
-                    src={src}
+                    src={thumbOf(src)}
                     alt={`${altBase} miniatura ${i + 1}`}
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -159,11 +154,11 @@ export default function ProductImageGallery({
               >
                 {video ? (
                   <>
-                    <video
-                      src={src}
-                      preload="metadata"
-                      muted
-                      playsInline
+                    <img
+                      src={thumbOf(src)}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                     />
                     <span className="absolute inset-0 grid place-items-center">
@@ -174,7 +169,7 @@ export default function ProductImageGallery({
                   </>
                 ) : (
                   <img
-                    src={src}
+                    src={thumbOf(src)}
                     alt={`${altBase} miniatura ${i + 1}`}
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -204,8 +199,8 @@ export default function ProductImageGallery({
               controls
               playsInline
               preload="metadata"
+              poster={posterOf(currentSrc)}
               className="max-w-full max-h-full object-contain"
-              // poster="(opcional) /ruta/preview.jpg"
               aria-label={`${altBase} (video) ${index + 1} de ${images.length}`}
             >
               {/* Si querés ofrecer varios formatos: */}

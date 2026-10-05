@@ -26,6 +26,7 @@ const reconcileWithCatalog = (items: CartItem[]): CartItem[] =>
           ...it.product,
           name: current.name,
           category: current.category,
+          images: current.images,
           basePrice: unit,
         },
         price: unit,

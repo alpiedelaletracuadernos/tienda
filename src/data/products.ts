@@ -172,7 +172,6 @@ export const productoImagenes: ModelAssets = {
     `${routeBase}productos/combo-premium_0009.webp`,
     
   ],
-  convertidos: [`${routeBase}productos/convertidos_log.csv`],
   'cuaderno-a4-libreta-a6': [
     `${routeBase}productos/cuaderno-a4libreta-a6_0001.webp`,
     `${routeBase}productos/cuaderno-a4libreta-a6_0001.mp4`,
@@ -228,13 +227,9 @@ export const productoImagenes: ModelAssets = {
   ],
   'cuadernos-por-mayor': [
     `${routeBase}productos/cuadernos-por-mayor_0001.webp`,
-    `${routeBase}productos/cuadernos-por-mayor_0001.mp4`,
     `${routeBase}productos/cuadernos-por-mayor_0002.webp`,
-    `${routeBase}productos/cuadernos-por-mayor_0002.mp4`,
     `${routeBase}productos/cuadernos-por-mayor_0003.webp`,
-    `${routeBase}productos/cuadernos-por-mayor_0003.mp4`,
     `${routeBase}productos/cuadernos-por-mayor_0004.webp`,
-    `${routeBase}productos/cuadernos-por-mayor_0004.mp4`,
     `${routeBase}productos/cuadernos-por-mayor_0006.webp`,
     `${routeBase}productos/cuadernos-por-mayor_0009.webp`,
     `${routeBase}productos/cuadernos-por-mayor_0010.webp`,
@@ -254,7 +249,6 @@ export const productoImagenes: ModelAssets = {
   ],
   'libretas-a6': [
     `${routeBase}productos/libretas-a6_0001.webp`,
-    `${routeBase}productos/libretas-a6_0001.mp4`,
     `${routeBase}productos/libretas-a6_0002.webp`,
     `${routeBase}productos/libretas-a6_0003.webp`,
     `${routeBase}productos/libretas-a6_0004.webp`,

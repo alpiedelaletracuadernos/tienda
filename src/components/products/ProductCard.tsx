@@ -10,6 +10,7 @@ import { calculateProductPricing } from '@/lib/pricing/calc-product-pricing';
 import { isEligibleForDiscount } from '@/config/promotions';
 import { COMING_SOON_LABEL, availabilityNote, isPurchasable } from '@/lib/availability';
 import { cn } from '@/lib/utils';
+import { responsiveSrcSet, stillOf } from '@/lib/media';
 
 interface ProductCardProps {
   product: Product;
@@ -38,7 +39,11 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         {/* 👇 Hacemos el wrapper RELATIVE para anclar el badge */}
         <div className="relative aspect-square overflow-hidden bg-muted">
           <img
-            src={product.images[0]}
+            src={stillOf(product.images[0])}
+            srcSet={responsiveSrcSet(product.images[0])}
+            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+            width={1200}
+            height={1200}
             alt={product.name}
             className={cn(
               'w-full h-full object-cover group-hover:scale-105 transition-transform duration-300',
