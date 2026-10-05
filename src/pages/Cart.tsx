@@ -10,6 +10,7 @@ import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { formatARS } from '@/lib/currency';
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
 import { thumbOf } from '@/lib/media';
+import vars from '@/data/data';
 import { getCartLineKey } from '@/lib/cart-key';
 
 export default function Cart() {
@@ -117,6 +118,12 @@ export default function Cart() {
                             {item.selectedSize && <p>Tamaño: {item.selectedSize}</p>}
                             {item.selectedInterior && <p>Interior: {item.selectedInterior}</p>}
                             {item.selectedCover && <p>Tapa: {item.selectedCover}</p>}
+                            {item.isCustom && (
+                              <p>
+                                Personalización de tapa: +{formatARS(vars.personalizationSurcharge)}{' '}
+                                c/u (incluido)
+                              </p>
+                            )}
                           </div>
 
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
@@ -241,7 +248,7 @@ export default function Cart() {
                   <div className="text-sm text-muted-foreground space-y-2 pt-4 border-t">
                     <p>✓ Envíos a todo el país</p>
                     <p>✓ Retiro sin cargo en San Nicolás</p>
-                    <p>✓ Pago seguro con Mercado Pago</p>
+                    <p>✓ Pagás con efectivo, transferencia o Mercado Pago</p>
                   </div>
                 </CardContent>
               </Card>

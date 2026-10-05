@@ -418,11 +418,6 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
               <div className="min-w-0">
                 <div className="flex items-start justify-between gap-4 mb-2">
                   <h1 className="text-3xl sm:text-4xl font-bold break-words">{product.name}</h1>
-                  {product.remainingQuota <= 5 && (
-                    <Badge variant="destructive" className="shrink-0">
-                      ¡Solo {product.remainingQuota} disponibles!
-                    </Badge>
-                  )}
                 </div>
 
                 {/* Precio: única fuente (calculateProductPricing). Si hay

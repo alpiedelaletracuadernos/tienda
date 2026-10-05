@@ -2,7 +2,6 @@
 import { Product } from '@/types/product';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import vars from '@/data/data';
 import { formatARS } from '@/lib/currency';
@@ -75,11 +74,6 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               {product.name}
             </h3>
           </Link>
-          {purchasable && product.remainingQuota <= 5 && (
-            <Badge variant="destructive" className="shrink-0 text-xs">
-              ¡Últimos {product.remainingQuota}!
-            </Badge>
-          )}
         </div>
 
         <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>

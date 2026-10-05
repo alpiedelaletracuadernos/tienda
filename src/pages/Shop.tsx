@@ -290,7 +290,7 @@ const Shop = () => {
                   variant="outline"
                   className="px-3 py-1.5 text-xs sm:text-sm whitespace-normal break-words leading-snug"
                 >
-                  ✨ 15 cupos disponibles esta semana
+                  ✨ Nueva colección 2027 · Hecho a mano en San Nicolás
                 </Badge>
               </div>
             </div>
