@@ -65,7 +65,7 @@ export const vars: AppVars = {
     },
     maxUploadSizeBytes: 5 * 1024 * 1024, // 5 MB
     dateFormat: 'dd/MM/yyyy',
-    personalizationSurcharge: 5000, // Recargo $5000 inicial
+    personalizationSurcharge: 8000, // Recargo por personalizar la tapa
     promotions: {
         discount: {
             enabled: false,
@@ -79,7 +79,7 @@ export const vars: AppVars = {
             eligibleCategories: ['agendas', 'agendas docentes']
         },
         hotSale: {
-            enabled: true,
+            enabled: false,
             percentage: 25,
             applyToPersonalized: true,
             startDate: '2026-05-11',
