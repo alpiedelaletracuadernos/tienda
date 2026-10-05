@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
-import { getProductBySlug, productoImagenes } from '@/data/products';
+import { getProductBySlug } from '@/data/products';
 import { modeloOptions } from '@/data/options';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,13 +29,13 @@ import { ShareButton } from '@/components/products/ShareButton';
 import { PromoBar } from '@/components/promos/PromoBar';
 import { PersonalizationStep } from '@/components/products/pdp/PersonalizationStep';
 import { QuantityStepper } from '@/components/products/pdp/QuantityStepper';
-import { InspirationStrip } from '@/components/products/pdp/InspirationStrip';
 import { safeStorage } from '@/lib/safe-storage';
 
 //PROMOCIONES
 import { isHotSaleActive, formatHotSaleDateRange } from '@/config/promotions';
 import { calculateProductPricing } from '@/lib/pricing/calc-product-pricing';
 import { formatARS } from '@/lib/currency';
+import { personalizationSurchargeFor } from '@/lib/pricing/personalization';
 
 // —— WhatsApp ————————————————————————————————————————
 const WHATSAPP_NUMBER = AppVars.phoneNumber;
@@ -79,7 +79,9 @@ const ProductDetail = () => {
 
 const ProductDetailContent = ({ product }: { product: Product }) => {
   const { addItem } = useCart();
-  const hasModels = MODEL_CATEGORIES.has(normalizeCategory(product.category));
+  // El producto puede forzarlo con `coverDesigns`; si no, decide la categoría.
+  const hasModels =
+    product.coverDesigns ?? MODEL_CATEGORIES.has(normalizeCategory(product.category));
   // Decisión del dueño de la tienda: los productos con `colors` definido
   // (hoy el Box premium regalo) no usan los diseños de tapa del catálogo de
   // agendas; se eligen por color. Es una decisión por datos, no por categoría.
@@ -504,6 +506,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
               {/* ——— Paso ③ (o ②): ¿Lo querés personalizado? ——— */}
               <PersonalizationStep
                 step={personalizationStepNumber}
+                surcharge={personalizationSurchargeFor(product)}
                 isCustom={isCustom}
                 onCustomChange={setIsCustom}
                 styleId={styleId}
@@ -540,7 +543,6 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
 
               <ProductSpecs product={product} />
 
-              <InspirationStrip images={productoImagenes['personalizados']} />
             </div>
           </div>
         </div>

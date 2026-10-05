@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ProductCard } from '@/components/products/ProductCard';
 import { PromoBar } from '@/components/promos/PromoBar';
-import { isPurchasable, sortByAvailability } from '@/lib/availability';
+import { isPurchasable } from '@/lib/availability';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { products } from '@/data/products';
 import AppVars from '@/data/data';
@@ -168,7 +168,8 @@ const Shop = () => {
     }
   }, [searchParams, categoryOptions, sizeOptions, interiorOptions]);
 
-  const filteredProducts = sortByAvailability(products).filter((product) => {
+  // `products` ya viene en el orden de catálogo (src/data/catalog-order.ts).
+  const filteredProducts = products.filter((product) => {
     const categoryMatch = selectedCategory === 'all' || product.category === selectedCategory;
     const sizeMatch = selectedSize === 'all' || product.sizes.includes(selectedSize as ProductSize);
     const interiorMatch =

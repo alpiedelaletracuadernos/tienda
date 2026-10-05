@@ -10,7 +10,3 @@ export const isPurchasable = (product: Pick<Product, 'inStock'>) => product.inSt
 
 export const availabilityNote = (product: Pick<Product, 'availabilityNote'>) =>
   product.availabilityNote ?? DEFAULT_NOTE;
-
-/** Orden estable: primero lo que se puede comprar, después "Próximamente". */
-export const sortByAvailability = <T extends Pick<Product, 'inStock'>>(list: T[]): T[] =>
-  [...list].sort((a, b) => Number(isPurchasable(b)) - Number(isPurchasable(a)));

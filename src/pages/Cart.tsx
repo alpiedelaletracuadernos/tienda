@@ -10,7 +10,7 @@ import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { formatARS } from '@/lib/currency';
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
 import { thumbOf } from '@/lib/media';
-import vars from '@/data/data';
+import { personalizationSurchargeForId } from '@/lib/pricing/personalization';
 import { getCartLineKey } from '@/lib/cart-key';
 
 export default function Cart() {
@@ -120,8 +120,10 @@ export default function Cart() {
                             {item.selectedCover && <p>Tapa: {item.selectedCover}</p>}
                             {item.isCustom && (
                               <p>
-                                Personalización de tapa: +{formatARS(vars.personalizationSurcharge)}{' '}
-                                c/u (incluido)
+                                Personalización de tapa:{' '}
+                                {personalizationSurchargeForId(item.product.id) > 0
+                                  ? `+${formatARS(personalizationSurchargeForId(item.product.id))} c/u (incluido)`
+                                  : 'incluida en el precio'}
                               </p>
                             )}
                           </div>

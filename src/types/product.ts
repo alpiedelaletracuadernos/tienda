@@ -85,6 +85,13 @@ export interface Product {
   availabilityNote?: string;
   /** true = borrador: cargado pero no publicado (no aparece ni por URL). */
   draft?: boolean;
+  /** true = la personalización de tapa ya está en el precio (no suma recargo). */
+  personalizationIncluded?: boolean;
+  /**
+   * Fuerza mostrar (true) u ocultar (false) el selector de diseños de tapa.
+   * Sin definir, lo decide la categoría (agendas, agendas docentes, cuadernos).
+   */
+  coverDesigns?: boolean;
   weeklyQuota: number;
   remainingQuota: number;
   colors?: ProductColor[];

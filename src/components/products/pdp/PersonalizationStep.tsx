@@ -6,7 +6,6 @@ import { Switch } from '@/components/ui/switch';
 import { StepSection } from '@/components/products/StepSection';
 import { formatARS } from '@/lib/currency';
 import type { PersonalizationStyleId } from '@/lib/whatsapp';
-import vars from '@/data/data';
 
 const PERSONALIZATION_STYLES: { id: PersonalizationStyleId; label: string }[] = [
   { id: 'nombre', label: 'Nombre/Iniciales' },
@@ -18,6 +17,8 @@ const PERSONALIZATION_STYLES: { id: PersonalizationStyleId; label: string }[] = 
 
 type Props = {
   step: number;
+  /** Recargo por personalizar; 0 = incluida en el precio. */
+  surcharge: number;
   isCustom: boolean;
   onCustomChange: (v: boolean) => void;
   styleId: PersonalizationStyleId;
@@ -28,6 +29,7 @@ type Props = {
 
 export function PersonalizationStep({
   step,
+  surcharge,
   isCustom,
   onCustomChange,
   styleId,
@@ -39,7 +41,11 @@ export function PersonalizationStep({
     <StepSection
       step={step}
       title="¿Lo querés personalizado?"
-      hint={`+${formatARS(vars.personalizationSurcharge)} sobre el precio de lista`}
+      hint={
+        surcharge > 0
+          ? `+${formatARS(surcharge)} sobre el precio de lista`
+          : 'Incluida en el precio'
+      }
     >
       <div className="space-y-4 rounded-2xl border p-4 sm:p-5">
         <div className="flex items-center justify-between gap-4">

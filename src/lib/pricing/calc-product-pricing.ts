@@ -1,8 +1,8 @@
 // src/lib/pricing/calc-product-pricing.ts
 import type { Product } from '@/types/product';
 import type { CartItem } from '@/types/cart';
-import vars from '@/data/data';
 import { calculateCartPricing } from './calc-cart-pricing';
+import { personalizationSurchargeFor } from './personalization';
 
 /**
  * Única fuente de precios para vistas de producto (PDP, ProductCard).
@@ -21,7 +21,10 @@ import { calculateCartPricing } from './calc-cart-pricing';
  * gratis no cambia el total de la línea).
  */
 export function calculateProductPricing(args: {
-  product: Pick<Product, 'id' | 'name' | 'basePrice' | 'images' | 'category'>;
+  product: Pick<
+    Product,
+    'id' | 'name' | 'basePrice' | 'images' | 'category' | 'personalizationIncluded'
+  >;
   quantity?: number; // default 1
   isCustom?: boolean; // suma el recargo de personalización
 }): {
@@ -35,7 +38,9 @@ export function calculateProductPricing(args: {
   const { product, quantity = 1, isCustom = false } = args;
   const qty = Math.max(1, quantity);
 
-  const listUnit = isCustom ? product.basePrice + vars.personalizationSurcharge : product.basePrice;
+  const listUnit = isCustom
+    ? product.basePrice + personalizationSurchargeFor(product)
+    : product.basePrice;
 
   const hypotheticalItem: CartItem = {
     product: {

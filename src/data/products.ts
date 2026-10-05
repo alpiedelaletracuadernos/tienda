@@ -1,4 +1,5 @@
 import { Product, ModelAssets, ProductColor } from '@/types/product';
+import { sortByCatalogOrder } from '@/data/catalog-order';
 
 const routeBase = 'assets/';
 
@@ -44,23 +45,6 @@ export const productoImagenes: ModelAssets = {
   'agenda-diaria-2027': tapas2027.slice(4, 10),
   // TODO: reemplazar por fotos reales de la Pocket cuando estén.
   'agenda-perpetua-pocket': tapas2027.slice(10, 14),
-  'agenda-2-dias-por-hoja': [
-    `${routeBase}productos/agenda-2-dias-por-hoja_0001.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0002.mp4`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0003.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0004.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0005.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0006.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0007.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0008.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0009.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0010.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0011.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0012.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0013.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0014.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0015.webp`,
-  ],
   'agenda-docente-inicial': [
     `${routeBase}productos/agenda-docente-inicial_0002.webp`,
     `${routeBase}productos/agenda-docente-inicial_0001.mp4`,
@@ -352,43 +336,8 @@ export const catalog: Product[] = [
     images: productoImagenes['agenda-semanal-2027'],
   },
   {
-    id: '2',
-    name: 'Agenda 2 dias por hoja 2026',
-    slug: 'agenda-2-dias-por-hoja-a5',
-    category: 'agendas',
-    description:
-      'Más espacio por día para anotar TODO! Formato de 2 días por cada hoja con bloques amplios para escribir. Personaliza la tapa con tu nombre o lo que más te guste. Hecha a mano por pedido, con tapa dura y en papel de 90gr con anillado doble alambre. Entrega rápida. Envíos a todo el país y retiro en zona centro de San Nicolás de los Arroyos.',
-    basePrice: 33000,
-    sizes: ['A5'],
-    interiors: ['dos-por-hoja'],
-    coverTypes: ['dura'],
-    materials: [
-      'Tapa dura',
-      'hojas Interior 90g',
-      'Espiral metálico doble alambre',
-      'Elástico de cierre',
-    ],
-    includes: [
-      'Personalización de tapa incluida',
-      'Bolsillo interno',
-      'Plancha de stickers',
-      'Calendario 2026 y 2027',
-      'Planificador anual y horarios',
-      'Planner mensual con tracker de habitos',
-      'Balance mensual para anotar ingresos y gastos',
-      'Planner con los dias distribuidos 2 por cada pagina',
-      'Seccion de notas',
-      'Hoja para contraseñas',
-    ],
-    productionTime: '8-10 horas hábiles',
-    inStock: false,
-    weeklyQuota: 15,
-    remainingQuota: 15,
-    images: productoImagenes['agenda-2-dias-por-hoja'],
-  },
-  {
     id: '3',
-    name: 'Agenda Universitaria 2026',
+    name: 'Agenda Universitaria',
     slug: 'agenda-universitaria',
     category: 'agendas',
     description:
@@ -561,16 +510,16 @@ export const catalog: Product[] = [
     sizes: ['A5'],
     interiors: ['Cuaderno con planner'],
     coverTypes: ['blanda'],
+    coverDesigns: true, // usa los diseños de tapa 2027 aunque sea un planner
     materials: ['Tapa dura', 'hojas Interior 90g', 'Espiral metálico doble alambre'],
     includes: [
-      'Personalizacion de tapa incluida',
       'Bolsillo interno',
       'Plancha de stickers',
       'Planner perpetuo para 12 meses',
       'Hojas rayadas',
     ],
     productionTime: '12-24 horas habiles',
-    inStock: false,
+    inStock: true,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['cuaderno-con-planner-perpetuo'],
@@ -672,9 +621,14 @@ export const catalog: Product[] = [
     interiors: ['2 pedidos por hoja', '3 pedidos por hoja', '6 pedidos por hoja'],
     coverTypes: ['dura'],
     materials: ['Tapa dura A5', 'Hojas interior 90gr', 'espiral metalico doble alambre'],
-    includes: ['Tapa a elección', '100 hojas interior de 2,3 o 6 pedidos por hoja'],
+    includes: [
+      'Tapa a elección',
+      'Personalización de tapa incluida',
+      '100 hojas interior de 2,3 o 6 pedidos por hoja',
+    ],
     productionTime: '8-10 horas hábiles',
-    inStock: false,
+    inStock: true,
+    personalizationIncluded: true,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['cuaderno-de-pedidos'],
@@ -699,7 +653,7 @@ export const catalog: Product[] = [
       'Bolsillo',
     ],
     productionTime: '12-24 horas habiles',
-    inStock: false,
+    inStock: true,
     weeklyQuota: 10,
     remainingQuota: 15,
     images: productoImagenes['planner-semanal-perpetuo-tapa-dura'],
@@ -718,7 +672,7 @@ export const catalog: Product[] = [
     materials: ['Tapa dura A5', 'Hojas interior 90gr', 'espiral metalico doble alambre'],
     includes: ['Tapa dura', 'Espacio para 200 recetas', 'Division de recetas dulces y saladas'],
     productionTime: '8-10 horas hábiles',
-    inStock: false,
+    inStock: true,
     weeklyQuota: 10,
     remainingQuota: 10,
     images: productoImagenes['recetarios'],
@@ -747,12 +701,12 @@ export const catalog: Product[] = [
       'Seccion para 8 cursos que incluye planificación anual, fechas importantes, asistencias, calificaciones, contenidos dados, evaluaciones, trabajos grupales y mesas de examen/coloquios',
     ],
     productionTime: '12-24 horas habiles',
-    inStock: false,
+    inStock: true,
     weeklyQuota: 10,
     remainingQuota: 10,
     images: productoImagenes['cuaderno-docente'],
   },
-   {
+  {
     id: '15',
     name: 'Box premium regalo',
     slug: 'combo-premium',
@@ -782,13 +736,14 @@ export const catalog: Product[] = [
       'Personalización de tapa incluida',
     ],
     productionTime: '8-10 dias hábiles',
-    inStock: false,
+    inStock: true,
+    personalizationIncluded: true,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['combo-premium'],
     colors: BOX_COLORS,
   },
-   {
+  {
     id: '16',
     name: 'Cuaderno A4 + libreta A6',
     slug: 'cuaderno-a4-libreta-a6',
@@ -809,12 +764,12 @@ export const catalog: Product[] = [
       'Libreta A6',
     ],
     productionTime: '8-10 dias hábiles',
-    inStock: false,
+    inStock: true,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['cuaderno-a4-libreta-a6'],
   },
-   {
+  {
     id: '17',
     name: 'Libreta A6',
     slug: 'libretas-a6',
@@ -824,7 +779,7 @@ export const catalog: Product[] = [
     basePrice: 5000,
     sizes: [],
     interiors: [],
-    coverTypes: ['dura'],
+    coverTypes: ['blanda'],
     materials: [
       'Tapa blanda',
       'hojas Interior 90g',
@@ -834,7 +789,7 @@ export const catalog: Product[] = [
       'Libreta A6',
     ],
     productionTime: '8-10 dias hábiles',
-    inStock: false,
+    inStock: true,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['libretas-a6'],
@@ -1054,7 +1009,7 @@ export const catalog: Product[] = [
 //   },
 // ];
 
-export const products: Product[] = catalog.filter((p) => !p.draft);
+export const products: Product[] = sortByCatalogOrder(catalog.filter((p) => !p.draft));
 
 export const getProductBySlug = (slug: string) => {
   return products.find((p) => p.slug === slug);

@@ -6,7 +6,7 @@ import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
 import { getCartLineKey } from '@/lib/cart-key';
 import { products } from '@/data/products';
 import { isPurchasable } from '@/lib/availability';
-import vars from '@/data/data';
+import { personalizationSurchargeFor } from '@/lib/pricing/personalization';
 
 /**
  * Alinea un carrito guardado con el catálogo vigente: saca los productos que
@@ -18,7 +18,7 @@ const reconcileWithCatalog = (items: CartItem[]): CartItem[] =>
   items.flatMap((it) => {
     const current = products.find((p) => p.id === it?.product?.id);
     if (!current || !isPurchasable(current)) return [];
-    const unit = current.basePrice + (it.isCustom ? vars.personalizationSurcharge : 0);
+    const unit = current.basePrice + (it.isCustom ? personalizationSurchargeFor(current) : 0);
     return [
       {
         ...it,
