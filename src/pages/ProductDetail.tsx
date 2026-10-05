@@ -29,6 +29,7 @@ import { ProductSpecs } from '@/components/products/ProductSpecs';
 import { ProductComingSoon } from '@/components/products/ProductComingSoon';
 import { isPurchasable } from '@/lib/availability';
 import { thumbOf } from '@/lib/media';
+import { ShareButton } from '@/components/products/ShareButton';
 import { safeStorage } from '@/lib/safe-storage';
 
 //PROMOCIONES
@@ -414,10 +415,11 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
 
             {/* Info */}
             <div className="space-y-8 min-w-0">
-              {/* Título + stock */}
+              {/* Título + compartir */}
               <div className="min-w-0">
                 <div className="flex items-start justify-between gap-4 mb-2">
                   <h1 className="text-3xl sm:text-4xl font-bold break-words">{product.name}</h1>
+                  <ShareButton slug={product.slug} name={product.name} className="shrink-0" />
                 </div>
 
                 {/* Precio: única fuente (calculateProductPricing). Si hay

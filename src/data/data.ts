@@ -8,6 +8,7 @@ export interface AppVars {
     address?: string;
     locale: string;
     apiBaseUrl: string;
+    siteUrl: string; // URL pública de la tienda, con barra final
     supportHours?: string;
     social?: {
         facebook?: string;
@@ -53,6 +54,7 @@ export const vars: AppVars = {
     address: 'Centro, San Nicolas, Argentina',
     locale: 'es-ES',
     apiBaseUrl: '',
+    siteUrl: 'https://alpiedelaletracuadernos.github.io/tienda/',
     supportHours: 'Lun-Vie 09:00-18:00',
     social: {
         facebook: 'https://facebook.com/alpie',

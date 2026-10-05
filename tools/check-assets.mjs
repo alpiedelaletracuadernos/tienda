@@ -8,35 +8,12 @@
 //
 // Uso: npm run check:assets            (falla si falta algo)
 //      npm run check:assets -- --unused (lista además lo que no se usa)
-import { build } from 'esbuild';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, relative } from 'node:path';
+import { loadData, root } from './load-data.mjs';
 
-const root = resolve(fileURLToPath(import.meta.url), '../..');
 const pub = join(root, 'public');
 const src = join(root, 'src');
-
-// Los datos son TS: se bundlean en memoria para leer los valores reales
-// (incluidas rutas armadas con template strings).
-async function loadData() {
-  const result = await build({
-    stdin: {
-      contents: `export { catalog, productoImagenes } from '@/data/products';
-                 export { modeloOptions } from '@/data/options';`,
-      resolveDir: root,
-      loader: 'ts',
-    },
-    bundle: true,
-    write: false,
-    format: 'esm',
-    platform: 'node',
-    alias: { '@': src },
-    logLevel: 'silent',
-  });
-  const code = result.outputFiles[0].text;
-  return import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`);
-}
 
 const walk = (dir) =>
   readdirSync(dir).flatMap((name) => {

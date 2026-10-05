@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import ProductImageGallery from '@/components/products/ProductImageGallery';
 import { ProductSpecs } from '@/components/products/ProductSpecs';
+import { ShareButton } from '@/components/products/ShareButton';
 import { COMING_SOON_LABEL, availabilityNote } from '@/lib/availability';
 import { buildRestockMessage, buildWaLink } from '@/lib/whatsapp';
 import vars from '@/data/data';
@@ -40,7 +41,10 @@ export function ProductComingSoon({ product }: { product: Product }) {
                 <Badge className="bg-foreground text-background hover:bg-foreground">
                   {COMING_SOON_LABEL}
                 </Badge>
-                <h1 className="text-3xl sm:text-4xl font-bold break-words">{product.name}</h1>
+                <div className="flex items-start justify-between gap-4">
+                  <h1 className="text-3xl sm:text-4xl font-bold break-words">{product.name}</h1>
+                  <ShareButton slug={product.slug} name={product.name} className="shrink-0" />
+                </div>
                 <p className="text-lg font-medium text-muted-foreground">
                   {availabilityNote(product)}: estamos actualizando este producto para 2027.
                 </p>
