@@ -4,6 +4,34 @@ import { persist } from 'zustand/middleware';
 import { CartItem } from '@/types/cart';
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
 import { getCartLineKey } from '@/lib/cart-key';
+import { products } from '@/data/products';
+import { isPurchasable } from '@/lib/availability';
+import vars from '@/data/data';
+
+/**
+ * Alinea un carrito guardado con el catálogo vigente: saca los productos que
+ * ya no existen o no se pueden comprar ("Próximamente") y re-sincroniza
+ * nombre y precio de lista (base + recargo si es personalizado), así un
+ * carrito armado antes de un cambio de precios no queda con valores viejos.
+ */
+const reconcileWithCatalog = (items: CartItem[]): CartItem[] =>
+  items.flatMap((it) => {
+    const current = products.find((p) => p.id === it?.product?.id);
+    if (!current || !isPurchasable(current)) return [];
+    const unit = current.basePrice + (it.isCustom ? vars.personalizationSurcharge : 0);
+    return [
+      {
+        ...it,
+        product: {
+          ...it.product,
+          name: current.name,
+          category: current.category,
+          basePrice: unit,
+        },
+        price: unit,
+      },
+    ];
+  });
 
 interface CartStore {
   items: CartItem[];
@@ -84,6 +112,15 @@ export const useCart = create<CartStore>()(
       // subí sólo `version` (que es lo que dispara `migrate`).
       name: 'cart:v4',
       version: 4,
+      // Corre en cada carga (a diferencia de `migrate`, que sólo corre al
+      // subir `version`).
+      merge: (persisted, current) => {
+        const items = (persisted as { items?: CartItem[] } | undefined)?.items;
+        return {
+          ...current,
+          items: Array.isArray(items) ? reconcileWithCatalog(items) : current.items,
+        };
+      },
       migrate: (persistedState: unknown) => {
         const state = persistedState as { items?: CartItem[] } | undefined;
         if (state?.items && Array.isArray(state.items)) {

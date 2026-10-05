@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import vars from '@/data/data';
 import { isHotSaleActive } from '@/config/promotions';
+import { isPurchasable } from '@/lib/availability';
 
 export const FeaturedProducts = () => {
-  const featured = products.slice(0, 4);
+  const featured = products.filter(isPurchasable).slice(0, 4);
 
   return (
     <section className="py-24 bg-soft/30">

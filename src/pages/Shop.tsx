@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ProductCard } from '@/components/products/ProductCard';
+import { isPurchasable, sortByAvailability } from '@/lib/availability';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { products } from '@/data/products';
 import AppVars from '@/data/data';
@@ -43,6 +44,7 @@ const CATEGORY_LABELS: Record<ProductCategory, string> = {
 
 const INTERIOR_LABELS: Record<InteriorType, string> = {
   semanal: 'Semanal',
+  diaria: 'Diaria',
   'dos-por-hoja': '2 días por hoja',
   universitaria: 'Universitaria',
   docente: 'Docente',
@@ -104,6 +106,7 @@ const Shop = () => {
   const [selectedSize, setSelectedSize] = useState<ProductSize | 'all'>('all');
   const [selectedInterior, setSelectedInterior] = useState<InteriorType | 'all'>('all');
   const [interiorSheetOpen, setInteriorSheetOpen] = useState(false);
+  const [onlyAvailable, setOnlyAvailable] = useState(false);
 
   // Datos del comprador (para el mensaje final)
   const [buyerName, setBuyerName] = useState('');
@@ -164,26 +167,36 @@ const Shop = () => {
     }
   }, [searchParams, categoryOptions, sizeOptions, interiorOptions]);
 
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = sortByAvailability(products).filter((product) => {
     const categoryMatch = selectedCategory === 'all' || product.category === selectedCategory;
     const sizeMatch = selectedSize === 'all' || product.sizes.includes(selectedSize as ProductSize);
     const interiorMatch =
       selectedInterior === 'all' || product.interiors.includes(selectedInterior as InteriorType);
-    return categoryMatch && sizeMatch && interiorMatch;
+    const availabilityMatch = !onlyAvailable || isPurchasable(product);
+    return categoryMatch && sizeMatch && interiorMatch && availabilityMatch;
   });
 
   const hasActiveFilters =
-    selectedCategory !== 'all' || selectedSize !== 'all' || selectedInterior !== 'all';
+    selectedCategory !== 'all' ||
+    selectedSize !== 'all' ||
+    selectedInterior !== 'all' ||
+    onlyAvailable;
 
   const clearAllFilters = () => {
     setSelectedCategory('all');
     setSelectedSize('all');
     setSelectedInterior('all');
+    setOnlyAvailable(false);
   };
 
   // Pills de filtros activos, mostradas sobre la grilla (Baymard: el usuario
   // necesita ver el resumen de filtros activos mientras navega).
   const activeFilterPills = [
+    onlyAvailable && {
+      key: 'available',
+      label: 'Solo disponibles',
+      onRemove: () => setOnlyAvailable(false),
+    },
     selectedCategory !== 'all' && {
       key: 'category',
       label: CATEGORY_LABELS[selectedCategory],
@@ -287,6 +300,13 @@ const Shop = () => {
         {/* Filters */}
         <section className="py-8 border-b bg-background lg:sticky top-16 z-30">
           <div className="container px-4 w-full max-w-full space-y-4">
+            {/* Disponibilidad: hay productos "Próximamente" que no se pueden comprar */}
+            <div className="flex flex-wrap gap-2">
+              <FilterChip active={onlyAvailable} onClick={() => setOnlyAvailable((v) => !v)}>
+                Solo disponibles
+              </FilterChip>
+            </div>
+
             {/* Categoría: chips siempre visibles, "Todas" primero */}
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">

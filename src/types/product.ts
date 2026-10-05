@@ -7,7 +7,7 @@ export type ProductCategory =
   | 'especiales'
   | 'planners';
 
-export type ProductSize = 'A5' | 'A4';
+export type ProductSize = 'A6' | 'A5' | 'A4';
 
 export type ModelAssets = {
   [key: string]: string[];
@@ -35,6 +35,7 @@ export type DesignOption = {
 
 export type InteriorType =
   | 'semanal'
+  | 'diaria'
   | 'dos-por-hoja'
   | 'universitaria'
   | 'docente'
@@ -78,7 +79,12 @@ export interface Product {
   materials: string[];
   includes: string[];
   productionTime: string;
+  /** false = se muestra como "Próximamente" y no se puede comprar. */
   inStock: boolean;
+  /** Texto que acompaña al "Próximamente" (default en `lib/availability.ts`). */
+  availabilityNote?: string;
+  /** true = borrador: cargado pero no publicado (no aparece ni por URL). */
+  draft?: boolean;
   weeklyQuota: number;
   remainingQuota: number;
   colors?: ProductColor[];

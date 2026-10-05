@@ -126,6 +126,17 @@ export function buildPdpMessage(
   return lines.join('\n');
 }
 
+// Producto "Próximamente": pedir aviso cuando vuelva a estar disponible
+export function buildRestockMessage(product: Pick<Product, 'name'>): string {
+  return [
+    'Hola! Vi en la tienda que este producto está *próximamente*:',
+    '',
+    `*${product.name}*`,
+    '',
+    '¿Me avisan cuando esté disponible? ✨',
+  ].join('\n');
+}
+
 // Checkout (carrito completo)
 export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): string {
   const lines: string[] = [];

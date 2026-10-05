@@ -8,6 +8,8 @@ import vars from '@/data/data';
 import { formatARS } from '@/lib/currency';
 import { calculateProductPricing } from '@/lib/pricing/calc-product-pricing';
 import { isEligibleForDiscount } from '@/config/promotions';
+import { COMING_SOON_LABEL, availabilityNote, isPurchasable } from '@/lib/availability';
+import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
   product: Product;
@@ -17,6 +19,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   const pricing = calculateProductPricing({ product, quantity: 1 });
   const formattedPrice = formatARS(pricing.listUnit);
   const formattedFinalPrice = formatARS(pricing.finalUnit);
+  const purchasable = isPurchasable(product);
 
   // El badge Hot Sale es un caso particular pedido por el negocio: se resalta
   // en la card aunque haya otras promos acumuladas, así que se detecta aparte
@@ -37,9 +40,18 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           <img
             src={product.images[0]}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className={cn(
+              'w-full h-full object-cover group-hover:scale-105 transition-transform duration-300',
+              !purchasable && 'grayscale opacity-70'
+            )}
+            loading="lazy"
+            decoding="async"
           />
-          {hsEligible ? (
+          {!purchasable ? (
+            <span className="absolute left-2 top-2 rounded-full bg-foreground text-background text-[11px] font-semibold px-2.5 py-0.5 shadow-sm">
+              {COMING_SOON_LABEL}
+            </span>
+          ) : hsEligible ? (
             <span className="absolute left-2 top-2 rounded-full bg-accent text-accent-foreground text-[11px] font-bold px-2.5 py-0.5 shadow-sm">
               HOT SALE -{vars.promotions.hotSale.percentage}%
             </span>
@@ -58,7 +70,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               {product.name}
             </h3>
           </Link>
-          {product.remainingQuota <= 5 && (
+          {purchasable && product.remainingQuota <= 5 && (
             <Badge variant="destructive" className="shrink-0 text-xs">
               ¡Últimos {product.remainingQuota}!
             </Badge>
@@ -67,7 +79,9 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
         <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
 
-        {pricing.hasDiscount ? (
+        {!purchasable ? (
+          <p className="text-sm font-medium text-muted-foreground">{availabilityNote(product)}</p>
+        ) : pricing.hasDiscount ? (
           <div className="flex items-baseline gap-1 flex-wrap">
             <span className="text-sm text-muted-foreground">Desde</span>
             <span className="text-sm text-muted-foreground line-through">{formattedPrice}</span>
@@ -90,8 +104,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       </CardContent>
 
       <CardFooter className="p-4 pt-0">
-        <Button asChild className="w-full" size="sm">
-          <Link to={`/producto/${product.slug}`}>Ver Producto</Link>
+        <Button asChild className="w-full" size="sm" variant={purchasable ? 'default' : 'outline'}>
+          <Link to={`/producto/${product.slug}`}>{purchasable ? 'Ver Producto' : 'Ver detalle'}</Link>
         </Button>
       </CardFooter>
     </Card>

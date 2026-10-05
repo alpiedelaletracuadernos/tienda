@@ -25,6 +25,9 @@ import { VariantSelector } from '@/components/products/VariantSelector';
 import { ColorSwatchSelector } from '@/components/products/ColorSwatchSelector';
 import { StepSection } from '@/components/products/StepSection';
 import { StickyBuyBar } from '@/components/products/StickyBuyBar';
+import { ProductSpecs } from '@/components/products/ProductSpecs';
+import { ProductComingSoon } from '@/components/products/ProductComingSoon';
+import { isPurchasable } from '@/lib/availability';
 import { safeStorage } from '@/lib/safe-storage';
 
 //PROMOCIONES
@@ -80,6 +83,10 @@ const ProductDetail = () => {
         </div>
       </div>
     );
+  }
+
+  if (!isPurchasable(product)) {
+    return <ProductComingSoon key={product.slug} product={product} />;
   }
 
   // `key` por slug: sin esto React reusa la misma instancia al navegar de un
@@ -672,6 +679,8 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
                   </a>
                 </Button>
               </div>
+
+              <ProductSpecs product={product} />
 
               {/* Inspirate */}
               <div id="inspirate" className="space-y-3 w-full max-w-full scroll-mt-24">

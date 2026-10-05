@@ -11,7 +11,39 @@ export const BOX_COLORS: ProductColor[] = [
   { id: 'magenta', name: 'Magenta', hex: '#C2185B' },
 ];
 
+// Tapas Edición 2027 (también son las opciones del selector de diseño).
+const tapas2027 = [
+  `${routeBase}models/edicion-2027_0001.webp`,
+  `${routeBase}models/edicion-2027_0002.webp`,
+  `${routeBase}models/edicion-2027_0003.webp`,
+  `${routeBase}models/edicion-2027_0004.webp`,
+  `${routeBase}models/edicion-2027_0005.webp`,
+  `${routeBase}models/edicion-2027_0006.webp`,
+  `${routeBase}models/edicion-2027_0007.webp`,
+  `${routeBase}models/edicion-2027_0008.webp`,
+  `${routeBase}models/edicion-2027_0009.webp`,
+  `${routeBase}models/edicion-2027_0010.webp`,
+  `${routeBase}models/edicion-2027_0011.webp`,
+  `${routeBase}models/edicion-2027_0012.webp`,
+  `${routeBase}models/edicion-2027_0013.webp`,
+  `${routeBase}models/edicion-2027_0014.webp`,
+  `${routeBase}models/edicion-2027_0015.webp`,
+  `${routeBase}models/edicion-2027_0016.webp`,
+];
+
 export const productoImagenes: ModelAssets = {
+  // Fotos 2027: hasta tener fotos del interior 2027 se usan las tapas y, en la
+  // semanal, las fotos del interior 2026 que no muestran el año (el diseño
+  // del interior no cambió).
+  'agenda-semanal-2027': [
+    ...tapas2027.slice(0, 4),
+    ...[3, 4, 5, 6, 9, 10, 11, 12, 13, 14].map(
+      (n) => `${routeBase}productos/agenda-semanal_${String(n).padStart(4, '0')}.webp`
+    ),
+  ],
+  'agenda-diaria-2027': tapas2027.slice(4, 10),
+  // TODO: reemplazar por fotos reales de la Pocket cuando estén.
+  'agenda-perpetua-pocket': tapas2027.slice(10, 14),
   'agenda-2-dias-por-hoja': [
     `${routeBase}productos/agenda-2-dias-por-hoja_0001.webp`,
     `${routeBase}productos/agenda-2-dias-por-hoja_0002.mp4`,
@@ -288,41 +320,42 @@ export const productoImagenes: ModelAssets = {
   ],
 };
 
-export const products: Product[] = [
+// Catálogo completo, incluidos los borradores (`draft`). El resto de la app
+// usa `products`, que sólo trae lo publicado.
+export const catalog: Product[] = [
   {
     id: '1',
-    name: 'Agenda Semanal 2026',
+    name: 'Agenda Semanal 2027',
     slug: 'agenda-semanal-a5',
     category: 'agendas',
     description:
-      'Empeza el año ordenada: vista semanal, personalización de tapa incluida y papel de 90gr que no traspasa. Ideal para planificar rutinas y agendar actividades. Entrega rápida. Envíos a todo el país y retiro por zona centro de  San Nicolás de los Arroyos .',
-    basePrice: 29000,
+      'Un nuevo año, nuevas metas y 52 semanas para hacerlas realidad. La Agenda Semanal 2027 está pensada para que puedas organizar tu tiempo, ordenar tus prioridades y disfrutar más de cada semana. Todo lo que necesitás para planificar tu año está reunido en un solo lugar, de una manera práctica y simple.',
+    basePrice: 34800,
     sizes: ['A5'],
     interiors: ['semanal'],
     coverTypes: ['dura'],
     materials: [
-      'Tapa dura',
-      'hojas Interior 90g',
-      'Espiral metálico doble alambre',
+      'Tapa dura laminada',
+      'Hojas interiores de 90gr',
+      'Anillado doble alambre',
       'Elástico de cierre',
     ],
     includes: [
-      'Personalización de tapa incluida',
-      'Bolsillo interno',
+      'Portada de inicio con el año',
+      'Calendario 2027 y 2028, con feriados de Argentina',
+      'Planificador anual, espacio para fechas importantes y horarios',
+      'Por cada mes: portada mensual a color, planner mensual con tracker de hábitos, balance mensual (para anotar ingresos y gastos) y planner semanal con los días',
+      'Hojas para notas',
+      'Hojas para contraseñas',
       'Plancha de stickers',
-      'Calendario 2026 y 2027',
-      'Planificador anual y horarios',
-      'Planner mensual con tracker de habitos',
-      'Balance mensual para anotar ingresos y gastos',
-      'Planner semanal con los dias',
-      'Seccion de notas',
-      'Hoja para contraseñas',
+      'Sobre',
+      'Elástico',
     ],
     productionTime: '8-10 horas hábiles',
     inStock: true,
     weeklyQuota: 15,
     remainingQuota: 15,
-    images: productoImagenes['agenda-semanal'],
+    images: productoImagenes['agenda-semanal-2027'],
   },
   {
     id: '2',
@@ -354,7 +387,7 @@ export const products: Product[] = [
       'Hoja para contraseñas',
     ],
     productionTime: '8-10 horas hábiles',
-    inStock: true,
+    inStock: false,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['agenda-2-dias-por-hoja'],
@@ -390,7 +423,7 @@ export const products: Product[] = [
       'Hoja para contraseñas',
     ],
     productionTime: '12-24 horas habiles',
-    inStock: true,
+    inStock: false,
     weeklyQuota: 10,
     remainingQuota: 15,
     images: productoImagenes['agenda-universitaria-2026'],
@@ -432,7 +465,7 @@ export const products: Product[] = [
       'Hojas rayadas para notas',
     ],
     productionTime: '12-24 horas habiles',
-    inStock: true,
+    inStock: false,
     weeklyQuota: 10,
     remainingQuota: 15,
     images: productoImagenes['agenda-docente-inicial'],
@@ -477,7 +510,7 @@ export const products: Product[] = [
       'Hojas rayadas para notas',
     ],
     productionTime: '12-24 horas habiles',
-    inStock: true,
+    inStock: false,
     weeklyQuota: 10,
     remainingQuota: 15,
     images: productoImagenes['agenda-docente-primario'],
@@ -518,7 +551,7 @@ export const products: Product[] = [
       'Hojas rayadas para notas',
     ],
     productionTime: '12-24 horas habiles',
-    inStock: true,
+    inStock: false,
     weeklyQuota: 10,
     remainingQuota: 15,
     images: productoImagenes['agenda-docente-secundario'],
@@ -543,7 +576,7 @@ export const products: Product[] = [
       'Hojas rayadas',
     ],
     productionTime: '12-24 horas habiles',
-    inStock: true,
+    inStock: false,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['cuaderno-con-planner-perpetuo'],
@@ -647,7 +680,7 @@ export const products: Product[] = [
     materials: ['Tapa dura A5', 'Hojas interior 90gr', 'espiral metalico doble alambre'],
     includes: ['Tapa a elección', '100 hojas interior de 2,3 o 6 pedidos por hoja'],
     productionTime: '8-10 horas hábiles',
-    inStock: true,
+    inStock: false,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['cuaderno-de-pedidos'],
@@ -672,7 +705,7 @@ export const products: Product[] = [
       'Bolsillo',
     ],
     productionTime: '12-24 horas habiles',
-    inStock: true,
+    inStock: false,
     weeklyQuota: 10,
     remainingQuota: 15,
     images: productoImagenes['planner-semanal-perpetuo-tapa-dura'],
@@ -691,7 +724,7 @@ export const products: Product[] = [
     materials: ['Tapa dura A5', 'Hojas interior 90gr', 'espiral metalico doble alambre'],
     includes: ['Tapa dura', 'Espacio para 200 recetas', 'Division de recetas dulces y saladas'],
     productionTime: '8-10 horas hábiles',
-    inStock: true,
+    inStock: false,
     weeklyQuota: 10,
     remainingQuota: 10,
     images: productoImagenes['recetarios'],
@@ -720,7 +753,7 @@ export const products: Product[] = [
       'Seccion para 8 cursos que incluye planificación anual, fechas importantes, asistencias, calificaciones, contenidos dados, evaluaciones, trabajos grupales y mesas de examen/coloquios',
     ],
     productionTime: '12-24 horas habiles',
-    inStock: true,
+    inStock: false,
     weeklyQuota: 10,
     remainingQuota: 10,
     images: productoImagenes['cuaderno-docente'],
@@ -755,7 +788,7 @@ export const products: Product[] = [
       'Personalización de tapa incluida',
     ],
     productionTime: '8-10 dias hábiles',
-    inStock: true,
+    inStock: false,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['combo-premium'],
@@ -782,7 +815,7 @@ export const products: Product[] = [
       'Libreta A6',
     ],
     productionTime: '8-10 dias hábiles',
-    inStock: true,
+    inStock: false,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['cuaderno-a4-libreta-a6'],
@@ -807,10 +840,75 @@ export const products: Product[] = [
       'Libreta A6',
     ],
     productionTime: '8-10 dias hábiles',
-    inStock: true,
+    inStock: false,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['libretas-a6'],
+  },
+  {
+    id: '18',
+    name: 'Agenda Diaria 2027',
+    slug: 'agenda-diaria-a5',
+    category: 'agendas',
+    description:
+      'Para quienes saben que un día bien organizado puede cambiarlo todo. La Agenda Diaria 2027 te invita a hacer espacio para tus planes, tus pendientes y también para vos. Con una página para cada día, vas a tener el lugar necesario para organizar tu jornada, visualizar tus horarios y no dejar nada librado al azar.',
+    basePrice: 42000,
+    sizes: ['A5'],
+    interiors: ['diaria'],
+    coverTypes: ['dura'],
+    materials: [
+      'Tapa dura laminada',
+      'Hojas interiores de 90gr',
+      'Anillado doble alambre',
+      'Elástico de cierre',
+    ],
+    includes: [
+      'Portada de inicio con el año',
+      'Calendario 2027 y 2028, con feriados de Argentina',
+      'Planificador anual, espacio para fechas importantes y horarios',
+      'Por cada mes: portada mensual a color, planner mensual con tracker de hábitos, balance mensual (para anotar ingresos y gastos) y planner diario',
+      'Un día por hoja (sábado y domingo comparten hoja), con horario de 7 a 21 hs',
+      'Hojas para notas',
+      'Hojas para contraseñas',
+      'Plancha de stickers',
+      'Sobre',
+      'Elástico',
+    ],
+    productionTime: '8-10 horas hábiles',
+    inStock: true,
+    weeklyQuota: 15,
+    remainingQuota: 15,
+    images: productoImagenes['agenda-diaria-2027'],
+  },
+  {
+    // Borrador hasta tener fotos reales del producto: sacar `draft` para publicarla.
+    id: '19',
+    name: 'Agenda Perpetua Pocket',
+    slug: 'agenda-perpetua-pocket-a6',
+    category: 'agendas',
+    description:
+      'Una agenda pensada para acompañarte a donde vayas y ayudarte a organizar tu día a día sin perder de vista lo que realmente importa. 🤍 Su formato A6 la hace cómoda, práctica y fácil de llevar en la cartera, mochila o bolso. Además, al ser semanal perpetua, podés empezar a usarla cuando quieras y organizar tus semanas a tu propio ritmo.',
+    basePrice: 18000,
+    sizes: ['A6'],
+    interiors: ['perpetua'],
+    coverTypes: ['dura'],
+    materials: ['Tapa dura laminada', 'Hojas interiores de 90gr', 'Anillado doble alambre'],
+    includes: [
+      'Portada con frase',
+      'Espacio para fechas importantes, tracker de hábitos, horarios y objetivos',
+      'Planificador mensual para 12 meses',
+      'Planificador semanal para 54 semanas',
+      'Balance mensual para 12 meses',
+      'Sección de notas',
+      'Hojas para contraseñas',
+      'Hojas para colorear, frases y actividades entre las secciones y cada varias páginas',
+    ],
+    productionTime: '8-10 horas hábiles',
+    inStock: true,
+    draft: true,
+    weeklyQuota: 15,
+    remainingQuota: 15,
+    images: productoImagenes['agenda-perpetua-pocket'],
   },
   
 ];
@@ -961,6 +1059,8 @@ export const products: Product[] = [
 //     remainingQuota: 12,
 //   },
 // ];
+
+export const products: Product[] = catalog.filter((p) => !p.draft);
 
 export const getProductBySlug = (slug: string) => {
   return products.find((p) => p.slug === slug);
