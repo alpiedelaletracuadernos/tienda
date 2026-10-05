@@ -27,9 +27,10 @@ export type ModeloType = {
  */
 export type DesignOption = {
   id: string;
-  image: string; // URL de la miniatura
-  modelo: string; // ej: "48"
-  collection: string; // ej: "Edicion-2026"
+  image: string; // URL de la imagen grande (galería y pantalla completa)
+  thumb?: string; // URL de la miniatura para grillas; si falta se usa `image`
+  modelo: string; // ej: "66"
+  collection: string; // ej: "Edicion-2027"
 };
 
 export type InteriorType =
