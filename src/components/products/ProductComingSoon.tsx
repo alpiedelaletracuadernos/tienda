@@ -12,10 +12,11 @@ import { Button } from '@/components/ui/button';
 import ProductImageGallery from '@/components/products/ProductImageGallery';
 import { ProductSpecs } from '@/components/products/ProductSpecs';
 import { ShareButton } from '@/components/products/ShareButton';
-import { COMING_SOON_LABEL, availabilityNote } from '@/lib/availability';
+import { availabilityLabel, availabilityMessage } from '@/lib/availability';
 import { buildRestockMessage, buildWaLink } from '@/lib/whatsapp';
 import vars from '@/data/data';
 import type { Product } from '@/types/product';
+import { isPresaleProduct } from '@/config/presale';
 
 export function ProductComingSoon({ product }: { product: Product }) {
   return (
@@ -39,32 +40,42 @@ export function ProductComingSoon({ product }: { product: Product }) {
             <div className="space-y-6 min-w-0">
               <div className="space-y-3">
                 <Badge className="bg-foreground text-background hover:bg-foreground">
-                  {COMING_SOON_LABEL}
+                  {availabilityLabel(product)}
                 </Badge>
                 <div className="flex items-start justify-between gap-4">
                   <h1 className="text-3xl sm:text-4xl font-bold break-words">{product.name}</h1>
                   <ShareButton slug={product.slug} name={product.name} className="shrink-0" />
                 </div>
                 <p className="text-lg font-medium text-muted-foreground">
-                  {availabilityNote(product)}: estamos actualizando este producto para 2027.
+                  {availabilityMessage(product)}
                 </p>
                 <p className="text-muted-foreground break-words">{product.description}</p>
               </div>
 
               <div className="space-y-3">
-                <Button asChild size="lg" className="w-full">
-                  <a
-                    href={buildWaLink(vars.phoneNumber, buildRestockMessage(product))}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Bell className="mr-2 h-5 w-5" />
-                    Avisame cuando esté disponible
-                  </a>
-                </Button>
-                <Button asChild variant="outline" className="w-full">
-                  <Link to="/catalogo">Ver productos disponibles</Link>
-                </Button>
+                {isPresaleProduct(product.slug) ? (
+                  // Preventa cerrada: no hay nada que "avisar"; se deriva a las
+                  // agendas 2027, que siguen a la venta por separado.
+                  <Button asChild size="lg" className="w-full">
+                    <Link to="/catalogo?cat=agendas">Ver las agendas 2027</Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button asChild size="lg" className="w-full">
+                      <a
+                        href={buildWaLink(vars.phoneNumber, buildRestockMessage(product))}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Bell className="mr-2 h-5 w-5" />
+                        Avisame cuando esté disponible
+                      </a>
+                    </Button>
+                    <Button asChild variant="outline" className="w-full">
+                      <Link to="/catalogo">Ver productos disponibles</Link>
+                    </Button>
+                  </>
+                )}
               </div>
 
               <ProductSpecs product={product} />

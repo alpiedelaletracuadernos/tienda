@@ -27,6 +27,12 @@ import { ProductComingSoon } from '@/components/products/ProductComingSoon';
 import { isPurchasable } from '@/lib/availability';
 import { ShareButton } from '@/components/products/ShareButton';
 import { PromoBar } from '@/components/promos/PromoBar';
+import { KitPriceBox } from '@/components/presale/KitPriceBox';
+import { KitValueBreakdown } from '@/components/presale/KitValueBreakdown';
+import { KitFaq } from '@/components/presale/KitFaq';
+import { PresaleCompareBox } from '@/components/presale/PresaleCompareBox';
+import { kitPricingFor, listPriceFor } from '@/lib/pricing/kit';
+import { presale } from '@/config/presale';
 import { PersonalizationStep } from '@/components/products/pdp/PersonalizationStep';
 import { QuantityStepper } from '@/components/products/pdp/QuantityStepper';
 import { safeStorage } from '@/lib/safe-storage';
@@ -97,9 +103,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
   const [selectedInterior, setSelectedInterior] = useState<InteriorType | undefined>(
     product.interiors[0]
   );
-  const [selectedCover, setSelectedCover] = useState<CoverType | undefined>(
-    product.coverTypes[0]
-  );
+  const [selectedCover, setSelectedCover] = useState<CoverType | undefined>(product.coverTypes[0]);
   const [personalization, setPersonalization] = useState('');
   const [quantity, setQuantity] = useState(1);
   const PROMO_2X1_LABEL_DETAIL = 'Consultá diseños en stock por WhatsApp'; // usado en varios lados
@@ -121,11 +125,17 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
     (a) => a.length >= 2
   );
 
+  // Kit (preventa): primero se elige la agenda (cambia el precio), después
+  // el diseño; no hay paso de configuración ni de personalización.
+  const isKit = !!product.kitItems?.length;
+  const showPersonalization = product.personalizable !== false;
+
   // Numeración corrida: los pasos que no se muestran no dejan un hueco.
   let stepCounter = 0;
+  const versionStepNumber = isKit ? ++stepCounter : 0;
   const designStepNumber = showDesignStep ? ++stepCounter : 0;
-  const configStepNumber = hasRealChoices ? ++stepCounter : 0;
-  const personalizationStepNumber = ++stepCounter;
+  const configStepNumber = !isKit && hasRealChoices ? ++stepCounter : 0;
+  const personalizationStepNumber = showPersonalization ? ++stepCounter : 0;
 
   // ——— Modelo (unificado por ID)
   // B9: la clave de persistencia se namespacea por producto (`pdp:selectedModelId:${slug}`)
@@ -136,9 +146,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
   const [fsModelOpen, setFsModelOpen] = useState(false);
 
   // ——— Color (Box premium y futuros productos que se eligen por color)
-  const [selectedColor, setSelectedColor] = useState<ProductColor | undefined>(
-    product.colors?.[0]
-  );
+  const [selectedColor, setSelectedColor] = useState<ProductColor | undefined>(product.colors?.[0]);
 
   useEffect(() => {
     try {
@@ -179,8 +187,10 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
   const galleryImages = useMemo(() => {
     if (!hasModels || !selectedModelImage) return product.images ?? [];
     const rest = (product.images ?? []).filter((src) => src !== selectedModelImage);
+    // En el kit la primera foto es el kit completo; la tapa elegida va segunda.
+    if (isKit && rest.length) return [rest[0], selectedModelImage, ...rest.slice(1)];
     return [selectedModelImage, ...rest];
-  }, [hasModels, selectedModelImage, product.images]);
+  }, [hasModels, isKit, selectedModelImage, product.images]);
 
   // B5: la lupa de una miniatura abre ESE diseño en pantalla completa,
   // no necesariamente el seleccionado.
@@ -255,9 +265,10 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
   const hotSaleActive = isHotSaleActive();
 
   const pricing = useMemo(
-    () => calculateProductPricing({ product, quantity, isCustom }),
-    [product, quantity, isCustom]
+    () => calculateProductPricing({ product, interior: selectedInterior, quantity, isCustom }),
+    [product, selectedInterior, quantity, isCustom]
   );
+  const kit = useMemo(() => kitPricingFor(product, selectedInterior), [product, selectedInterior]);
 
   const formattedListUnit = formatARS(pricing.listUnit);
   const formattedFinalUnit = formatARS(pricing.finalUnit);
@@ -305,20 +316,29 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
   useEffect(() => {
     const el = addToCartRef.current;
     if (!el) return;
-    const observer = new IntersectionObserver(([entry]) => setShowStickyBar(!entry.isIntersecting), {
-      threshold: 0,
-    });
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting),
+      {
+        threshold: 0,
+      }
+    );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
   const stickyUnitPrice = formattedFinalUnit;
-  const stickyOriginalPrice = pricing.hasDiscount ? formattedListUnit : undefined;
+  const stickyOriginalPrice = kit
+    ? formatARS(kit.separateTotal)
+    : pricing.hasDiscount
+      ? formattedListUnit
+      : undefined;
+  const ctaLabel = isKit ? presale.ctaLabel : 'Agregar al Carrito';
   // "48" solo no dice nada al cliente; con diseño se antepone "Diseño".
   // Con colores, el summary usa el nombre del color en su lugar.
   const stickySummary = [
+    isKit && selectedInterior ? `Agenda ${selectedInterior}` : null,
     usesColors ? selectedColor?.name : usesModels ? `Diseño ${selectedModelLabel}` : null,
-    selectedSize,
+    isKit ? null : selectedSize,
   ]
     .filter(Boolean)
     .join(' · ');
@@ -326,7 +346,9 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
   return (
     <div className="min-h-screen overflow-x-clip">
       <Header />
-      {(hotSaleActive || AppVars.promotions.twoForOne.enabled || AppVars.promotions.discount.enabled) && (
+      {(hotSaleActive ||
+        AppVars.promotions.twoForOne.enabled ||
+        AppVars.promotions.discount.enabled) && (
         // Item 6 (Fase 2a): las tres barras de promo comparten un único
         // contenedor sticky en vez de tener `sticky top-16 z-40` cada una,
         // así se apilan en vez de pisarse cuando hay más de una activa.
@@ -378,48 +400,81 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
                   <ShareButton slug={product.slug} name={product.name} className="shrink-0" />
                 </div>
 
-                {/* Precio: única fuente (calculateProductPricing). Si hay
+                {product.badge && (
+                  <Badge className="mb-1 bg-primary text-primary-foreground hover:bg-primary tracking-wide">
+                    {product.badge}
+                  </Badge>
+                )}
+
+                {kit ? (
+                  <KitPriceBox kit={kit} deliveryNote={product.deliveryNote} />
+                ) : (
+                  <>
+                    {/* Precio: única fuente (calculateProductPricing). Si hay
                     promos activas se acumulan todas — no es un "o" entre
                     Hot Sale y descuento, es la suma que aplicaría el motor
                     del carrito. */}
-                <div className="mt-3 sm:mt-4 space-y-1">
-                  <div className="flex items-baseline gap-3 flex-wrap">
-                    {pricing.hasDiscount && (
-                      <span className="text-sm text-muted-foreground line-through">
-                        {formattedListUnit}
-                      </span>
-                    )}
-                    <span
-                      className={`text-2xl sm:text-3xl font-bold ${
-                        pricing.hasDiscount ? 'text-accent' : 'text-primary'
-                      }`}
-                    >
-                      {formattedFinalUnit}
-                    </span>
-                    <span className="text-sm text-muted-foreground">por unidad</span>
-                  </div>
-
-                  {pricing.discounts.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {pricing.discounts.map((d) => (
-                        <Badge
-                          key={d.label}
-                          className="bg-accent text-accent-foreground font-semibold"
+                    <div className="mt-3 sm:mt-4 space-y-1">
+                      <div className="flex items-baseline gap-3 flex-wrap">
+                        {pricing.hasDiscount && (
+                          <span className="text-sm text-muted-foreground line-through">
+                            {formattedListUnit}
+                          </span>
+                        )}
+                        <span
+                          className={`text-2xl sm:text-3xl font-bold ${
+                            pricing.hasDiscount ? 'text-accent' : 'text-primary'
+                          }`}
                         >
-                          {d.label}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+                          {formattedFinalUnit}
+                        </span>
+                        <span className="text-sm text-muted-foreground">por unidad</span>
+                      </div>
 
-                  <p className="text-sm text-muted-foreground">
-                    Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:{' '}
-                    <span className="font-semibold text-foreground">{formattedFinalTotal}</span>
-                  </p>
-                </div>
+                      {pricing.discounts.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {pricing.discounts.map((d) => (
+                            <Badge
+                              key={d.label}
+                              className="bg-accent text-accent-foreground font-semibold"
+                            >
+                              {d.label}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+
+                      <p className="text-sm text-muted-foreground">
+                        Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:{' '}
+                        <span className="font-semibold text-foreground">{formattedFinalTotal}</span>
+                      </p>
+                    </div>
+                  </>
+                )}
 
                 <p className="text-muted-foreground mt-3 break-words">{product.description}</p>
               </div>
+
+              {/* Agenda suelta: el kit con esta agenda sale menos (sólo en preventa) */}
+              <PresaleCompareBox product={product} />
+
+              {/* Kit: qué incluye, con el valor de cada pieza */}
+              {kit && <KitValueBreakdown kit={kit} />}
+
+              {/* ——— Kit · Paso ①: Elegí tu agenda (define el precio) ——— */}
+              {isKit && (
+                <StepSection step={versionStepNumber} title="Elegí tu agenda">
+                  <VariantSelector
+                    label="Agenda"
+                    options={product.interiors}
+                    value={selectedInterior}
+                    onChange={setSelectedInterior}
+                    formatOption={(i) =>
+                      `${i.charAt(0).toUpperCase()}${i.slice(1)} · ${formatARS(listPriceFor(product, i))}`
+                    }
+                  />
+                </StepSection>
+              )}
 
               {/* ——— Paso ①: Elegí tu diseño / color ——— */}
               {usesColors ? (
@@ -427,9 +482,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
                   <ColorSwatchSelector
                     options={product.colors ?? []}
                     value={selectedColor?.id}
-                    onChange={(id) =>
-                      setSelectedColor(product.colors?.find((c) => c.id === id))
-                    }
+                    onChange={(id) => setSelectedColor(product.colors?.find((c) => c.id === id))}
                   />
                 </StepSection>
               ) : hasModels ? (
@@ -451,7 +504,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
               ) : null}
 
               {/* ——— Paso ②: Configurá (sólo si hay variantes reales) ——— */}
-              {hasRealChoices ? (
+              {isKit ? null : hasRealChoices ? (
                 <StepSection step={configStepNumber} title="Configurá">
                   <div className="space-y-4">
                     <VariantSelector
@@ -504,16 +557,18 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
               )}
 
               {/* ——— Paso ③ (o ②): ¿Lo querés personalizado? ——— */}
-              <PersonalizationStep
-                step={personalizationStepNumber}
-                surcharge={personalizationSurchargeFor(product)}
-                isCustom={isCustom}
-                onCustomChange={setIsCustom}
-                styleId={styleId}
-                onStyleChange={setStyleId}
-                text={personalization}
-                onTextChange={setPersonalization}
-              />
+              {showPersonalization && (
+                <PersonalizationStep
+                  step={personalizationStepNumber}
+                  surcharge={personalizationSurchargeFor(product)}
+                  isCustom={isCustom}
+                  onCustomChange={setIsCustom}
+                  styleId={styleId}
+                  onStyleChange={setStyleId}
+                  text={personalization}
+                  onTextChange={setPersonalization}
+                />
+              )}
 
               <QuantityStepper value={quantity} onChange={setQuantity} max={10} />
 
@@ -524,13 +579,9 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
               <div className="space-y-3">
                 <Button ref={addToCartRef} size="lg" className="w-full" onClick={handleAddToCart}>
                   <ShoppingCart className="mr-2 h-5 w-5" />
-                  Agregar al Carrito
+                  {ctaLabel}
                 </Button>
-                <Button
-                  asChild
-                  variant={isCustom ? 'outline' : 'ghost'}
-                  className="w-full"
-                >
+                <Button asChild variant={isCustom ? 'outline' : 'ghost'} className="w-full">
                   <a
                     href={buildWaLink(WHATSAPP_NUMBER, modeSpecificMessage)}
                     target="_blank"
@@ -543,6 +594,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
 
               <ProductSpecs product={product} />
 
+              {isKit && <KitFaq />}
             </div>
           </div>
         </div>
@@ -565,6 +617,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
         originalPrice={stickyOriginalPrice}
         summary={stickySummary}
         onAddToCart={handleAddToCart}
+        addLabel={isKit ? presale.ctaLabel : undefined}
       />
     </div>
   );

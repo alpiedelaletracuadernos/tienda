@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/Footer';
 import { ProductCard } from '@/components/products/ProductCard';
 import { PromoBar } from '@/components/promos/PromoBar';
 import { isPurchasable } from '@/lib/availability';
+import { isPresaleProduct } from '@/config/presale';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { products } from '@/data/products';
 import AppVars from '@/data/data';
@@ -449,7 +450,11 @@ const Shop = () => {
             {filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    featured={isPresaleProduct(product.slug) && isPurchasable(product)}
+                  />
                 ))}
               </div>
             ) : (

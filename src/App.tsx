@@ -26,6 +26,7 @@ const PageFallback = () => (
 
 // 👇 Componente que resetea el scroll al cambiar de ruta
 import ScrollToTop from "./components/ScrollToTop";
+import { PresaleTopBar } from "./components/presale/PresaleTopBar";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
       <HashRouter>
         {/* Se monta una sola vez y escucha los cambios de pathname */}
         <ScrollToTop />
+        <PresaleTopBar />
         <Suspense fallback={<PageFallback />}>
         <Routes>
           <Route path="/" element={<Index />} />

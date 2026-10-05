@@ -1,5 +1,7 @@
 import { Product, ModelAssets, ProductColor } from '@/types/product';
 import { sortByCatalogOrder } from '@/data/catalog-order';
+import vars from '@/data/data';
+import { isPresaleActive } from '@/config/presale';
 
 const routeBase = 'assets/';
 
@@ -13,6 +15,18 @@ export const BOX_COLORS: ProductColor[] = [
 ];
 
 export const productoImagenes: ModelAssets = {
+  // Provisorias (fotos 2027 de agendas) hasta tener las fotos del kit completo:
+  // se reemplazan con `optimize_images.py numerar ... --prefix kit-mi-ano-2027 --force`.
+  'kit-mi-ano-2027': [
+    `${routeBase}productos/kit-mi-ano-2027_0001.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0002.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0003.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0004.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0005.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0006.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0007.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0008.webp`,
+  ],
   // Fotos de la producción 2027 (WEB_LANZAMIENTO_2027/SEMANAL y /DIARIA), en orden.
   'agenda-semanal-2027': [
     `${routeBase}productos/agenda-semanal-2027_0001.webp`,
@@ -330,6 +344,66 @@ export const productoImagenes: ModelAssets = {
 // Catálogo completo, incluidos los borradores (`draft`). El resto de la app
 // usa `products`, que sólo trae lo publicado.
 export const catalog: Product[] = [
+  {
+    // Producto principal de la temporada. Precio, referencia y vigencia:
+    // ver vars.promotions.presale y src/lib/pricing/kit.ts.
+    id: '20',
+    name: 'Kit Mi Año 2027',
+    slug: 'kit-mi-ano-2027',
+    category: 'especiales',
+    description:
+      'Todo lo que necesitás para organizar tu 2027, en un solo kit: la agenda, un cuaderno para el día a día, una libreta de bolsillo, un señalador imantado y una tarjeta. Lo hacemos a mano, uno por uno, acá en San Nicolás. La preventa nos sirve para saber cuántos armar y hacerlos bien, sin apuro. Por eso tiene fecha: va hasta el viernes 16/10.',
+    basePrice: 32000,
+    priceByInterior: { semanal: 32000, diaria: 37000 },
+    kitItems: [
+      {
+        label: 'Agenda 2027',
+        detail:
+          'Tapa dura con laminado brillo, anillado doble alambre que abre 180°, hojas de 90 gramos, portada a color.',
+        image: `${routeBase}productos/kit-mi-ano-2027_0002.webp`,
+        priceFromSlug: { semanal: 'agenda-semanal-a5', diaria: 'agenda-diaria-a5' },
+      },
+      {
+        label: 'Cuaderno A5 tapa blanda rayado',
+        detail: 'Para lo de todos los días, lo que no entra en la agenda.',
+        value: 8200,
+      },
+      {
+        label: 'Libreta A6 lisa',
+        detail: 'Chica, va en la cartera o el bolsillo.',
+        value: 5000,
+      },
+      {
+        label: 'Señalador imantado + tarjeta',
+        detail: 'El señalador se abraza a la hoja y no se cae.',
+        value: 2000,
+      },
+    ],
+    sizes: ['A5'],
+    interiors: ['semanal', 'diaria'],
+    coverTypes: ['dura'],
+    coverDesigns: true,
+    personalizable: false,
+    excludeFromPromos: true,
+    badge: vars.promotions.presale.badge,
+    deliveryNote: vars.promotions.presale.delivery,
+    materials: [
+      'Tapa dura con laminado brillo',
+      'Anillado doble alambre, abre 180° y no se deforma',
+      'Hojas de 90 gramos que no se traspasan',
+      'Portadas a color',
+      'Hecho a mano en San Nicolás de los Arroyos',
+    ],
+    includes: [],
+    productionTime: '5 días hábiles',
+    // Disponible sólo durante la preventa; después queda como "Preventa cerrada".
+    inStock: isPresaleActive(),
+    availabilityLabel: vars.promotions.presale.closedLabel,
+    availabilityMessage: vars.promotions.presale.closedMessage,
+    weeklyQuota: 15,
+    remainingQuota: 15,
+    images: productoImagenes['kit-mi-ano-2027'],
+  },
   {
     id: '1',
     name: 'Agenda Semanal 2027',
@@ -1041,6 +1115,8 @@ export const products: Product[] = sortByCatalogOrder(catalog.filter((p) => !p.d
 export const getProductBySlug = (slug: string) => {
   return products.find((p) => p.slug === slug);
 };
+
+export const getProductById = (id: string) => catalog.find((p) => p.id === id);
 
 export const getProductsByCategory = (category: string) => {
   return products.filter((p) => p.category === category);

@@ -5,8 +5,13 @@
 // slug. Los que no estén en la lista van al final, en el orden en que están
 // cargados en products.ts, así un producto nuevo nunca desaparece.
 import type { Product } from '@/types/product';
+import { isPresaleActive, presale } from '@/config/presale';
+
+// Durante la preventa el kit va primero (y por eso también en Destacados).
+const PRESALE_FIRST = isPresaleActive() ? [presale.slug] : [];
 
 export const CATALOG_ORDER = [
+  ...PRESALE_FIRST,
   'agenda-semanal-a5',
   'agenda-diaria-a5',
   'agenda-perpetua-pocket-a6',

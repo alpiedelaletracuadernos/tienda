@@ -8,6 +8,10 @@ import { Testimonials } from '@/components/home/Testimonials';
 import { ShippingInfo } from '@/components/home/ShippingInfo';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import MobileUSPs from '@/components/home/MobileUSPs';
+import { PresaleHero } from '@/components/presale/PresaleHero';
+import { PresaleValueBlock } from '@/components/presale/PresaleValueBlock';
+import { CraftBlock } from '@/components/presale/CraftBlock';
+import { isPresaleActive } from '@/config/presale';
 import Promo2x1Modal from '@/components/promos/Promo2x1';
 import HotSaleBanner from '@/components/promos/HotSaleBanner';
 import HotSaleModal from '@/components/promos/HotSaleModal';
@@ -21,6 +25,9 @@ const LADDER_LABEL = '15% en 1u • 20% en 2u • 30% en 3+u';
 const BLACK_FRIDAY_ACTIVE = false;
 
 const Index = () => {
+  // Durante la preventa la portada empuja el kit; el 17/10 vuelve sola la
+  // portada habitual.
+  const presaleOn = isPresaleActive();
   return (
     <div className="min-h-screen w-full overflow-x-clip">
       <HotSaleBanner />
@@ -77,9 +84,11 @@ const Index = () => {
 
       <Header />
       <main>
-        <Hero />
+        {presaleOn ? <PresaleHero /> : <Hero />}
         <MobileUSPs />
+        {presaleOn && <PresaleValueBlock />}
         <FeaturedProducts />
+        {presaleOn && <CraftBlock />}
 
         <section id="como-pedir" className="scroll-mt-24">
           <HowToOrder />
