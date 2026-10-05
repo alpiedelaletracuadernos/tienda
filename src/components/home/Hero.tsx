@@ -80,7 +80,7 @@ export default function Hero() {
       {/* Contenido */}
       <div className="container relative z-10 px-4">
         <div className="max-w-[44rem] text-white space-y-6">
-          <p className="text-xs sm:text-sm font-semibold tracking-wide uppercase text-primary-200">
+          <p className="text-xs sm:text-sm font-semibold tracking-wide uppercase text-primary-light">
             ✨ Nueva colección 2027
           </p>
 
@@ -111,15 +111,15 @@ export default function Hero() {
           {/* Trust + Objeciones resueltas */}
           <ul className="hidden mt-4 md:grid grid-cols-3 gap-4 text-left text-[0.8rem] sm:text-sm">
             <li className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-bold text-primary-300">100%</span>
+              <span className="text-xl sm:text-2xl font-bold text-primary-light">100%</span>
               <span className="text-white/85">Personalizable</span>
             </li>
             <li className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-bold text-primary-300">48&nbsp;h</span>
+              <span className="text-xl sm:text-2xl font-bold text-primary-light">48&nbsp;h</span>
               <span className="text-white/85">Entrega rápida</span>
             </li>
             <li className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-bold text-primary-300">
+              <span className="text-xl sm:text-2xl font-bold text-primary-light">
                 {modeloOptions.length}
               </span>
               <span className="text-white/85">Diseños 2027</span>

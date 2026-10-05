@@ -28,13 +28,7 @@ export default function MobileUSPs() {
             w-full max-w-full min-w-0
             flex flex-nowrap gap-3
             overflow-x-auto overflow-y-hidden
-            snap-x snap-mandatory scroll-smooth
-            [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.400)_transparent]
-            [&::-webkit-scrollbar]:h-2
-            [&::-webkit-scrollbar-track]:bg-transparent
-            [&::-webkit-scrollbar-thumb]:bg-slate-400/60
-            hover:[&::-webkit-scrollbar-thumb]:bg-slate-500/70
-            [&::-webkit-scrollbar-thumb]:rounded-full
+            snap-x snap-mandatory scroll-smooth scrollbar-soft
             -mx-2 px-2 py-3
           "
           role="list"
@@ -55,14 +49,14 @@ export default function MobileUSPs() {
               <div className="flex flex-col items-center gap-1">
                 <Icon className="h-5 w-5 text-primary" aria-hidden="true" />
                 <span className="text-xl font-bold text-primary">{headline}</span>
-                <span className="text-[0.8rem] text-slate-800">{sub}</span>
+                <span className="text-[0.8rem] text-foreground">{sub}</span>
               </div>
             </li>
           ))}
         </ul>
 
         {/* Nota opcional (ayuda a conversión y confianza) */}
-        <p className="mt-3 text-xs text-slate-500">
+        <p className="mt-3 text-xs text-muted-foreground">
           Producción artesanal, boceto previo sin costo y múltiples medios de pago.
         </p>
       </div>

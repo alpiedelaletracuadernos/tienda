@@ -58,13 +58,7 @@ export default function ProductImageGallery({
             flex lg:hidden flex-nowrap gap-3
             overflow-x-auto overflow-y-hidden
             snap-x snap-mandatory scroll-smooth
-            py-1 px-2
-            [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.400)_transparent]
-            [&::-webkit-scrollbar]:h-2
-            [&::-webkit-scrollbar-track]:bg-transparent
-            [&::-webkit-scrollbar-thumb]:bg-slate-400/60
-            hover:[&::-webkit-scrollbar-thumb]:bg-slate-500/70
-            [&::-webkit-scrollbar-thumb]:rounded-full
+            py-1 px-2 scrollbar-soft
           "
           role="listbox"
           aria-label="Miniaturas"
@@ -122,13 +116,7 @@ export default function ProductImageGallery({
             hidden lg:flex lg:flex-col gap-3
             lg:max-h-[50svh] xl:max-h-[55svh] min-h-0
             overflow-y-auto pr-1
-            snap-y snap-mandatory
-            [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.400)_transparent]
-            [&::-webkit-scrollbar]:w-2
-            [&::-webkit-scrollbar-track]:bg-transparent
-            [&::-webkit-scrollbar-thumb]:bg-slate-400/60
-            hover:[&::-webkit-scrollbar-thumb]:bg-slate-500/70
-            [&::-webkit-scrollbar-thumb]:rounded-full
+            snap-y snap-mandatory scrollbar-soft
           "
           role="listbox"
           aria-label="Miniaturas"

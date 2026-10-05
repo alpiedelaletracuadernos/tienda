@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ProductCard } from '@/components/products/ProductCard';
+import { PromoBar } from '@/components/promos/PromoBar';
 import { isPurchasable, sortByAvailability } from '@/lib/availability';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { products } from '@/data/products';
@@ -249,31 +250,19 @@ const Shop = () => {
       <Header />
       <HotSaleBanner />
 
-      {AppVars.promotions.discount.enabled && (
-        <>
-          {/* Descuentos */}
-          <div className="sticky top-16 z-40 bg-black text-white">
-            <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
-                <span className="text-sm sm:text-base font-semibold">Descuento del {AppVars.promotions.discount.percentage}% en diseños seleccionados</span>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-      {AppVars.promotions.twoForOne.enabled && (
-        <>
-          {/* Barra informativa sticky: 2X1 */}
-          <div className="sticky top-16 z-40 bg-black text-white">
-            <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
-                <span className="text-sm sm:text-base font-semibold">{PROMO_2X1_LABEL}</span>
-              </div>
-            </div>
-          </div>
-        </>
+      {(AppVars.promotions.discount.enabled || AppVars.promotions.twoForOne.enabled) && (
+        // Contenedor sticky único: si hay más de una promo, las barras se
+        // apilan en vez de pisarse (mismo criterio que la ficha de producto).
+        <div className="sticky top-16 z-40">
+          {AppVars.promotions.discount.enabled && (
+            <PromoBar badge="PROMO">
+              Descuento del {AppVars.promotions.discount.percentage}% en diseños seleccionados
+            </PromoBar>
+          )}
+          {AppVars.promotions.twoForOne.enabled && (
+            <PromoBar badge="PROMO">{PROMO_2X1_LABEL}</PromoBar>
+          )}
+        </div>
       )}
 
       <main>

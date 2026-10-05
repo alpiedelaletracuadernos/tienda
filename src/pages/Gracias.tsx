@@ -31,7 +31,7 @@ Quedo atento/a a los próximos pasos. ¡Gracias!`;
       <main className="py-10">
         <div className="container px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success text-success-foreground mb-4">
               <CheckCircle2 className="w-9 h-9" />
             </div>
 

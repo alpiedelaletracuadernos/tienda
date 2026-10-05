@@ -60,7 +60,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               HOT SALE -{vars.promotions.hotSale.percentage}%
             </span>
           ) : discountEligible ? (
-            <span className="absolute left-2 top-2 rounded-full bg-amber-400 text-black text-[11px] font-semibold px-2 py-0.5 shadow-sm">
+            <span className="absolute left-2 top-2 rounded-full bg-promo text-promo-foreground text-[11px] font-semibold px-2 py-0.5 shadow-sm">
               Promo {vars.promotions.discount.percentage}% OFF
             </span>
           ) : null}
@@ -96,7 +96,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         )}
 
         {/* {twoForOne && (
-          <p className="text-xs text-amber-700 mt-1">
+          <p className="text-xs text-notice-foreground mt-1">
             2×1: llevás 2 y pagás 1
           </p>
         )} */}

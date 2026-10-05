@@ -30,6 +30,7 @@ import { ProductComingSoon } from '@/components/products/ProductComingSoon';
 import { isPurchasable } from '@/lib/availability';
 import { thumbOf } from '@/lib/media';
 import { ShareButton } from '@/components/products/ShareButton';
+import { PromoBar } from '@/components/promos/PromoBar';
 import { safeStorage } from '@/lib/safe-storage';
 
 //PROMOCIONES
@@ -354,40 +355,18 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
         // así se apilan en vez de pisarse cuando hay más de una activa.
         <div className="sticky top-16 z-40">
           {hotSaleActive && (
-            <div className="bg-accent text-accent-foreground">
-              <div className="container px-4 py-2 flex flex-wrap items-center gap-2">
-                <Badge className="bg-white text-accent font-bold hover:bg-white/90">HOT SALE</Badge>
-                <span className="text-sm font-semibold">
-                  {AppVars.promotions.hotSale.percentage}% OFF en toda la tienda ·{' '}
-                  {formatHotSaleDateRange()}
-                </span>
-              </div>
-            </div>
+            <PromoBar badge="HOT SALE" tone="accent">
+              {AppVars.promotions.hotSale.percentage}% OFF en toda la tienda ·{' '}
+              {formatHotSaleDateRange()}
+            </PromoBar>
           )}
           {AppVars.promotions.twoForOne.enabled && (
-            <div className="bg-black text-white">
-              <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-amber-400 text-black hover:bg-amber-400">2X1</Badge>
-                  <span className="text-sm sm:text-base font-semibold">
-                    {PROMO_2X1_LABEL_DETAIL}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <PromoBar badge="2X1">{PROMO_2X1_LABEL_DETAIL}</PromoBar>
           )}
           {AppVars.promotions.discount.enabled && (
-            <div className="bg-black text-white">
-              <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
-                  <span className="text-sm sm:text-base font-semibold">
-                    Descuento del {AppVars.promotions.discount.percentage}% en diseños
-                    seleccionados
-                  </span>
-                </div>
-              </div>
-            </div>
+            <PromoBar badge="PROMO">
+              Descuento del {AppVars.promotions.discount.percentage}% en diseños seleccionados
+            </PromoBar>
           )}
         </div>
       )}
@@ -458,7 +437,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
 
                   <p className="text-sm text-muted-foreground">
                     Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:{' '}
-                    <span className="font-semibold text-slate-900">{formattedFinalTotal}</span>
+                    <span className="font-semibold text-foreground">{formattedFinalTotal}</span>
                   </p>
                 </div>
 
@@ -588,7 +567,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
                                 'ring-1 ring-slate-300/60',
                                 selected
                                   ? 'bg-primary text-primary-foreground ring-primary'
-                                  : 'bg-white hover:bg-slate-50',
+                                  : 'bg-white hover:bg-muted',
                               ].join(' ')}
                             >
                               {s.label}
@@ -689,13 +668,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
                     flex flex-nowrap gap-3
                     overflow-x-auto overflow-y-hidden
                     snap-x snap-mandatory scroll-smooth
-                    px-2 py-1
-                    [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.400)_transparent]
-                    [&::-webkit-scrollbar]:h-2
-                    [&::-webkit-scrollbar-track]:bg-transparent
-                    [&::-webkit-scrollbar-thumb]:bg-slate-400/60
-                    hover:[&::-webkit-scrollbar-thumb]:bg-slate-500/70
-                    [&::-webkit-scrollbar-thumb]:rounded-full
+                    px-2 py-1 scrollbar-soft
                   "
                   aria-label="Ejemplos de personalización"
                 >
