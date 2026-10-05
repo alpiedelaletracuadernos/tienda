@@ -43,8 +43,21 @@ export const productoImagenes: ModelAssets = {
     ),
   ],
   'agenda-diaria-2027': tapas2027.slice(4, 10),
-  // TODO: reemplazar por fotos reales de la Pocket cuando estén.
-  'agenda-perpetua-pocket': tapas2027.slice(10, 14),
+  'agenda-perpetua-pocket': [
+    `${routeBase}productos/agenda-perpetua-pocket_0001.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0002.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0003.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0004.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0005.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0006.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0007.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0008.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0009.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0010.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0011.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0012.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0013.webp`,
+  ],
   'agenda-docente-inicial': [
     `${routeBase}productos/agenda-docente-inicial_0002.webp`,
     `${routeBase}productos/agenda-docente-inicial_0001.mp4`,
@@ -830,7 +843,6 @@ export const catalog: Product[] = [
     images: productoImagenes['agenda-diaria-2027'],
   },
   {
-    // Borrador hasta tener fotos reales del producto: sacar `draft` para publicarla.
     id: '19',
     name: 'Agenda Perpetua Pocket',
     slug: 'agenda-perpetua-pocket-a6',
@@ -854,7 +866,6 @@ export const catalog: Product[] = [
     ],
     productionTime: '8-10 horas hábiles',
     inStock: true,
-    draft: true,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['agenda-perpetua-pocket'],

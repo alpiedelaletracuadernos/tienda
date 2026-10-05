@@ -9,6 +9,7 @@ import type { Product } from '@/types/product';
 export const CATALOG_ORDER = [
   'agenda-semanal-a5',
   'agenda-diaria-a5',
+  'agenda-perpetua-pocket-a6',
   'agenda-universitaria',
   'agenda-docente-nivel-inicial',
   'agenda-docente-nivel-primario',
