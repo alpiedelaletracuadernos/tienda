@@ -564,7 +564,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
                               onClick={() => setStyleId(s.id)}
                               className={[
                                 'px-3 py-1.5 rounded-full text-sm transition-colors',
-                                'ring-1 ring-slate-300/60',
+                                'ring-1 ring-border',
                                 selected
                                   ? 'bg-primary text-primary-foreground ring-primary'
                                   : 'bg-white hover:bg-muted',
@@ -675,7 +675,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
                   {productoImagenes['personalizados'].map((src, i) => (
                     <div
                       key={i}
-                      className="snap-center flex-none w-32 h-32 sm:w-36 sm:h-36 rounded-xl overflow-hidden ring-1 ring-slate-200 bg-white"
+                      className="snap-center flex-none w-32 h-32 sm:w-36 sm:h-36 rounded-xl overflow-hidden ring-1 ring-border bg-white"
                     >
                       <img
                         src={thumbOf(src)}

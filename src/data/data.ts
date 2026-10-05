@@ -16,10 +16,6 @@ export interface AppVars {
         twitter?: string;
         whatsapp?: string;
     };
-    theme?: {
-        primary: string;
-        secondary?: string;
-    };
     maxUploadSizeBytes?: number;
     dateFormat?: string;
     personalizationSurcharge: number; // Recargo por personalizar producto
@@ -60,10 +56,6 @@ export const vars: AppVars = {
         facebook: 'https://facebook.com/alpie',
         instagram: 'https://www.instagram.com/alpiedelaletra.cuadernos/profilecard/?igsh=NG1sdHY5djZnMm1j',
         whatsapp: '5493364364774'
-    },
-    theme: {
-        primary: '#ff6b6b',
-        secondary: '#1a1a1a'
     },
     maxUploadSizeBytes: 5 * 1024 * 1024, // 5 MB
     dateFormat: 'dd/MM/yyyy',

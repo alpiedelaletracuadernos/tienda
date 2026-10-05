@@ -38,7 +38,7 @@ export default function MobileUSPs() {
               key={i}
               className="
                 snap-center flex-none
-                rounded-2xl ring-1 ring-slate-200 bg-white/90
+                rounded-2xl ring-1 ring-border bg-white/90
                 backdrop-blur supports-[backdrop-filter]:bg-white/70
                 shadow-sm
                 px-4 py-3

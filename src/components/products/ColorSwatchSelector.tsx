@@ -82,7 +82,7 @@ export function ColorSwatchSelector({
               onClick={() => onChange(opt.id)}
               tabIndex={checked || (!value && idx === 0) ? 0 : -1}
               className={cn(
-                'relative h-11 w-11 shrink-0 rounded-full ring-1 ring-slate-300/60',
+                'relative h-11 w-11 shrink-0 rounded-full ring-1 ring-border',
                 'flex items-center justify-center',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary',
                 checked && 'ring-2 ring-offset-2 ring-primary'

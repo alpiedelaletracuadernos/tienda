@@ -67,10 +67,10 @@ function DesignThumb({ option, checked, tabIndex, onSelect, onExpand, registerRe
         tabIndex={tabIndex}
         className={cn(
           'group relative block w-full overflow-hidden rounded-xl aspect-[3/4]',
-          'bg-white ring-1 ring-slate-300/60',
+          'bg-white ring-1 ring-border',
           checked
             ? 'ring-4 ring-primary ring-offset-2'
-            : 'hover:ring-2 hover:ring-slate-400/60',
+            : 'hover:ring-2 hover:ring-muted-foreground/40',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary'
         )}
       >

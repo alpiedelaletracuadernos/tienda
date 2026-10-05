@@ -86,7 +86,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
+        sans: ['var(--font-sans)'],
       },
       borderRadius: {
         lg: "var(--radius)",

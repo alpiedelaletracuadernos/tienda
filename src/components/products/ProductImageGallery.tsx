@@ -76,8 +76,8 @@ export default function ProductImageGallery({
                 role="option"
                 aria-selected={selected}
                 className={clsx(
-                  "relative snap-center flex-none w-20 h-20 rounded-xl overflow-hidden ring-1 ring-slate-300/50 bg-white shadow-sm",
-                  selected ? "ring-2 ring-primary" : "hover:ring-2 hover:ring-slate-400/60"
+                  "relative snap-center flex-none w-20 h-20 rounded-xl overflow-hidden ring-1 ring-border bg-white shadow-sm",
+                  selected ? "ring-2 ring-primary" : "hover:ring-2 hover:ring-muted-foreground/40"
                 )}
                 onClick={() => select(i)}
                 title={video ? "Miniatura de video" : `Miniatura ${i + 1}`}
@@ -134,8 +134,8 @@ export default function ProductImageGallery({
                 role="option"
                 aria-selected={selected}
                 className={clsx(
-                  "relative snap-start w-full aspect-square rounded-xl overflow-hidden ring-1 ring-slate-300/50 bg-white shadow-sm",
-                  selected ? "ring-2 ring-primary" : "hover:ring-2 hover:ring-slate-400/60"
+                  "relative snap-start w-full aspect-square rounded-xl overflow-hidden ring-1 ring-border bg-white shadow-sm",
+                  selected ? "ring-2 ring-primary" : "hover:ring-2 hover:ring-muted-foreground/40"
                 )}
                 onClick={() => select(i)}
                 title={video ? "Miniatura de video" : `Miniatura ${i + 1}`}
@@ -174,7 +174,7 @@ export default function ProductImageGallery({
         <div
           className="
             w-full max-w-full h-auto mx-auto
-            rounded-2xl bg-muted/60 ring-1 ring-slate-200 overflow-hidden
+            rounded-2xl bg-muted/60 ring-1 ring-border overflow-hidden
             flex items-center justify-center
             p-3 sm:p-4
             max-h-[70svh] sm:max-h-[75svh] md:max-h-[80svh]
