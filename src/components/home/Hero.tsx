@@ -174,7 +174,7 @@ export default function Hero() {
 
           {/* Micro-reseña/UGC (no LCP) */}
           <div className="mt-4 text-white/85 text-sm">
-            ★★★★★ “La personalización quedó perfecta y llegó rapidísimo.” — Sofía, SN
+            “Me encantó la presentación, los stickers, la calidad…” — mensaje de un cliente
           </div>
         </div>
 
