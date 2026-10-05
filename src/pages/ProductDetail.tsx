@@ -7,16 +7,13 @@ import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { getProductBySlug, productoImagenes } from '@/data/products';
 import { modeloOptions } from '@/data/options';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 import { useCart } from '@/hooks/use-cart';
 import { toast } from 'sonner';
-import { ArrowLeft, ShoppingCart, Minus, Plus } from 'lucide-react';
+import { ArrowLeft, ShoppingCart } from 'lucide-react';
 import { Product, ProductSize, InteriorType, CoverType, ProductColor } from '@/types/product';
 import AppVars from '@/data/data';
-import { buildPdpMessage, buildWaLink } from '@/lib/whatsapp';
+import { buildPdpMessage, buildWaLink, type PersonalizationStyleId } from '@/lib/whatsapp';
 
 import { DesignPicker } from '@/components/products/DesignPicker';
 import ProductImageGallery from '@/components/products/ProductImageGallery';
@@ -28,42 +25,24 @@ import { StickyBuyBar } from '@/components/products/StickyBuyBar';
 import { ProductSpecs } from '@/components/products/ProductSpecs';
 import { ProductComingSoon } from '@/components/products/ProductComingSoon';
 import { isPurchasable } from '@/lib/availability';
-import { thumbOf } from '@/lib/media';
 import { ShareButton } from '@/components/products/ShareButton';
 import { PromoBar } from '@/components/promos/PromoBar';
+import { PersonalizationStep } from '@/components/products/pdp/PersonalizationStep';
+import { QuantityStepper } from '@/components/products/pdp/QuantityStepper';
+import { InspirationStrip } from '@/components/products/pdp/InspirationStrip';
 import { safeStorage } from '@/lib/safe-storage';
 
 //PROMOCIONES
 import { isHotSaleActive, formatHotSaleDateRange } from '@/config/promotions';
 import { calculateProductPricing } from '@/lib/pricing/calc-product-pricing';
+import { formatARS } from '@/lib/currency';
 
 // —— WhatsApp ————————————————————————————————————————
 const WHATSAPP_NUMBER = AppVars.phoneNumber;
 
-const PERSONALIZATION_STYLES = [
-  { id: 'nombre', label: 'Nombre/Iniciales' },
-  { id: 'frase', label: 'Frase/Versículo' },
-  { id: 'foto', label: 'Foto/Imagen' },
-  { id: 'trama', label: 'Trama/Patrón' },
-  { id: 'logo', label: 'Logo/Marca' },
-] as const;
-
-type PersonalizationStyleId = (typeof PERSONALIZATION_STYLES)[number]['id'];
-
-const formatARS = (n: number) =>
-  new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 0,
-  }).format(n);
-
-const DISCOUNT_CATEGORIES = new Set(['agendas', 'agendas docentes']);
 const MODEL_CATEGORIES = new Set(['agendas', 'agendas docentes', 'cuadernos']);
 
 const normalizeCategory = (c?: string) => (c ?? '').trim().toLowerCase();
-
-const isDiscountEligibleCategory = (category?: string) =>
-  DISCOUNT_CATEGORIES.has(normalizeCategory(category));
 
 // ——— Componente exterior: SIN hooks más allá de useParams. ———————————
 // Motivo (B1): garantiza que el guard de "producto no encontrado" pueda
@@ -128,10 +107,6 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
   // ramas de render que puedan divergir ni quedar "pisadas" al navegar
   // entre productos sin recargar.
   const [isCustom, setIsCustom] = useState(false);
-
-  // Cantidad: stepper con tope real de 10 (antes sólo se clampaba el mínimo).
-  const incrementQuantity = () => setQuantity((q) => Math.min(10, q + 1));
-  const decrementQuantity = () => setQuantity((q) => Math.max(1, q - 1));
 
   // Qué se elige en el paso ①, decidido por datos:
   //  · con `colors`  → círculos de color (hoy: Box premium regalo)
@@ -527,111 +502,17 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
               )}
 
               {/* ——— Paso ③ (o ②): ¿Lo querés personalizado? ——— */}
-              <StepSection
+              <PersonalizationStep
                 step={personalizationStepNumber}
-                title="¿Lo querés personalizado?"
-                hint={`+${formatARS(AppVars.personalizationSurcharge)} sobre el precio de lista`}
-              >
-                <div className="space-y-4 rounded-2xl border p-4 sm:p-5">
-                  <div className="flex items-center justify-between gap-4">
-                    <Label htmlFor="isCustom" className="cursor-pointer">
-                      Personalizar con nombre, foto, frase o trama
-                    </Label>
-                    <Switch id="isCustom" checked={isCustom} onCheckedChange={setIsCustom} />
-                  </div>
+                isCustom={isCustom}
+                onCustomChange={setIsCustom}
+                styleId={styleId}
+                onStyleChange={setStyleId}
+                text={personalization}
+                onTextChange={setPersonalization}
+              />
 
-                  {isCustom && (
-                    <div className="space-y-4 border-t pt-4">
-                      <p className="text-sm text-muted-foreground">
-                        Portada o interior: <strong>foto</strong>, <strong>frase</strong>,{' '}
-                        <strong>nombre</strong> o <strong>trama</strong>. Lo definimos por WhatsApp
-                        con <em>boceto previo</em>.
-                      </p>
-
-                      {/* Estilos */}
-                      <div
-                        role="radiogroup"
-                        aria-label="Estilos de personalización"
-                        className="flex flex-wrap gap-2"
-                      >
-                        {PERSONALIZATION_STYLES.map((s) => {
-                          const selected = styleId === s.id;
-                          return (
-                            <button
-                              key={s.id}
-                              role="radio"
-                              aria-checked={selected}
-                              onClick={() => setStyleId(s.id)}
-                              className={[
-                                'px-3 py-1.5 rounded-full text-sm transition-colors',
-                                'ring-1 ring-border',
-                                selected
-                                  ? 'bg-primary text-primary-foreground ring-primary'
-                                  : 'bg-white hover:bg-muted',
-                              ].join(' ')}
-                            >
-                              {s.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {/* Texto opcional */}
-                      <div className="space-y-2">
-                        <Label htmlFor="personalization">Texto (opcional)</Label>
-                        <Input
-                          id="personalization"
-                          placeholder='Ej.: "María" o "¡Vamos por más!"'
-                          value={personalization}
-                          onChange={(e) => setPersonalization(e.target.value)}
-                          maxLength={40}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          Si elegís “Foto/Logo”, te pediremos el archivo por WhatsApp.
-                        </p>
-                      </div>
-
-                      <ul className="text-xs text-muted-foreground space-y-1">
-                        <li>
-                          • Boceto incluido (1 revisión). Producción: 8–10 h. Entrega rápida 24–48 h
-                          (con recargo).
-                        </li>
-                        <li>• Para fotos: luz natural y al menos ~1500 px del lado más corto.</li>
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </StepSection>
-
-              {/* Cantidad */}
-              <div className="space-y-2">
-                <Label id="quantity-label">Cantidad</Label>
-                <div className="flex items-center gap-2" role="group" aria-labelledby="quantity-label">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-9 w-9"
-                    onClick={decrementQuantity}
-                    disabled={quantity <= 1}
-                    aria-label="Restar cantidad"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="w-8 text-center font-medium" aria-live="polite">
-                    {quantity}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-9 w-9"
-                    onClick={incrementQuantity}
-                    disabled={quantity >= 10}
-                    aria-label="Sumar cantidad"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+              <QuantityStepper value={quantity} onChange={setQuantity} max={10} />
 
               {/* CTAs: "Agregar al carrito" es la primaria (habilita el 2x1,
                   que poolea unidades entre líneas del carrito); WhatsApp
@@ -659,37 +540,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
 
               <ProductSpecs product={product} />
 
-              {/* Inspirate */}
-              <div id="inspirate" className="space-y-3 w-full max-w-full scroll-mt-24">
-                <h3 className="font-semibold">Inspirate</h3>
-                <div
-                  className="
-                    w-full max-w-full
-                    flex flex-nowrap gap-3
-                    overflow-x-auto overflow-y-hidden
-                    snap-x snap-mandatory scroll-smooth
-                    px-2 py-1 scrollbar-soft
-                  "
-                  aria-label="Ejemplos de personalización"
-                >
-                  {productoImagenes['personalizados'].map((src, i) => (
-                    <div
-                      key={i}
-                      className="snap-center flex-none w-32 h-32 sm:w-36 sm:h-36 rounded-xl overflow-hidden ring-1 ring-border bg-white"
-                    >
-                      <img
-                        src={thumbOf(src)}
-                        alt={`Ejemplo ${i + 1}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  ¿Tenés una foto o idea? Enviámela por WhatsApp y armamos el boceto.
-                </p>
-              </div>
+              <InspirationStrip images={productoImagenes['personalizados']} />
             </div>
           </div>
         </div>
