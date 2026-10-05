@@ -28,16 +28,16 @@ const Index = () => {
       {vars.promotions.twoForOne.enabled && (
         <>
           {/* ——— Barra de anuncio 2x1 ——— */}
-          <div className="sticky top-16 z-40 w-full bg-amber-50/90 backdrop-blur supports-[backdrop-filter]:backdrop-blur border-b border-amber-100">
+          <div className="sticky top-16 z-40 w-full bg-notice/90 backdrop-blur supports-[backdrop-filter]:backdrop-blur border-b border-notice-border">
             <div className="container px-4 py-2">
               <div className="flex items-center justify-center gap-2 text-center">
                 {/* etiqueta responsive (envuelve a varias líneas si hace falta) */}
-                {/* <span className="inline-flex items-center justify-center rounded-full border border-amber-300 bg-white px-3 py-1 text-[0.8rem] font-semibold text-amber-800 whitespace-normal break-words">
+                {/* <span className="inline-flex items-center justify-center rounded-full border border-amber-300 bg-white px-3 py-1 text-[0.8rem] font-semibold text-notice-foreground whitespace-normal break-words">
               {LADDER_LABEL}
             </span> */}
                 <a
                   href="/catalogo"
-                  className=" inline text-sm font-medium text-amber-800 underline underline-offset-4 hover:no-underline"
+                  className=" inline text-sm font-medium text-notice-foreground underline underline-offset-4 hover:no-underline"
                 >
                   2x1 en diseños en stock. ¡Aprovechá la oferta!
                 </a>
@@ -56,16 +56,16 @@ const Index = () => {
       {vars.promotions.discount.enabled && (
         <>
           {/* ——— Barra de anuncio 2x1 ——— */}
-          <div className="sticky top-16 z-40 w-full bg-amber-50/90 backdrop-blur supports-[backdrop-filter]:backdrop-blur border-b border-amber-100">
+          <div className="sticky top-16 z-40 w-full bg-notice/90 backdrop-blur supports-[backdrop-filter]:backdrop-blur border-b border-notice-border">
             <div className="container px-4 py-2">
               <div className="flex items-center justify-center gap-2 text-center">
                 {/* etiqueta responsive (envuelve a varias líneas si hace falta) */}
-                {/* <span className="inline-flex items-center justify-center rounded-full border border-amber-300 bg-white px-3 py-1 text-[0.8rem] font-semibold text-amber-800 whitespace-normal break-words">
+                {/* <span className="inline-flex items-center justify-center rounded-full border border-amber-300 bg-white px-3 py-1 text-[0.8rem] font-semibold text-notice-foreground whitespace-normal break-words">
               {LADDER_LABEL}
             </span> */}
                 <a
                   href="/catalogo"
-                  className=" inline text-sm font-medium text-amber-800 underline underline-offset-4 hover:no-underline"
+                  className=" inline text-sm font-medium text-notice-foreground underline underline-offset-4 hover:no-underline"
                 >
                   Descuento del {vars.promotions.discount.percentage}% en diseños seleccionados
                 </a>

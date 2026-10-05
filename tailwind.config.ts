@@ -22,6 +22,7 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          light: "hsl(var(--primary-light))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -38,6 +39,28 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          strong: "hsl(var(--accent-strong))",
+        },
+        promo: {
+          DEFAULT: "hsl(var(--promo))",
+          foreground: "hsl(var(--promo-foreground))",
+        },
+        announcement: {
+          DEFAULT: "hsl(var(--announcement))",
+          foreground: "hsl(var(--announcement-foreground))",
+        },
+        notice: {
+          DEFAULT: "hsl(var(--notice))",
+          foreground: "hsl(var(--notice-foreground))",
+          border: "hsl(var(--notice-border))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        whatsapp: {
+          DEFAULT: "hsl(var(--whatsapp))",
+          hover: "hsl(var(--whatsapp-hover))",
         },
         soft: {
           DEFAULT: "hsl(var(--soft))",
@@ -63,7 +86,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
+        sans: ['var(--font-sans)'],
       },
       borderRadius: {
         lg: "var(--radius)",

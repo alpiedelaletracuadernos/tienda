@@ -4,6 +4,8 @@ import { useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ProductCard } from '@/components/products/ProductCard';
+import { PromoBar } from '@/components/promos/PromoBar';
+import { isPurchasable, sortByAvailability } from '@/lib/availability';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { products } from '@/data/products';
 import AppVars from '@/data/data';
@@ -43,6 +45,7 @@ const CATEGORY_LABELS: Record<ProductCategory, string> = {
 
 const INTERIOR_LABELS: Record<InteriorType, string> = {
   semanal: 'Semanal',
+  diaria: 'Diaria',
   'dos-por-hoja': '2 días por hoja',
   universitaria: 'Universitaria',
   docente: 'Docente',
@@ -104,6 +107,7 @@ const Shop = () => {
   const [selectedSize, setSelectedSize] = useState<ProductSize | 'all'>('all');
   const [selectedInterior, setSelectedInterior] = useState<InteriorType | 'all'>('all');
   const [interiorSheetOpen, setInteriorSheetOpen] = useState(false);
+  const [onlyAvailable, setOnlyAvailable] = useState(false);
 
   // Datos del comprador (para el mensaje final)
   const [buyerName, setBuyerName] = useState('');
@@ -164,26 +168,36 @@ const Shop = () => {
     }
   }, [searchParams, categoryOptions, sizeOptions, interiorOptions]);
 
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = sortByAvailability(products).filter((product) => {
     const categoryMatch = selectedCategory === 'all' || product.category === selectedCategory;
     const sizeMatch = selectedSize === 'all' || product.sizes.includes(selectedSize as ProductSize);
     const interiorMatch =
       selectedInterior === 'all' || product.interiors.includes(selectedInterior as InteriorType);
-    return categoryMatch && sizeMatch && interiorMatch;
+    const availabilityMatch = !onlyAvailable || isPurchasable(product);
+    return categoryMatch && sizeMatch && interiorMatch && availabilityMatch;
   });
 
   const hasActiveFilters =
-    selectedCategory !== 'all' || selectedSize !== 'all' || selectedInterior !== 'all';
+    selectedCategory !== 'all' ||
+    selectedSize !== 'all' ||
+    selectedInterior !== 'all' ||
+    onlyAvailable;
 
   const clearAllFilters = () => {
     setSelectedCategory('all');
     setSelectedSize('all');
     setSelectedInterior('all');
+    setOnlyAvailable(false);
   };
 
   // Pills de filtros activos, mostradas sobre la grilla (Baymard: el usuario
   // necesita ver el resumen de filtros activos mientras navega).
   const activeFilterPills = [
+    onlyAvailable && {
+      key: 'available',
+      label: 'Solo disponibles',
+      onRemove: () => setOnlyAvailable(false),
+    },
     selectedCategory !== 'all' && {
       key: 'category',
       label: CATEGORY_LABELS[selectedCategory],
@@ -236,31 +250,19 @@ const Shop = () => {
       <Header />
       <HotSaleBanner />
 
-      {AppVars.promotions.discount.enabled && (
-        <>
-          {/* Descuentos */}
-          <div className="sticky top-16 z-40 bg-black text-white">
-            <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
-                <span className="text-sm sm:text-base font-semibold">Descuento del {AppVars.promotions.discount.percentage}% en diseños seleccionados</span>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-      {AppVars.promotions.twoForOne.enabled && (
-        <>
-          {/* Barra informativa sticky: 2X1 */}
-          <div className="sticky top-16 z-40 bg-black text-white">
-            <div className="container px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Badge className="bg-amber-400 text-black hover:bg-amber-400">PROMO</Badge>
-                <span className="text-sm sm:text-base font-semibold">{PROMO_2X1_LABEL}</span>
-              </div>
-            </div>
-          </div>
-        </>
+      {(AppVars.promotions.discount.enabled || AppVars.promotions.twoForOne.enabled) && (
+        // Contenedor sticky único: si hay más de una promo, las barras se
+        // apilan en vez de pisarse (mismo criterio que la ficha de producto).
+        <div className="sticky top-16 z-40">
+          {AppVars.promotions.discount.enabled && (
+            <PromoBar badge="PROMO">
+              Descuento del {AppVars.promotions.discount.percentage}% en diseños seleccionados
+            </PromoBar>
+          )}
+          {AppVars.promotions.twoForOne.enabled && (
+            <PromoBar badge="PROMO">{PROMO_2X1_LABEL}</PromoBar>
+          )}
+        </div>
       )}
 
       <main>
@@ -277,7 +279,7 @@ const Shop = () => {
                   variant="outline"
                   className="px-3 py-1.5 text-xs sm:text-sm whitespace-normal break-words leading-snug"
                 >
-                  ✨ 15 cupos disponibles esta semana
+                  ✨ Nueva colección 2027 · Hecho a mano en San Nicolás
                 </Badge>
               </div>
             </div>
@@ -287,6 +289,13 @@ const Shop = () => {
         {/* Filters */}
         <section className="py-8 border-b bg-background lg:sticky top-16 z-30">
           <div className="container px-4 w-full max-w-full space-y-4">
+            {/* Disponibilidad: hay productos "Próximamente" que no se pueden comprar */}
+            <div className="flex flex-wrap gap-2">
+              <FilterChip active={onlyAvailable} onClick={() => setOnlyAvailable((v) => !v)}>
+                Solo disponibles
+              </FilterChip>
+            </div>
+
             {/* Categoría: chips siempre visibles, "Todas" primero */}
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">

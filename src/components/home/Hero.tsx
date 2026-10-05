@@ -1,13 +1,41 @@
 // src/components/landing/Hero.tsx
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { modeloOptions } from "@/data/options";
 
-// Importá dos assets:
-// 1) heroPoster.webp (LCP): imagen estática optimizada (2000–2400px ancho)
-// 2) heroLoop.mp4 (opcional): loop sutil <8s, muted; NO debe ser LCP
+// Dos assets:
+// 1) heroPoster(-768).webp (LCP): imagen estática, con versión chica para mobile
+// 2) heroLoop-opt.mp4 (decorativo): loop sutil, muted; NO es LCP
+
+/**
+ * El video sólo se monta en pantallas md+ y si el usuario no pidió ahorrar
+ * datos ni reducir movimiento. Antes se ocultaba con `opacity-0` en mobile,
+ * pero el navegador lo descargaba igual.
+ */
+function useShouldPlayHeroVideo() {
+  const [play, setPlay] = useState(false);
+  useEffect(() => {
+    const wide = window.matchMedia("(min-width: 768px)");
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const saveData =
+      (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData ===
+      true;
+    const update = () => setPlay(wide.matches && !calm.matches && !saveData);
+    update();
+    wide.addEventListener("change", update);
+    calm.addEventListener("change", update);
+    return () => {
+      wide.removeEventListener("change", update);
+      calm.removeEventListener("change", update);
+    };
+  }, []);
+  return play;
+}
 
 export default function Hero() {
+  const playVideo = useShouldPlayHeroVideo();
   return (
     <section
       className="relative isolate min-h-[90svh] flex items-center overflow-hidden"
@@ -16,32 +44,34 @@ export default function Hero() {
       {/* Background media: video opcional + imagen LCP como capa */}
       <div className="absolute inset-0 -z-10">
         {/* IMAGEN LCP (no lazy), alto contraste con overlay */}
-        <picture>
-          <source srcSet="assets/hero/heroPoster.png" type="image/webp" />
-          <img
-            src="assets/hero/heroPoster.png"
-            alt="Agenda personalizada sobre mesa, tapa con nombre y vista del interior"
-            width={2400}
-            height={1400}
-            fetchPriority="high"
-            loading="eager"
-            decoding="sync"
-            className="h-full w-full object-cover"
-          />
-        </picture>
+        <img
+          src="assets/hero/heroPoster.webp"
+          srcSet="assets/hero/heroPoster-768.webp 768w, assets/hero/heroPoster.webp 1344w"
+          sizes="100vw"
+          alt="Agenda personalizada sobre mesa, tapa con nombre y vista del interior"
+          width={1344}
+          height={768}
+          fetchPriority="high"
+          loading="eager"
+          decoding="async"
+          className="h-full w-full object-cover"
+        />
 
-        {/* VIDEO decorativo opcional (no bloquea LCP) */}
-        <video
-          className="absolute inset-0 h-full w-full object-cover opacity-0 md:opacity-100"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-        >
-          <source src="assets/hero/heroLoopBetter.avif" type="video/mp4" />
-        </video>
+        {/* VIDEO decorativo (no bloquea LCP) */}
+        {playVideo && (
+          <video
+            className="absolute inset-0 h-full w-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            poster="assets/hero/heroPoster.webp"
+            aria-hidden="true"
+          >
+            <source src="assets/hero/heroLoop-opt.mp4" type="video/mp4" />
+          </video>
+        )}
 
         {/* Overlay para contraste WCAG */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-black/20" />
@@ -50,9 +80,8 @@ export default function Hero() {
       {/* Contenido */}
       <div className="container relative z-10 px-4">
         <div className="max-w-[44rem] text-white space-y-6">
-          {/* Eyebrow con escasez/urgencia moderada */}
-          <p className="text-xs sm:text-sm font-semibold tracking-wide uppercase text-primary-200">
-            ✨ Cupos limitados · Hasta 15 por semana
+          <p className="text-xs sm:text-sm font-semibold tracking-wide uppercase text-primary-light">
+            ✨ Nueva colección 2027
           </p>
 
           <h1 className="text-4xl sm:text-6xl font-bold leading-tight">
@@ -82,16 +111,18 @@ export default function Hero() {
           {/* Trust + Objeciones resueltas */}
           <ul className="hidden mt-4 md:grid grid-cols-3 gap-4 text-left text-[0.8rem] sm:text-sm">
             <li className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-bold text-primary-300">100%</span>
+              <span className="text-xl sm:text-2xl font-bold text-primary-light">100%</span>
               <span className="text-white/85">Personalizable</span>
             </li>
             <li className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-bold text-primary-300">48&nbsp;h</span>
+              <span className="text-xl sm:text-2xl font-bold text-primary-light">48&nbsp;h</span>
               <span className="text-white/85">Entrega rápida</span>
             </li>
             <li className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-bold text-primary-300">+60</span>
-              <span className="text-white/85">Modelos listos</span>
+              <span className="text-xl sm:text-2xl font-bold text-primary-light">
+                {modeloOptions.length}
+              </span>
+              <span className="text-white/85">Diseños 2027</span>
             </li>
           </ul>
 
@@ -101,10 +132,10 @@ export default function Hero() {
             aria-label="Accesos rápidos a categorías"
           >
             {[
-              { to: "/catalogo?cat=agendas&size=A5", label: "Agendas A5" },
-              { to: "/catalogo?cat=agendas%20docentes", label: "Docentes" },
-              { to: "/catalogo?cat=agendas&interior=perpetua", label: "Perpetuas" },
+              { to: "/catalogo?interior=semanal", label: "Agenda semanal" },
+              { to: "/catalogo?interior=diaria", label: "Agenda diaria" },
               { to: "/catalogo?cat=cuadernos&size=A4", label: "Cuadernos A4" },
+              { to: "/catalogo?cat=cuadernos&size=A5", label: "Cuadernos A5" },
             ].map((c) => (
               <Link
                 key={c.label}

@@ -8,16 +8,13 @@ export interface AppVars {
     address?: string;
     locale: string;
     apiBaseUrl: string;
+    siteUrl: string; // URL pública de la tienda, con barra final
     supportHours?: string;
     social?: {
         facebook?: string;
         instagram?: string;
         twitter?: string;
         whatsapp?: string;
-    };
-    theme?: {
-        primary: string;
-        secondary?: string;
     };
     maxUploadSizeBytes?: number;
     dateFormat?: string;
@@ -53,19 +50,16 @@ export const vars: AppVars = {
     address: 'Centro, San Nicolas, Argentina',
     locale: 'es-ES',
     apiBaseUrl: '',
+    siteUrl: 'https://alpiedelaletracuadernos.github.io/tienda/',
     supportHours: 'Lun-Vie 09:00-18:00',
     social: {
         facebook: 'https://facebook.com/alpie',
         instagram: 'https://www.instagram.com/alpiedelaletra.cuadernos/profilecard/?igsh=NG1sdHY5djZnMm1j',
         whatsapp: '5493364364774'
     },
-    theme: {
-        primary: '#ff6b6b',
-        secondary: '#1a1a1a'
-    },
     maxUploadSizeBytes: 5 * 1024 * 1024, // 5 MB
     dateFormat: 'dd/MM/yyyy',
-    personalizationSurcharge: 5000, // Recargo $5000 inicial
+    personalizationSurcharge: 8000, // Recargo por personalizar la tapa
     promotions: {
         discount: {
             enabled: false,
@@ -79,7 +73,7 @@ export const vars: AppVars = {
             eligibleCategories: ['agendas', 'agendas docentes']
         },
         hotSale: {
-            enabled: true,
+            enabled: false,
             percentage: 25,
             applyToPersonalized: true,
             startDate: '2026-05-11',

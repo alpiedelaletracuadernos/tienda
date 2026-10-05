@@ -87,8 +87,7 @@ export default function HotSaleModal({ forceOpen }: Props) {
       {/* Dialog */}
       <div
         ref={dialogRef}
-        className="relative z-[101] w-full sm:max-w-md mx-0 sm:mx-4 rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl"
-        style={{ background: 'linear-gradient(135deg, #EC6B79 0%, #d4556a 100%)' }}
+        className="relative z-[101] w-full sm:max-w-md mx-0 sm:mx-4 rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-accent to-accent-strong"
       >
         {/* Cierre */}
         <button

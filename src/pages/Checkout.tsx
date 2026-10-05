@@ -195,13 +195,7 @@ const Checkout = () => {
                 </div>
 
                 <div
-                  className="space-y-3 max-h-[40svh] overflow-auto pr-1
-                  [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.400)_transparent]
-                  [&::-webkit-scrollbar]:w-2
-                  [&::-webkit-scrollbar-track]:bg-transparent
-                  [&::-webkit-scrollbar-thumb]:bg-slate-400/60
-                  hover:[&::-webkit-scrollbar-thumb]:bg-slate-500/70
-                  [&::-webkit-scrollbar-thumb]:rounded-full"
+                  className="space-y-3 max-h-[40svh] overflow-auto pr-1 scrollbar-soft"
                 >
                   {(!items || items.length === 0) && (
                     <p className="text-sm text-muted-foreground">Tu carrito está vacío.</p>

@@ -7,7 +7,7 @@ export type ProductCategory =
   | 'especiales'
   | 'planners';
 
-export type ProductSize = 'A5' | 'A4';
+export type ProductSize = 'A6' | 'A5' | 'A4';
 
 export type ModelAssets = {
   [key: string]: string[];
@@ -27,13 +27,15 @@ export type ModeloType = {
  */
 export type DesignOption = {
   id: string;
-  image: string; // URL de la miniatura
-  modelo: string; // ej: "48"
-  collection: string; // ej: "Edicion-2026"
+  image: string; // URL de la imagen grande (galería y pantalla completa)
+  thumb?: string; // URL de la miniatura para grillas; si falta se usa `image`
+  modelo: string; // ej: "66"
+  collection: string; // ej: "Edicion-2027"
 };
 
 export type InteriorType =
   | 'semanal'
+  | 'diaria'
   | 'dos-por-hoja'
   | 'universitaria'
   | 'docente'
@@ -77,7 +79,12 @@ export interface Product {
   materials: string[];
   includes: string[];
   productionTime: string;
+  /** false = se muestra como "Próximamente" y no se puede comprar. */
   inStock: boolean;
+  /** Texto que acompaña al "Próximamente" (default en `lib/availability.ts`). */
+  availabilityNote?: string;
+  /** true = borrador: cargado pero no publicado (no aparece ni por URL). */
+  draft?: boolean;
   weeklyQuota: number;
   remainingQuota: number;
   colors?: ProductColor[];

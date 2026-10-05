@@ -128,7 +128,7 @@ export default function Promo2x1Modal({
         </button>
 
         {/* Imagen promo (mobile/desktop) */}
-        <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-slate-100">
+        <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-muted">
           {/* Usa 2 imágenes distintas optimizadas */}
           <picture>
             <source media="(max-width: 767px)" srcSet="assets/promos/2X1.png" />
@@ -153,12 +153,12 @@ export default function Promo2x1Modal({
           <h3 id="promo2x1-title" className="text-xl sm:text-2xl font-bold">
             2×1 por tiempo limitado
           </h3>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-muted-foreground">
             Llevá <strong>2 productos al precio de 1</strong> en nuestros diseños disponibles en stock. Aprovechalo hoy: cupos semanales limitados.
           </p>
 
           {/* Bullets de confianza */}
-          <ul className="text-sm text-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+          <ul className="text-sm text-foreground/80 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
             <li>• Hecho a mano</li>
             <li>• Entrega 24–48h</li>
           </ul>
@@ -176,14 +176,14 @@ export default function Promo2x1Modal({
             {/* Secundario: ver catálogo */}
             <a
               href="#/catalogo"
-              className="text-sm text-slate-600 hover:text-slate-900 underline underline-offset-4 justify-self-start sm:justify-self-end"
+              className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4 justify-self-start sm:justify-self-end"
             >
               Ver catálogo →
             </a>
           </div>
 
           {/* Nota legal/condiciones cortas */}
-          <p className="text-[11px] text-slate-500">
+          <p className="text-[11px] text-muted-foreground">
             Válido solo en modelos en stock. No acumulable con otras promos. Sujeto a disponibilidad semanal.
           </p>
         </div>

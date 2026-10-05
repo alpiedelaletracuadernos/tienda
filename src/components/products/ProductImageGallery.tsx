@@ -2,6 +2,7 @@
 import { useState, useId, useRef, useEffect } from "react";
 import { Maximize2, Play } from "lucide-react";
 import clsx from "clsx";
+import { isVideo, posterOf, thumbOf } from "@/lib/media";
 
 type Props = {
   images: string[];                 // puede contener URLs de imágenes o videos
@@ -10,12 +11,6 @@ type Props = {
   onOpenFullscreen?: (src: string) => void;
 };
 
-const VIDEO_EXT_RE = /\.(mp4|webm|ogg|ogv|mov|m4v)$/i;
-const isVideo = (src: string) => {
-  // Ignora querystrings al evaluar la extensión
-  const clean = src.split("?")[0];
-  return VIDEO_EXT_RE.test(clean);
-};
 
 export default function ProductImageGallery({
   images,
@@ -63,13 +58,7 @@ export default function ProductImageGallery({
             flex lg:hidden flex-nowrap gap-3
             overflow-x-auto overflow-y-hidden
             snap-x snap-mandatory scroll-smooth
-            py-1 px-2
-            [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.400)_transparent]
-            [&::-webkit-scrollbar]:h-2
-            [&::-webkit-scrollbar-track]:bg-transparent
-            [&::-webkit-scrollbar-thumb]:bg-slate-400/60
-            hover:[&::-webkit-scrollbar-thumb]:bg-slate-500/70
-            [&::-webkit-scrollbar-thumb]:rounded-full
+            py-1 px-2 scrollbar-soft
           "
           role="listbox"
           aria-label="Miniaturas"
@@ -87,19 +76,19 @@ export default function ProductImageGallery({
                 role="option"
                 aria-selected={selected}
                 className={clsx(
-                  "relative snap-center flex-none w-20 h-20 rounded-xl overflow-hidden ring-1 ring-slate-300/50 bg-white shadow-sm",
-                  selected ? "ring-2 ring-primary" : "hover:ring-2 hover:ring-slate-400/60"
+                  "relative snap-center flex-none w-20 h-20 rounded-xl overflow-hidden ring-1 ring-border bg-white shadow-sm",
+                  selected ? "ring-2 ring-primary" : "hover:ring-2 hover:ring-muted-foreground/40"
                 )}
                 onClick={() => select(i)}
                 title={video ? "Miniatura de video" : `Miniatura ${i + 1}`}
               >
                 {video ? (
                   <>
-                    <video
-                      src={src}
-                      preload="metadata"     // no descarga el video completo
-                      muted
-                      playsInline            // iOS: reproducción inline
+                    <img
+                      src={thumbOf(src)}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                     />
                     <span className="absolute inset-0 grid place-items-center">
@@ -110,7 +99,7 @@ export default function ProductImageGallery({
                   </>
                 ) : (
                   <img
-                    src={src}
+                    src={thumbOf(src)}
                     alt={`${altBase} miniatura ${i + 1}`}
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -127,13 +116,7 @@ export default function ProductImageGallery({
             hidden lg:flex lg:flex-col gap-3
             lg:max-h-[50svh] xl:max-h-[55svh] min-h-0
             overflow-y-auto pr-1
-            snap-y snap-mandatory
-            [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.400)_transparent]
-            [&::-webkit-scrollbar]:w-2
-            [&::-webkit-scrollbar-track]:bg-transparent
-            [&::-webkit-scrollbar-thumb]:bg-slate-400/60
-            hover:[&::-webkit-scrollbar-thumb]:bg-slate-500/70
-            [&::-webkit-scrollbar-thumb]:rounded-full
+            snap-y snap-mandatory scrollbar-soft
           "
           role="listbox"
           aria-label="Miniaturas"
@@ -151,19 +134,19 @@ export default function ProductImageGallery({
                 role="option"
                 aria-selected={selected}
                 className={clsx(
-                  "relative snap-start w-full aspect-square rounded-xl overflow-hidden ring-1 ring-slate-300/50 bg-white shadow-sm",
-                  selected ? "ring-2 ring-primary" : "hover:ring-2 hover:ring-slate-400/60"
+                  "relative snap-start w-full aspect-square rounded-xl overflow-hidden ring-1 ring-border bg-white shadow-sm",
+                  selected ? "ring-2 ring-primary" : "hover:ring-2 hover:ring-muted-foreground/40"
                 )}
                 onClick={() => select(i)}
                 title={video ? "Miniatura de video" : `Miniatura ${i + 1}`}
               >
                 {video ? (
                   <>
-                    <video
-                      src={src}
-                      preload="metadata"
-                      muted
-                      playsInline
+                    <img
+                      src={thumbOf(src)}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                     />
                     <span className="absolute inset-0 grid place-items-center">
@@ -174,7 +157,7 @@ export default function ProductImageGallery({
                   </>
                 ) : (
                   <img
-                    src={src}
+                    src={thumbOf(src)}
                     alt={`${altBase} miniatura ${i + 1}`}
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -191,7 +174,7 @@ export default function ProductImageGallery({
         <div
           className="
             w-full max-w-full h-auto mx-auto
-            rounded-2xl bg-muted/60 ring-1 ring-slate-200 overflow-hidden
+            rounded-2xl bg-muted/60 ring-1 ring-border overflow-hidden
             flex items-center justify-center
             p-3 sm:p-4
             max-h-[70svh] sm:max-h-[75svh] md:max-h-[80svh]
@@ -204,8 +187,8 @@ export default function ProductImageGallery({
               controls
               playsInline
               preload="metadata"
+              poster={posterOf(currentSrc)}
               className="max-w-full max-h-full object-contain"
-              // poster="(opcional) /ruta/preview.jpg"
               aria-label={`${altBase} (video) ${index + 1} de ${images.length}`}
             >
               {/* Si querés ofrecer varios formatos: */}

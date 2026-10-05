@@ -5,9 +5,10 @@
 // en el pedido): la gente pasa de largo los carruseles, y recortar el set de
 // opciones sin dejar ver el total hace pensar al usuario que no hay más.
 //
-// Decisión del dueño de la tienda: la colección actual (Edicion-2026) es la
-// preseleccionada y la única visible sin abrir nada; las anteriores siguen
-// disponibles pero con menos peso visual, alcanzables desde el sheet.
+// Decisión del dueño de la tienda: la colección actual (Edicion-2027) es la
+// preseleccionada y la única visible sin abrir nada. Si en el futuro vuelven
+// a convivir varias colecciones, las anteriores quedan con menos peso visual,
+// alcanzables desde el sheet.
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Maximize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -18,18 +19,14 @@ import type { DesignOption } from '@/types/product';
 // El tipo vive en @/types/product (los datos no dependen de la UI).
 export type { DesignOption };
 
-// Orden de recencia pedido por el dueño de la tienda. No es alfabético ni el
-// orden crudo del array de datos: Edicion-2026 (actual) > Edicion-2025 >
-// capsula-Arg > Edicion-2024.
-const COLLECTION_ORDER = ['Edicion-2026', 'Edicion-2025', 'capsula-Arg', 'Edicion-2024'] as const;
+// Orden de recencia pedido por el dueño de la tienda (la primera es la
+// actual). Hoy sólo se ofrece la Edición 2027.
+const COLLECTION_ORDER = ['Edicion-2027'] as const;
 const CURRENT_COLLECTION: string = COLLECTION_ORDER[0];
 const COLLAPSED_COUNT = 6;
 
 const COLLECTION_LABELS: Record<string, string> = {
-  'Edicion-2026': 'Edición 2026',
-  'Edicion-2025': 'Edición 2025',
-  'capsula-Arg': 'Cápsula Arg',
-  'Edicion-2024': 'Edición 2024',
+  'Edicion-2027': 'Edición 2027',
 };
 
 const collectionLabel = (collection: string) => COLLECTION_LABELS[collection] ?? collection;
@@ -70,15 +67,15 @@ function DesignThumb({ option, checked, tabIndex, onSelect, onExpand, registerRe
         tabIndex={tabIndex}
         className={cn(
           'group relative block w-full overflow-hidden rounded-xl aspect-[3/4]',
-          'bg-white ring-1 ring-slate-300/60',
+          'bg-white ring-1 ring-border',
           checked
             ? 'ring-4 ring-primary ring-offset-2'
-            : 'hover:ring-2 hover:ring-slate-400/60',
+            : 'hover:ring-2 hover:ring-muted-foreground/40',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary'
         )}
       >
         <img
-          src={option.image}
+          src={option.thumb ?? option.image}
           alt={`Modelo ${option.modelo}`}
           className="h-full w-full object-cover"
           loading="lazy"
@@ -250,7 +247,7 @@ export function DesignPicker({ options, value, onChange, onExpand, className }: 
       if (next) {
         setHasOpenedOnce(true);
         // El sheet abre mostrando la colección del diseño actualmente
-        // elegido, no siempre la 2026.
+        // elegido, no siempre la actual.
         setSheetCollection(selectedOption?.collection ?? CURRENT_COLLECTION);
       }
     },
@@ -283,19 +280,22 @@ export function DesignPicker({ options, value, onChange, onExpand, className }: 
         <SheetContent side="bottom" className="h-[90svh] flex flex-col gap-0 p-0">
           <SheetHeader className="sticky top-0 z-10 shrink-0 space-y-3 border-b bg-background px-4 pb-3 pt-4 text-left">
             <SheetTitle>Elegí tu diseño</SheetTitle>
-            <div className="flex flex-wrap gap-2">
-              {collectionsPresent.map((col) => {
-                const isCurrent = col === CURRENT_COLLECTION;
-                const isActive = sheetCollection === col;
-                return (
-                  <Button
-                    key={col}
-                    type="button"
-                    size="sm"
-                    variant={isActive ? (isCurrent ? 'default' : 'secondary') : 'outline'}
-                    className={cn(
-                      'h-auto rounded-full',
-                      isCurrent ? 'px-3 py-1.5 text-sm' : 'px-2.5 py-1 text-xs text-muted-foreground'
+            {/* Con una sola colección los chips ("Edición 2027 · 16" y
+                "Todas · 16") serían redundantes. */}
+            {collectionsPresent.length > 1 && (
+              <div className="flex flex-wrap gap-2">
+                {collectionsPresent.map((col) => {
+                  const isCurrent = col === CURRENT_COLLECTION;
+                  const isActive = sheetCollection === col;
+                  return (
+                    <Button
+                      key={col}
+                      type="button"
+                      size="sm"
+                      variant={isActive ? (isCurrent ? 'default' : 'secondary') : 'outline'}
+                      className={cn(
+                        'h-auto rounded-full',
+                        isCurrent ? 'px-3 py-1.5 text-sm' : 'px-2.5 py-1 text-xs text-muted-foreground'
                     )}
                     onClick={() => setSheetCollection(col)}
                   >
@@ -313,6 +313,7 @@ export function DesignPicker({ options, value, onChange, onExpand, className }: 
                 Todas · {options.length}
               </Button>
             </div>
+            )}
           </SheetHeader>
 
           <div className="flex-1 overflow-y-auto px-4 py-4">

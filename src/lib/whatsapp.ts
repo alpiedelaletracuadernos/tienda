@@ -2,6 +2,7 @@
 import type { Product, ProductSize, InteriorType, CoverType } from '@/types/product';
 import type { CartItem, BuyerInfo } from '@/types/cart';
 import { formatARS } from '@/lib/currency';
+import vars from '@/data/data';
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
 
 export type PersonalizationStyleId = 'nombre' | 'frase' | 'foto' | 'trama' | 'logo';
@@ -126,6 +127,17 @@ export function buildPdpMessage(
   return lines.join('\n');
 }
 
+// Producto "Próximamente": pedir aviso cuando vuelva a estar disponible
+export function buildRestockMessage(product: Pick<Product, 'name'>): string {
+  return [
+    'Hola! Vi en la tienda que este producto está *próximamente*:',
+    '',
+    `*${product.name}*`,
+    '',
+    '¿Me avisan cuando esté disponible? ✨',
+  ].join('\n');
+}
+
 // Checkout (carrito completo)
 export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): string {
   const lines: string[] = [];
@@ -149,6 +161,10 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
       if (it.selectedInterior) lines.push(`   Interior: ${it.selectedInterior}`);
       if (it.selectedCover) lines.push(`   Tapa: ${it.selectedCover}`);
       if (it.personalization) lines.push(`   Personalización: “${it.personalization}”`);
+      if (it.isCustom)
+        lines.push(
+          `   Personalización de tapa: +${formatARS(vars.personalizationSurcharge)} (incluido en el unitario)`
+        );
       lines.push(`   Unitario: ${formatARS(unit)}  |  Subtotal: ${formatARS(subtotal)}`);
       lines.push('');
     });
