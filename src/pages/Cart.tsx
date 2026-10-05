@@ -10,7 +10,9 @@ import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { formatARS } from '@/lib/currency';
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
 import { thumbOf } from '@/lib/media';
-import vars from '@/data/data';
+import { getProductById } from '@/data/products';
+import { isPresaleProduct } from '@/config/presale';
+import { personalizationSurchargeForId } from '@/lib/pricing/personalization';
 import { getCartLineKey } from '@/lib/cart-key';
 
 export default function Cart() {
@@ -116,12 +118,21 @@ export default function Cart() {
                             {item.selectedModel && <p>Modelo: {item.selectedModel}</p>}
                             {item.selectedColor && <p>Color: {item.selectedColor}</p>}
                             {item.selectedSize && <p>Tamaño: {item.selectedSize}</p>}
-                            {item.selectedInterior && <p>Interior: {item.selectedInterior}</p>}
+                            {item.selectedInterior && (
+                              <p>
+                                {isPresaleProduct(getProductById(item.product.id)?.slug ?? '')
+                                  ? 'Agenda'
+                                  : 'Interior'}
+                                : {item.selectedInterior}
+                              </p>
+                            )}
                             {item.selectedCover && <p>Tapa: {item.selectedCover}</p>}
                             {item.isCustom && (
                               <p>
-                                Personalización de tapa: +{formatARS(vars.personalizationSurcharge)}{' '}
-                                c/u (incluido)
+                                Personalización de tapa:{' '}
+                                {personalizationSurchargeForId(item.product.id) > 0
+                                  ? `+${formatARS(personalizationSurchargeForId(item.product.id))} c/u (incluido)`
+                                  : 'incluida en el precio'}
                               </p>
                             )}
                           </div>

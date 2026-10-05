@@ -65,6 +65,20 @@ export type CoverType = 'dura' | 'blanda';
 
 export type ProductColor = { id: string; name: string; hex: string };
 
+/**
+ * Una pieza de un kit con su valor por separado. El valor sale fijo
+ * (`value`) o del precio actual de otro producto del catálogo según la
+ * versión elegida (`priceFromSlug`), así no queda desfasado si ese producto
+ * cambia de precio.
+ */
+export type KitItem = {
+  label: string;
+  detail: string;
+  image?: string;
+  value?: number;
+  priceFromSlug?: Partial<Record<InteriorType, string>>;
+};
+
 export interface Product {
   id: string;
   name: string;
@@ -85,6 +99,28 @@ export interface Product {
   availabilityNote?: string;
   /** true = borrador: cargado pero no publicado (no aparece ni por URL). */
   draft?: boolean;
+  /** true = la personalización de tapa ya está en el precio (no suma recargo). */
+  personalizationIncluded?: boolean;
+  /**
+   * Fuerza mostrar (true) u ocultar (false) el selector de diseños de tapa.
+   * Sin definir, lo decide la categoría (agendas, agendas docentes, cuadernos).
+   */
+  coverDesigns?: boolean;
+  /** Precio de lista según el interior elegido (kit: semanal / diaria). */
+  priceByInterior?: Partial<Record<InteriorType, number>>;
+  /** Kit: piezas con su valor por separado. Su suma es el precio de referencia. */
+  kitItems?: KitItem[];
+  /** Etiqueta en card y ficha (p. ej. "PREVENTA"). */
+  badge?: string;
+  /** false = no se ofrece personalizar la tapa (se oculta el paso). */
+  personalizable?: boolean;
+  /** Queda fuera de 2x1, descuento y Hot Sale. */
+  excludeFromPromos?: boolean;
+  /** Plazo de entrega que se muestra junto al precio. */
+  deliveryNote?: string;
+  /** Etiqueta y texto propios cuando no está disponible (default: "Próximamente"). */
+  availabilityLabel?: string;
+  availabilityMessage?: string;
   weeklyQuota: number;
   remainingQuota: number;
   colors?: ProductColor[];

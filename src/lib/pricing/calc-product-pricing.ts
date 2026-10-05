@@ -1,8 +1,9 @@
 // src/lib/pricing/calc-product-pricing.ts
-import type { Product } from '@/types/product';
+import type { InteriorType, Product } from '@/types/product';
 import type { CartItem } from '@/types/cart';
-import vars from '@/data/data';
 import { calculateCartPricing } from './calc-cart-pricing';
+import { personalizationSurchargeFor } from './personalization';
+import { listPriceFor } from './kit';
 
 /**
  * Única fuente de precios para vistas de producto (PDP, ProductCard).
@@ -21,7 +22,18 @@ import { calculateCartPricing } from './calc-cart-pricing';
  * gratis no cambia el total de la línea).
  */
 export function calculateProductPricing(args: {
-  product: Pick<Product, 'id' | 'name' | 'basePrice' | 'images' | 'category'>;
+  product: Pick<
+    Product,
+    | 'id'
+    | 'name'
+    | 'basePrice'
+    | 'images'
+    | 'category'
+    | 'personalizationIncluded'
+    | 'priceByInterior'
+  >;
+  /** Interior elegido: define el precio si el producto tiene `priceByInterior`. */
+  interior?: InteriorType;
   quantity?: number; // default 1
   isCustom?: boolean; // suma el recargo de personalización
 }): {
@@ -32,10 +44,11 @@ export function calculateProductPricing(args: {
   discounts: { label: string; amount: number }[];
   hasDiscount: boolean;
 } {
-  const { product, quantity = 1, isCustom = false } = args;
+  const { product, interior, quantity = 1, isCustom = false } = args;
   const qty = Math.max(1, quantity);
 
-  const listUnit = isCustom ? product.basePrice + vars.personalizationSurcharge : product.basePrice;
+  const base = listPriceFor(product, interior);
+  const listUnit = isCustom ? base + personalizationSurchargeFor(product) : base;
 
   const hypotheticalItem: CartItem = {
     product: {

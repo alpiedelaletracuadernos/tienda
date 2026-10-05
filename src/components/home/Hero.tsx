@@ -5,80 +5,105 @@ import { Button } from "@/components/ui/button";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { modeloOptions } from "@/data/options";
 
-// Dos assets:
-// 1) heroPoster(-768).webp (LCP): imagen estática, con versión chica para mobile
-// 2) heroLoop-opt.mp4 (decorativo): loop sutil, muted; NO es LCP
+// Portada 2027: video vertical (9:16).
+//  · Mobile: el video es el fondo de pantalla completa.
+//  · Desktop (md+): el video va en una tarjeta vertical a la derecha del texto,
+//    sobre un fondo con el primer cuadro ampliado y desenfocado.
+// El primer cuadro (poster) es la imagen LCP y se ve al instante; el video se
+// monta recién después de que la página terminó de cargar, y nunca con
+// "ahorro de datos" o "reducir movimiento" activados.
 
-/**
- * El video sólo se monta en pantallas md+ y si el usuario no pidió ahorrar
- * datos ni reducir movimiento. Antes se ocultaba con `opacity-0` en mobile,
- * pero el navegador lo descargaba igual.
- */
-function useShouldPlayHeroVideo() {
-  const [play, setPlay] = useState(false);
+const POSTER = "assets/hero/hero-2027-poster.webp";
+const POSTER_SRCSET =
+  "assets/hero/hero-2027-poster-480.webp 480w, assets/hero/hero-2027-poster.webp 720w";
+const POSTER_ALT = "Agendas 2027 de Al Pie de la Letra con tapas de colores";
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(query).matches
+  );
   useEffect(() => {
-    const wide = window.matchMedia("(min-width: 768px)");
-    const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const saveData =
-      (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData ===
-      true;
-    const update = () => setPlay(wide.matches && !calm.matches && !saveData);
+    const mq = window.matchMedia(query);
+    const update = () => setMatches(mq.matches);
     update();
-    wide.addEventListener("change", update);
-    calm.addEventListener("change", update);
-    return () => {
-      wide.removeEventListener("change", update);
-      calm.removeEventListener("change", update);
-    };
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, [query]);
+  return matches;
+}
+
+function useCanPlayHeroVideo() {
+  const calm = useMediaQuery("(prefers-reduced-motion: reduce)");
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    if (document.readyState === "complete") {
+      setLoaded(true);
+      return;
+    }
+    const onLoad = () => setLoaded(true);
+    window.addEventListener("load", onLoad, { once: true });
+    return () => window.removeEventListener("load", onLoad);
   }, []);
-  return play;
+  const saveData =
+    typeof navigator !== "undefined" &&
+    (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData ===
+      true;
+  return loaded && !calm && !saveData;
+}
+
+function HeroVideo({ className }: { className?: string }) {
+  return (
+    <video
+      className={className}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      poster={POSTER}
+      aria-hidden="true"
+    >
+      {/* VP9 (más liviano) primero; H.264 para Safari y equipos viejos */}
+      <source src="assets/hero/hero-2027.webm" type="video/webm" />
+      <source src="assets/hero/hero-2027.mp4" type="video/mp4" />
+    </video>
+  );
 }
 
 export default function Hero() {
-  const playVideo = useShouldPlayHeroVideo();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const playVideo = useCanPlayHeroVideo();
   return (
     <section
       className="relative isolate min-h-[90svh] flex items-center overflow-hidden"
       aria-label="Agendas y cuadernos artesanales personalizables"
     >
-      {/* Background media: video opcional + imagen LCP como capa */}
+      {/* Fondo: primer cuadro (LCP). En desktop, ampliado y desenfocado. */}
       <div className="absolute inset-0 -z-10">
-        {/* IMAGEN LCP (no lazy), alto contraste con overlay */}
         <img
-          src="assets/hero/heroPoster.webp"
-          srcSet="assets/hero/heroPoster-768.webp 768w, assets/hero/heroPoster.webp 1344w"
+          src={POSTER}
+          srcSet={POSTER_SRCSET}
           sizes="100vw"
-          alt="Agenda personalizada sobre mesa, tapa con nombre y vista del interior"
-          width={1344}
-          height={768}
+          alt=""
+          width={720}
+          height={1280}
           fetchPriority="high"
           loading="eager"
           decoding="async"
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover md:scale-110 md:blur-2xl"
         />
 
-        {/* VIDEO decorativo (no bloquea LCP) */}
-        {playVideo && (
-          <video
-            className="absolute inset-0 h-full w-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            poster="assets/hero/heroPoster.webp"
-            aria-hidden="true"
-          >
-            <source src="assets/hero/heroLoop-opt.mp4" type="video/mp4" />
-          </video>
+        {/* Mobile: el video es el fondo */}
+        {playVideo && !isDesktop && (
+          <HeroVideo className="absolute inset-0 h-full w-full object-cover" />
         )}
 
-        {/* Overlay para contraste WCAG */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-black/20" />
+        {/* Overlay para contraste del texto blanco (el video es muy claro) */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/55 to-black/45 md:bg-gradient-to-r md:from-black/70 md:via-black/45 md:to-black/10" />
       </div>
 
       {/* Contenido */}
-      <div className="container relative z-10 px-4">
+      <div className="container relative z-10 px-4 md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-10 lg:gap-16">
         <div className="max-w-[44rem] text-white space-y-6">
           <p className="text-xs sm:text-sm font-semibold tracking-wide uppercase text-primary-light">
             ✨ Nueva colección 2027
@@ -149,8 +174,22 @@ export default function Hero() {
 
           {/* Micro-reseña/UGC (no LCP) */}
           <div className="mt-4 text-white/85 text-sm">
-            ★★★★★ “La personalización quedó perfecta y llegó rapidísimo.” — Sofía, SN
+            “Me encantó la presentación, los stickers, la calidad…” — mensaje de un cliente
           </div>
+        </div>
+
+        {/* Desktop: video en tarjeta vertical */}
+        <div className="hidden md:block relative aspect-[9/16] h-[min(72svh,640px)] overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/20">
+          <img
+            src={POSTER}
+            alt={POSTER_ALT}
+            width={720}
+            height={1280}
+            loading="eager"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          {playVideo && isDesktop && <HeroVideo className="absolute inset-0 h-full w-full object-cover" />}
         </div>
       </div>
     </section>

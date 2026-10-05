@@ -2,7 +2,9 @@
 import type { Product, ProductSize, InteriorType, CoverType } from '@/types/product';
 import type { CartItem, BuyerInfo } from '@/types/cart';
 import { formatARS } from '@/lib/currency';
-import vars from '@/data/data';
+import { catalog } from '@/data/products';
+import { isPresaleProduct, presale } from '@/config/presale';
+import { personalizationSurchargeForId } from '@/lib/pricing/personalization';
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
 
 export type PersonalizationStyleId = 'nombre' | 'frase' | 'foto' | 'trama' | 'logo';
@@ -103,13 +105,20 @@ export function buildPdpMessage(
 ): string {
   const qty = selections.quantity ?? 1;
   const lines: string[] = [];
-  lines.push('Hola! Me interesa este producto:');
+  const isPresale = isPresaleProduct(product.slug);
+  if (isPresale) {
+    // Mismo texto que la campaña en redes + código para identificar el pedido.
+    lines.push(`Hola! Quiero reservar el ${presale.name} de la preventa. [${presale.campaignCode}]`);
+  } else {
+    lines.push('Hola! Me interesa este producto:');
+  }
   lines.push('');
   lines.push(`*${product?.name ?? 'Producto'}*`);
   if (selections.modelLabel) lines.push(`Modelo: ${selections.modelLabel}`);
   if (selections.color) lines.push(`Color: ${selections.color}`);
   if (selections.size) lines.push(`Tamaño: ${selections.size}`);
-  if (selections.interior) lines.push(`Interior: ${selections.interior}`);
+  if (selections.interior)
+    lines.push(isPresale ? `Agenda: ${selections.interior}` : `Interior: ${selections.interior}`);
   if (selections.cover) lines.push(`Tapa: ${selections.cover}`);
   if (personalization?.text) lines.push(`Personalización: "${personalization.text}"`);
   if (personalization?.styleId) {
@@ -123,7 +132,7 @@ export function buildPdpMessage(
   }
   lines.push(`Cantidad: ${qty}`);
   lines.push('');
-  lines.push('¿Está disponible? ✨');
+  lines.push(isPresale ? '¿Me pasás los datos para reservarlo? ✨' : '¿Está disponible? ✨');
   return lines.join('\n');
 }
 
@@ -147,9 +156,15 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
   if (!cartItems?.length) {
     lines.push('_(No tengo productos en el carrito aún)_');
   } else {
+    const presaleId = catalog.find((p) => isPresaleProduct(p.slug))?.id;
+    if (cartItems.some((it) => it.product.id === presaleId)) {
+      lines.push(`Preventa ${presale.name} [${presale.campaignCode}]`);
+      lines.push('');
+    }
     lines.push('*Detalle del pedido:*');
     lines.push('');
     cartItems.forEach((it, idx) => {
+      const isPresaleLine = it.product.id === presaleId;
       const name = it.product?.name ?? 'Producto';
       const qty = it.quantity ?? 1;
       const unit = it.price ?? it.product?.basePrice ?? 0;
@@ -158,13 +173,20 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
       if (it.selectedModel) lines.push(`   Modelo: ${it.selectedModel}`);
       if (it.selectedColor) lines.push(`   Color: ${it.selectedColor}`);
       if (it.selectedSize) lines.push(`   Tamaño: ${it.selectedSize}`);
-      if (it.selectedInterior) lines.push(`   Interior: ${it.selectedInterior}`);
+      if (it.selectedInterior)
+        lines.push(
+          isPresaleLine ? `   Agenda: ${it.selectedInterior}` : `   Interior: ${it.selectedInterior}`
+        );
       if (it.selectedCover) lines.push(`   Tapa: ${it.selectedCover}`);
       if (it.personalization) lines.push(`   Personalización: “${it.personalization}”`);
-      if (it.isCustom)
+      if (it.isCustom) {
+        const surcharge = personalizationSurchargeForId(it.product.id);
         lines.push(
-          `   Personalización de tapa: +${formatARS(vars.personalizationSurcharge)} (incluido en el unitario)`
+          surcharge > 0
+            ? `   Personalización de tapa: +${formatARS(surcharge)} (incluido en el unitario)`
+            : '   Personalización de tapa: incluida en el precio'
         );
+      }
       lines.push(`   Unitario: ${formatARS(unit)}  |  Subtotal: ${formatARS(subtotal)}`);
       lines.push('');
     });

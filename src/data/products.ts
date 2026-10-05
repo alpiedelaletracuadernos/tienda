@@ -1,4 +1,7 @@
 import { Product, ModelAssets, ProductColor } from '@/types/product';
+import { sortByCatalogOrder } from '@/data/catalog-order';
+import vars from '@/data/data';
+import { isPresaleActive } from '@/config/presale';
 
 const routeBase = 'assets/';
 
@@ -11,55 +14,79 @@ export const BOX_COLORS: ProductColor[] = [
   { id: 'magenta', name: 'Magenta', hex: '#C2185B' },
 ];
 
-// Tapas Edición 2027 (también son las opciones del selector de diseño).
-const tapas2027 = [
-  `${routeBase}models/edicion-2027_0001.webp`,
-  `${routeBase}models/edicion-2027_0002.webp`,
-  `${routeBase}models/edicion-2027_0003.webp`,
-  `${routeBase}models/edicion-2027_0004.webp`,
-  `${routeBase}models/edicion-2027_0005.webp`,
-  `${routeBase}models/edicion-2027_0006.webp`,
-  `${routeBase}models/edicion-2027_0007.webp`,
-  `${routeBase}models/edicion-2027_0008.webp`,
-  `${routeBase}models/edicion-2027_0009.webp`,
-  `${routeBase}models/edicion-2027_0010.webp`,
-  `${routeBase}models/edicion-2027_0011.webp`,
-  `${routeBase}models/edicion-2027_0012.webp`,
-  `${routeBase}models/edicion-2027_0013.webp`,
-  `${routeBase}models/edicion-2027_0014.webp`,
-  `${routeBase}models/edicion-2027_0015.webp`,
-  `${routeBase}models/edicion-2027_0016.webp`,
-];
-
 export const productoImagenes: ModelAssets = {
-  // Fotos 2027: hasta tener fotos del interior 2027 se usan las tapas y, en la
-  // semanal, las fotos del interior 2026 que no muestran el año (el diseño
-  // del interior no cambió).
-  'agenda-semanal-2027': [
-    ...tapas2027.slice(0, 4),
-    ...[3, 4, 5, 6, 9, 10, 11, 12, 13, 14].map(
-      (n) => `${routeBase}productos/agenda-semanal_${String(n).padStart(4, '0')}.webp`
-    ),
+  // Provisorias (fotos 2027 de agendas) hasta tener las fotos del kit completo:
+  // se reemplazan con `optimize_images.py numerar ... --prefix kit-mi-ano-2027 --force`.
+  'kit-mi-ano-2027': [
+    `${routeBase}productos/kit-mi-ano-2027_0001.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0002.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0003.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0004.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0005.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0006.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0007.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0008.webp`,
   ],
-  'agenda-diaria-2027': tapas2027.slice(4, 10),
-  // TODO: reemplazar por fotos reales de la Pocket cuando estén.
-  'agenda-perpetua-pocket': tapas2027.slice(10, 14),
-  'agenda-2-dias-por-hoja': [
-    `${routeBase}productos/agenda-2-dias-por-hoja_0001.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0002.mp4`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0003.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0004.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0005.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0006.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0007.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0008.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0009.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0010.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0011.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0012.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0013.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0014.webp`,
-    `${routeBase}productos/agenda-2-dias-por-hoja_0015.webp`,
+  // Fotos de la producción 2027 (WEB_LANZAMIENTO_2027/SEMANAL y /DIARIA), en orden.
+  'agenda-semanal-2027': [
+    `${routeBase}productos/agenda-semanal-2027_0001.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0002.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0003.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0004.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0005.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0006.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0007.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0008.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0009.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0010.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0011.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0012.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0013.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0014.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0015.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0016.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0017.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0018.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0019.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0020.webp`,
+  ],
+  'agenda-diaria-2027': [
+    `${routeBase}productos/agenda-diaria-2027_0001.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0002.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0003.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0004.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0005.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0006.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0007.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0008.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0009.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0010.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0011.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0012.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0013.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0014.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0015.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0016.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0017.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0018.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0019.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0020.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0021.webp`,
+  ],
+  'agenda-perpetua-pocket': [
+    `${routeBase}productos/agenda-perpetua-pocket_0001.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0002.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0003.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0004.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0005.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0006.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0007.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0008.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0009.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0010.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0011.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0012.webp`,
+    `${routeBase}productos/agenda-perpetua-pocket_0013.webp`,
   ],
   'agenda-docente-inicial': [
     `${routeBase}productos/agenda-docente-inicial_0002.webp`,
@@ -318,6 +345,66 @@ export const productoImagenes: ModelAssets = {
 // usa `products`, que sólo trae lo publicado.
 export const catalog: Product[] = [
   {
+    // Producto principal de la temporada. Precio, referencia y vigencia:
+    // ver vars.promotions.presale y src/lib/pricing/kit.ts.
+    id: '20',
+    name: 'Kit Mi Año 2027',
+    slug: 'kit-mi-ano-2027',
+    category: 'especiales',
+    description:
+      'Todo lo que necesitás para organizar tu 2027, en un solo kit: la agenda, un cuaderno para el día a día, una libreta de bolsillo, un señalador imantado y una tarjeta. Lo hacemos a mano, uno por uno, acá en San Nicolás. La preventa nos sirve para saber cuántos armar y hacerlos bien, sin apuro. Por eso tiene fecha: va hasta el viernes 16/10.',
+    basePrice: 32000,
+    priceByInterior: { semanal: 32000, diaria: 37000 },
+    kitItems: [
+      {
+        label: 'Agenda 2027',
+        detail:
+          'Tapa dura con laminado brillo, anillado doble alambre que abre 180°, hojas de 90 gramos, portada a color.',
+        image: `${routeBase}productos/kit-mi-ano-2027_0002.webp`,
+        priceFromSlug: { semanal: 'agenda-semanal-a5', diaria: 'agenda-diaria-a5' },
+      },
+      {
+        label: 'Cuaderno A5 tapa blanda rayado',
+        detail: 'Para lo de todos los días, lo que no entra en la agenda.',
+        value: 8200,
+      },
+      {
+        label: 'Libreta A6 lisa',
+        detail: 'Chica, va en la cartera o el bolsillo.',
+        value: 5000,
+      },
+      {
+        label: 'Señalador imantado + tarjeta',
+        detail: 'El señalador se abraza a la hoja y no se cae.',
+        value: 2000,
+      },
+    ],
+    sizes: ['A5'],
+    interiors: ['semanal', 'diaria'],
+    coverTypes: ['dura'],
+    coverDesigns: true,
+    personalizable: false,
+    excludeFromPromos: true,
+    badge: vars.promotions.presale.badge,
+    deliveryNote: vars.promotions.presale.delivery,
+    materials: [
+      'Tapa dura con laminado brillo',
+      'Anillado doble alambre, abre 180° y no se deforma',
+      'Hojas de 90 gramos que no se traspasan',
+      'Portadas a color',
+      'Hecho a mano en San Nicolás de los Arroyos',
+    ],
+    includes: [],
+    productionTime: '5 días hábiles',
+    // Disponible sólo durante la preventa; después queda como "Preventa cerrada".
+    inStock: isPresaleActive(),
+    availabilityLabel: vars.promotions.presale.closedLabel,
+    availabilityMessage: vars.promotions.presale.closedMessage,
+    weeklyQuota: 15,
+    remainingQuota: 15,
+    images: productoImagenes['kit-mi-ano-2027'],
+  },
+  {
     id: '1',
     name: 'Agenda Semanal 2027',
     slug: 'agenda-semanal-a5',
@@ -352,43 +439,8 @@ export const catalog: Product[] = [
     images: productoImagenes['agenda-semanal-2027'],
   },
   {
-    id: '2',
-    name: 'Agenda 2 dias por hoja 2026',
-    slug: 'agenda-2-dias-por-hoja-a5',
-    category: 'agendas',
-    description:
-      'Más espacio por día para anotar TODO! Formato de 2 días por cada hoja con bloques amplios para escribir. Personaliza la tapa con tu nombre o lo que más te guste. Hecha a mano por pedido, con tapa dura y en papel de 90gr con anillado doble alambre. Entrega rápida. Envíos a todo el país y retiro en zona centro de San Nicolás de los Arroyos.',
-    basePrice: 33000,
-    sizes: ['A5'],
-    interiors: ['dos-por-hoja'],
-    coverTypes: ['dura'],
-    materials: [
-      'Tapa dura',
-      'hojas Interior 90g',
-      'Espiral metálico doble alambre',
-      'Elástico de cierre',
-    ],
-    includes: [
-      'Personalización de tapa incluida',
-      'Bolsillo interno',
-      'Plancha de stickers',
-      'Calendario 2026 y 2027',
-      'Planificador anual y horarios',
-      'Planner mensual con tracker de habitos',
-      'Balance mensual para anotar ingresos y gastos',
-      'Planner con los dias distribuidos 2 por cada pagina',
-      'Seccion de notas',
-      'Hoja para contraseñas',
-    ],
-    productionTime: '8-10 horas hábiles',
-    inStock: false,
-    weeklyQuota: 15,
-    remainingQuota: 15,
-    images: productoImagenes['agenda-2-dias-por-hoja'],
-  },
-  {
     id: '3',
-    name: 'Agenda Universitaria 2026',
+    name: 'Agenda Universitaria',
     slug: 'agenda-universitaria',
     category: 'agendas',
     description:
@@ -561,16 +613,16 @@ export const catalog: Product[] = [
     sizes: ['A5'],
     interiors: ['Cuaderno con planner'],
     coverTypes: ['blanda'],
+    coverDesigns: true, // usa los diseños de tapa 2027 aunque sea un planner
     materials: ['Tapa dura', 'hojas Interior 90g', 'Espiral metálico doble alambre'],
     includes: [
-      'Personalizacion de tapa incluida',
       'Bolsillo interno',
       'Plancha de stickers',
       'Planner perpetuo para 12 meses',
       'Hojas rayadas',
     ],
     productionTime: '12-24 horas habiles',
-    inStock: false,
+    inStock: true,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['cuaderno-con-planner-perpetuo'],
@@ -672,9 +724,14 @@ export const catalog: Product[] = [
     interiors: ['2 pedidos por hoja', '3 pedidos por hoja', '6 pedidos por hoja'],
     coverTypes: ['dura'],
     materials: ['Tapa dura A5', 'Hojas interior 90gr', 'espiral metalico doble alambre'],
-    includes: ['Tapa a elección', '100 hojas interior de 2,3 o 6 pedidos por hoja'],
+    includes: [
+      'Tapa a elección',
+      'Personalización de tapa incluida',
+      '100 hojas interior de 2,3 o 6 pedidos por hoja',
+    ],
     productionTime: '8-10 horas hábiles',
-    inStock: false,
+    inStock: true,
+    personalizationIncluded: true,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['cuaderno-de-pedidos'],
@@ -699,7 +756,7 @@ export const catalog: Product[] = [
       'Bolsillo',
     ],
     productionTime: '12-24 horas habiles',
-    inStock: false,
+    inStock: true,
     weeklyQuota: 10,
     remainingQuota: 15,
     images: productoImagenes['planner-semanal-perpetuo-tapa-dura'],
@@ -718,7 +775,7 @@ export const catalog: Product[] = [
     materials: ['Tapa dura A5', 'Hojas interior 90gr', 'espiral metalico doble alambre'],
     includes: ['Tapa dura', 'Espacio para 200 recetas', 'Division de recetas dulces y saladas'],
     productionTime: '8-10 horas hábiles',
-    inStock: false,
+    inStock: true,
     weeklyQuota: 10,
     remainingQuota: 10,
     images: productoImagenes['recetarios'],
@@ -747,12 +804,12 @@ export const catalog: Product[] = [
       'Seccion para 8 cursos que incluye planificación anual, fechas importantes, asistencias, calificaciones, contenidos dados, evaluaciones, trabajos grupales y mesas de examen/coloquios',
     ],
     productionTime: '12-24 horas habiles',
-    inStock: false,
+    inStock: true,
     weeklyQuota: 10,
     remainingQuota: 10,
     images: productoImagenes['cuaderno-docente'],
   },
-   {
+  {
     id: '15',
     name: 'Box premium regalo',
     slug: 'combo-premium',
@@ -782,13 +839,14 @@ export const catalog: Product[] = [
       'Personalización de tapa incluida',
     ],
     productionTime: '8-10 dias hábiles',
-    inStock: false,
+    inStock: true,
+    personalizationIncluded: true,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['combo-premium'],
     colors: BOX_COLORS,
   },
-   {
+  {
     id: '16',
     name: 'Cuaderno A4 + libreta A6',
     slug: 'cuaderno-a4-libreta-a6',
@@ -809,12 +867,12 @@ export const catalog: Product[] = [
       'Libreta A6',
     ],
     productionTime: '8-10 dias hábiles',
-    inStock: false,
+    inStock: true,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['cuaderno-a4-libreta-a6'],
   },
-   {
+  {
     id: '17',
     name: 'Libreta A6',
     slug: 'libretas-a6',
@@ -824,7 +882,7 @@ export const catalog: Product[] = [
     basePrice: 5000,
     sizes: [],
     interiors: [],
-    coverTypes: ['dura'],
+    coverTypes: ['blanda'],
     materials: [
       'Tapa blanda',
       'hojas Interior 90g',
@@ -834,7 +892,7 @@ export const catalog: Product[] = [
       'Libreta A6',
     ],
     productionTime: '8-10 dias hábiles',
-    inStock: false,
+    inStock: true,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['libretas-a6'],
@@ -875,7 +933,6 @@ export const catalog: Product[] = [
     images: productoImagenes['agenda-diaria-2027'],
   },
   {
-    // Borrador hasta tener fotos reales del producto: sacar `draft` para publicarla.
     id: '19',
     name: 'Agenda Perpetua Pocket',
     slug: 'agenda-perpetua-pocket-a6',
@@ -899,7 +956,6 @@ export const catalog: Product[] = [
     ],
     productionTime: '8-10 horas hábiles',
     inStock: true,
-    draft: true,
     weeklyQuota: 15,
     remainingQuota: 15,
     images: productoImagenes['agenda-perpetua-pocket'],
@@ -1054,11 +1110,13 @@ export const catalog: Product[] = [
 //   },
 // ];
 
-export const products: Product[] = catalog.filter((p) => !p.draft);
+export const products: Product[] = sortByCatalogOrder(catalog.filter((p) => !p.draft));
 
 export const getProductBySlug = (slug: string) => {
   return products.find((p) => p.slug === slug);
 };
+
+export const getProductById = (id: string) => catalog.find((p) => p.id === id);
 
 export const getProductsByCategory = (category: string) => {
   return products.filter((p) => p.category === category);

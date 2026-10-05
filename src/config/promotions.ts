@@ -1,5 +1,6 @@
 import vars from '@/data/data';
 import type { CartItem } from '@/types/cart';
+import { catalog } from '@/data/products';
 import { format, isSameDay, isSameMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -7,7 +8,7 @@ export const normalizeCategory = (c?: string) => (c ?? '').trim().toLowerCase();
 
 /** Forma mínima que necesitan los predicados de elegibilidad. */
 type EligibilityInput = {
-  product: { category: string };
+  product: { category: string; id?: string };
   personalization?: string;
   isCustom?: boolean;
 };
@@ -24,12 +25,16 @@ type EligibilityInput = {
 const isPersonalized = (item: EligibilityInput): boolean =>
   !!item.isCustom || !!item.personalization;
 
+/** Productos marcados `excludeFromPromos` (p. ej. el kit en preventa). */
+const isExcluded = (item: EligibilityInput): boolean =>
+  !!item.product.id && !!catalog.find((p) => p.id === item.product.id)?.excludeFromPromos;
+
 /**
  * Validates if an item is eligible for the percentage discount
  */
 export const isEligibleForDiscount = (item: CartItem | EligibilityInput): boolean => {
   const settings = vars.promotions.discount;
-  if (!settings.enabled) return false;
+  if (!settings.enabled || isExcluded(item)) return false;
 
   const itemCategory = normalizeCategory(item.product.category);
   const isCategoryEligible = settings.eligibleCategories
@@ -88,7 +93,7 @@ export const formatHotSaleDateRange = (): string => {
  * Returns true when Hot Sale is active. Applies to ALL categories.
  */
 export const isEligibleForHotSale = (item: CartItem | EligibilityInput): boolean => {
-  if (!isHotSaleActive()) return false;
+  if (!isHotSaleActive() || isExcluded(item)) return false;
   const hs = vars.promotions.hotSale;
   if (isPersonalized(item) && !hs.applyToPersonalized) return false;
   return true;
@@ -99,7 +104,7 @@ export const isEligibleForHotSale = (item: CartItem | EligibilityInput): boolean
  */
 export const isEligibleFor2x1 = (item: CartItem | EligibilityInput): boolean => {
   const settings = vars.promotions.twoForOne;
-  if (!settings.enabled) return false;
+  if (!settings.enabled || isExcluded(item)) return false;
 
   const itemCategory = normalizeCategory(item.product.category);
   const isCategoryEligible = settings.eligibleCategories
