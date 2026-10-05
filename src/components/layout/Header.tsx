@@ -28,7 +28,13 @@ export const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center space-x-2 h-full py-3">
-          <img className="h-full" src="assets/logo.png" alt="Al Pie de la Letra - logo" />
+          <img
+            className="h-full w-auto"
+            src="assets/logo.webp"
+            width={187}
+            height={160}
+            alt="Al Pie de la Letra - logo"
+          />
         </Link>
 
         {/* Desktop Navigation */}
