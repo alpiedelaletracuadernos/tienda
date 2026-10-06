@@ -1,6 +1,6 @@
 // src/components/presale/KitFaq.tsx
 // Preguntas frecuentes del kit: responden las objeciones típicas de una
-// preventa (cuándo llega, envío, pago, personalización, arrepentimiento).
+// preventa (cuándo llega, envío, pago, personalización, cierre).
 import {
   Accordion,
   AccordionContent,
@@ -29,10 +29,6 @@ const FAQ = [
   {
     q: '¿Qué pasa después del 16/10?',
     a: 'La preventa cierra y el kit deja de estar disponible. Las agendas 2027 siguen a la venta por separado.',
-  },
-  {
-    q: '¿Y si me arrepiento?',
-    a: 'Tenés 10 días corridos desde que lo recibís para arrepentirte de la compra (Ley 24.240, art. 34). Escribinos por WhatsApp y lo resolvemos.',
   },
 ];
 

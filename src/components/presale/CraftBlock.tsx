@@ -8,7 +8,7 @@ import { thumbOf } from '@/lib/media';
 import { presale, presaleDeadlineText } from '@/config/presale';
 
 export function CraftBlock() {
-  const image = getProductBySlug(presale.slug)?.images[2];
+  const image = getProductBySlug(presale.slug)?.images[12];
   return (
     <section className="py-12 md:py-20 bg-soft/30">
       <div className="container px-4 grid gap-8 md:grid-cols-2 md:items-center">
@@ -17,7 +17,7 @@ export function CraftBlock() {
             src={image}
             srcSet={`${thumbOf(image)} 400w, ${image} 1200w`}
             sizes="(min-width: 768px) 50vw, 100vw"
-            alt="Agenda 2027 abierta en la vista mensual"
+            alt="Kit Mi Año 2027 sobre un escritorio"
             width={800}
             height={1200}
             loading="lazy"

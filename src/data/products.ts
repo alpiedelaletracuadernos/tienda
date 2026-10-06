@@ -15,8 +15,7 @@ export const BOX_COLORS: ProductColor[] = [
 ];
 
 export const productoImagenes: ModelAssets = {
-  // Provisorias (fotos 2027 de agendas) hasta tener las fotos del kit completo:
-  // se reemplazan con `optimize_images.py numerar ... --prefix kit-mi-ano-2027 --force`.
+  // Fotos del kit (WEB_LANZAMIENTO_2027/KIT PREVENTA), en orden.
   'kit-mi-ano-2027': [
     `${routeBase}productos/kit-mi-ano-2027_0001.webp`,
     `${routeBase}productos/kit-mi-ano-2027_0002.webp`,
@@ -26,6 +25,14 @@ export const productoImagenes: ModelAssets = {
     `${routeBase}productos/kit-mi-ano-2027_0006.webp`,
     `${routeBase}productos/kit-mi-ano-2027_0007.webp`,
     `${routeBase}productos/kit-mi-ano-2027_0008.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0009.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0010.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0011.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0012.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0013.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0014.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0015.webp`,
+    `${routeBase}productos/kit-mi-ano-2027_0016.webp`,
   ],
   // Fotos de la producción 2027 (WEB_LANZAMIENTO_2027/SEMANAL y /DIARIA), en orden.
   'agenda-semanal-2027': [
@@ -360,7 +367,7 @@ export const catalog: Product[] = [
         label: 'Agenda 2027',
         detail:
           'Tapa dura con laminado brillo, anillado doble alambre que abre 180°, hojas de 90 gramos, portada a color.',
-        image: `${routeBase}productos/kit-mi-ano-2027_0002.webp`,
+        image: `${routeBase}productos/kit-mi-ano-2027_0006.webp`,
         priceFromSlug: { semanal: 'agenda-semanal-a5', diaria: 'agenda-diaria-a5' },
       },
       {
