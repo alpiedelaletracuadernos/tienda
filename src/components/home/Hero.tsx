@@ -114,8 +114,8 @@ export default function Hero() {
           </h1>
 
           <p className="text-base sm:text-xl text-white/90">
-            Agendas y cuadernos artesanales con{" "}
-            <strong>personalización total</strong>: nombre, frase, foto o tramas.
+            Agendas y cuadernos artesanales con diseños propios, y la opción de{" "}
+            <strong>personalizar la tapa</strong> con nombre, frase, foto o tramas.
             Hecho a mano en San Nicolás de los Arroyos, con entrega rápida.
           </p>
 
