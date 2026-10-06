@@ -84,6 +84,8 @@ export type KitItem = {
 export interface Product {
   id: string;
   name: string;
+  /** Nombre corto para las cards del catálogo (el completo queda en la ficha). */
+  shortName?: string;
   slug: string;
   category: ProductCategory;
   description: string;

@@ -1,5 +1,6 @@
 // src/components/brand/MobileUSPs.tsx
-import { Clock, Sparkles, LayoutGrid, ShieldCheck, MessageSquare } from "lucide-react";
+import { Clock, LayoutGrid, ShieldCheck, MessageSquare } from "lucide-react";
+import { modeloOptions } from "@/data/options";
 
 type USP = {
   icon: React.ElementType;
@@ -8,9 +9,8 @@ type USP = {
 };
 
 const USPS: USP[] = [
-  { icon: Sparkles,   headline: "100%", sub: "Personalizable" },
   { icon: Clock,      headline: "48 h", sub: "Entrega rápida" },
-  { icon: LayoutGrid, headline: "+60",  sub: "Modelos listos" },
+  { icon: LayoutGrid, headline: String(modeloOptions.length), sub: "Diseños 2027" },
   { icon: ShieldCheck,headline: "Premium", sub: "Materiales y terminación" },
   { icon: MessageSquare, headline: "1:1", sub: "Atención por WhatsApp" },
 ];

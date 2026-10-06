@@ -76,7 +76,7 @@ export default function Hero() {
   return (
     <section
       className="relative isolate min-h-[90svh] flex items-center overflow-hidden"
-      aria-label="Agendas y cuadernos artesanales personalizables"
+      aria-label="Agendas y cuadernos artesanales hechos a mano"
     >
       {/* Fondo: primer cuadro (LCP). En desktop, ampliado y desenfocado. */}
       <div className="absolute inset-0 -z-10">
@@ -134,11 +134,7 @@ export default function Hero() {
           </div>
 
           {/* Trust + Objeciones resueltas */}
-          <ul className="hidden mt-4 md:grid grid-cols-3 gap-4 text-left text-[0.8rem] sm:text-sm">
-            <li className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-bold text-primary-light">100%</span>
-              <span className="text-white/85">Personalizable</span>
-            </li>
+          <ul className="hidden mt-4 md:grid grid-cols-2 max-w-xs gap-4 text-left text-[0.8rem] sm:text-sm">
             <li className="flex flex-col">
               <span className="text-xl sm:text-2xl font-bold text-primary-light">48&nbsp;h</span>
               <span className="text-white/85">Entrega rápida</span>
