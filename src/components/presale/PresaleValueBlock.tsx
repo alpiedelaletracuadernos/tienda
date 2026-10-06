@@ -10,7 +10,7 @@ import { KitValueBreakdown } from './KitValueBreakdown';
 
 export function PresaleValueBlock() {
   const product = getProductBySlug(presale.slug);
-  const kit = product && kitPricingFor(product, 'semanal');
+  const kit = product && kitPricingFor(product, presale.entryInterior);
   if (!kit) return null;
   return (
     <section id="que-incluye" className="scroll-mt-20 py-12 md:py-16">

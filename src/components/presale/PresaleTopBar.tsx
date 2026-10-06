@@ -24,7 +24,7 @@ export function PresaleTopBar() {
   const [dismissed, setDismissed] = useState(readDismissed);
 
   const product = getProductBySlug(presale.slug);
-  const kit = product && kitPricingFor(product, 'semanal');
+  const kit = product && kitPricingFor(product, presale.entryInterior);
   const hidden =
     !isPresaleActive() ||
     !kit ||

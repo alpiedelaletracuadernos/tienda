@@ -361,14 +361,22 @@ export const catalog: Product[] = [
     description:
       'Todo lo que necesitás para organizar tu 2027, en un solo kit: la agenda, un cuaderno para el día a día, una libreta de bolsillo, un señalador imantado y una tarjeta. Lo hacemos a mano, uno por uno, acá en San Nicolás. La preventa nos sirve para saber cuántos armar y hacerlos bien, sin apuro. Por eso tiene fecha: va hasta el viernes 16/10.',
     basePrice: 32000,
-    priceByInterior: { semanal: 32000, diaria: 37000 },
+    priceByInterior: {
+      'semanal sin horarios': 32000,
+      'semanal con horarios': 32000,
+      diaria: 37000,
+    },
     kitItems: [
       {
         label: 'Agenda 2027',
         detail:
           'Tapa dura con laminado brillo, anillado doble alambre que abre 180°, hojas de 90 gramos, portada a color.',
         image: `${routeBase}productos/kit-mi-ano-2027_0006.webp`,
-        priceFromSlug: { semanal: 'agenda-semanal-a5', diaria: 'agenda-diaria-a5' },
+        priceFromSlug: {
+          'semanal sin horarios': 'agenda-semanal-a5',
+          'semanal con horarios': 'agenda-semanal-a5',
+          diaria: 'agenda-diaria-a5',
+        },
       },
       {
         label: 'Cuaderno A5 tapa blanda rayado',
@@ -387,7 +395,7 @@ export const catalog: Product[] = [
       },
     ],
     sizes: ['A5'],
-    interiors: ['semanal', 'diaria'],
+    interiors: ['semanal sin horarios', 'semanal con horarios', 'diaria'],
     coverTypes: ['dura'],
     coverDesigns: true,
     personalizable: false,
@@ -420,7 +428,7 @@ export const catalog: Product[] = [
       'Un nuevo año, nuevas metas y 52 semanas para hacerlas realidad. La Agenda Semanal 2027 está pensada para que puedas organizar tu tiempo, ordenar tus prioridades y disfrutar más de cada semana. Todo lo que necesitás para planificar tu año está reunido en un solo lugar, de una manera práctica y simple.',
     basePrice: 34800,
     sizes: ['A5'],
-    interiors: ['semanal'],
+    interiors: ['semanal sin horarios', 'semanal con horarios'],
     coverTypes: ['dura'],
     materials: [
       'Tapa dura laminada',

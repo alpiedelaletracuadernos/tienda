@@ -26,7 +26,7 @@ const EXT_RE = /\.[a-z0-9]+$/i;
 const thumbOf = (s) => s.replace(EXT_RE, '_thumb.webp');
 const posterOf = (s) => s.replace(EXT_RE, '_poster.webp');
 
-const { catalog, productoImagenes, modeloOptions } = await loadData();
+const { catalog, productoImagenes, modeloOptions, INTERIOR_INFO } = await loadData();
 
 /** ruta relativa a public/ → quién la usa */
 const required = new Map();
@@ -42,6 +42,10 @@ const needMedia = (path, who) => {
 for (const p of catalog) p.images.forEach((img) => needMedia(img, `producto "${p.name}"`));
 for (const [key, list] of Object.entries(productoImagenes)) {
   list.forEach((img) => needMedia(img, `productoImagenes['${key}']`));
+}
+for (const [interior, info] of Object.entries(INTERIOR_INFO)) {
+  info.photos.forEach((p) => needMedia(p.src, `interior "${interior}"`));
+  if (info.card) need(info.card, `interior "${interior}" (tarjeta)`);
 }
 for (const m of modeloOptions) {
   need(m.image, `diseño ${m.modelo}`);

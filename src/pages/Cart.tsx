@@ -10,6 +10,7 @@ import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { formatARS } from '@/lib/currency';
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
 import { thumbOf } from '@/lib/media';
+import { interiorLabel } from '@/data/interiors';
 import { getProductById } from '@/data/products';
 import { isPresaleProduct } from '@/config/presale';
 import { personalizationSurchargeForId } from '@/lib/pricing/personalization';
@@ -123,7 +124,7 @@ export default function Cart() {
                                 {isPresaleProduct(getProductById(item.product.id)?.slug ?? '')
                                   ? 'Agenda'
                                   : 'Interior'}
-                                : {item.selectedInterior}
+                                : {interiorLabel(item.selectedInterior)}
                               </p>
                             )}
                             {item.selectedCover && <p>Tapa: {item.selectedCover}</p>}

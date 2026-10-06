@@ -19,6 +19,7 @@ import type { BuyerInfo } from '@/types/cart';
 // Motivo: evitamos solapes. Todo sale del motor.
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
 import { getCartLineKey } from '@/lib/cart-key';
+import { interiorLabel } from '@/data/interiors';
 
 type DeliveryMethod = 'retiro' | 'envio';
 
@@ -227,7 +228,7 @@ const Checkout = () => {
                               {it.selectedModel && <p>Modelo: {it.selectedModel}</p>}
                               {it.selectedColor && <p>Color: {it.selectedColor}</p>}
                               {it.selectedSize && <p>Tamaño: {it.selectedSize}</p>}
-                              {it.selectedInterior && <p>Interior: {it.selectedInterior}</p>}
+                              {it.selectedInterior && <p>Interior: {interiorLabel(it.selectedInterior)}</p>}
                               {it.selectedCover && <p>Tapa: {it.selectedCover}</p>}
                               {it.personalization && <p>Personalización: “{it.personalization}”</p>}
                             </div>
