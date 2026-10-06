@@ -645,6 +645,7 @@ export const catalog: Product[] = [
   {
     id: '8',
     name: 'Cuaderno A4 tapa blanda interior rayado, cuadriculado, liso o puntillado',
+    shortName: 'Cuaderno A4 tapa blanda',
     slug: 'cuaderno-A4-tapa-blanda',
     category: 'cuadernos',
     description:
@@ -673,6 +674,7 @@ export const catalog: Product[] = [
   {
     id: '9',
     name: 'Cuaderno A5 tapa dura interior rayado, cuadriculado, liso o puntillado',
+    shortName: 'Cuaderno A5 tapa dura',
     slug: 'cuaderno-A5-tapa-dura',
     category: 'cuadernos',
     description:
