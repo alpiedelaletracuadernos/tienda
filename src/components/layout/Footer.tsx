@@ -19,7 +19,7 @@ export const Footer = () => {
               alt="Al Pie de la Letra - logo pie de página"
             />
             <p className="text-sm text-muted-foreground">
-              Agendas y cuadernos artesanales 100% personalizados. Hechos a mano en San Nicolás, Argentina.
+              Agendas y cuadernos artesanales, hechos a mano en San Nicolás, Argentina.
             </p>
             <div className="flex space-x-4">
               <a
