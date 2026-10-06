@@ -2,6 +2,7 @@
 import type { Product, ProductSize, InteriorType, CoverType } from '@/types/product';
 import type { CartItem, BuyerInfo } from '@/types/cart';
 import { formatARS } from '@/lib/currency';
+import { interiorLabel } from '@/data/interiors';
 import { catalog } from '@/data/products';
 import { isPresaleProduct, presale } from '@/config/presale';
 import { personalizationSurchargeForId } from '@/lib/pricing/personalization';
@@ -118,7 +119,7 @@ export function buildPdpMessage(
   if (selections.color) lines.push(`Color: ${selections.color}`);
   if (selections.size) lines.push(`Tamaño: ${selections.size}`);
   if (selections.interior)
-    lines.push(isPresale ? `Agenda: ${selections.interior}` : `Interior: ${selections.interior}`);
+    lines.push(`${isPresale ? 'Agenda' : 'Interior'}: ${interiorLabel(selections.interior)}`);
   if (selections.cover) lines.push(`Tapa: ${selections.cover}`);
   if (personalization?.text) lines.push(`Personalización: "${personalization.text}"`);
   if (personalization?.styleId) {
@@ -175,7 +176,7 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
       if (it.selectedSize) lines.push(`   Tamaño: ${it.selectedSize}`);
       if (it.selectedInterior)
         lines.push(
-          isPresaleLine ? `   Agenda: ${it.selectedInterior}` : `   Interior: ${it.selectedInterior}`
+          `   ${isPresaleLine ? 'Agenda' : 'Interior'}: ${interiorLabel(it.selectedInterior)}`
         );
       if (it.selectedCover) lines.push(`   Tapa: ${it.selectedCover}`);
       if (it.personalization) lines.push(`   Personalización: “${it.personalization}”`);

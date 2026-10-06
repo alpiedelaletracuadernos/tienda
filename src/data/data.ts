@@ -1,5 +1,6 @@
 // src/data/data.ts
 // Objeto de variables globales para la aplicación
+import type { InteriorType } from '@/types/product';
 
 export interface AppVars {
     appName: string;
@@ -57,7 +58,9 @@ export interface AppVars {
             closedMessage: string;  // texto de la ficha cuando terminó
             barStorageKey: string;  // cierre de la barra superior (por sesión)
             /** Fichas de agenda suelta que muestran la comparación con el kit. */
-            compareFrom: Record<string, 'semanal' | 'diaria'>;
+            compareFrom: Record<string, InteriorType>;
+            /** Versión de entrada del kit (la del "desde"). */
+            entryInterior: InteriorType;
         };
     };
 }
@@ -117,9 +120,10 @@ export const vars: AppVars = {
                 'La preventa del Kit Mi Año 2027 cerró el 16/10. Las agendas 2027 siguen disponibles por separado.',
             barStorageKey: 'presale27_bar_dismissed',
             compareFrom: {
-                'agenda-semanal-a5': 'semanal',
+                'agenda-semanal-a5': 'semanal sin horarios',
                 'agenda-diaria-a5': 'diaria',
             },
+            entryInterior: 'semanal sin horarios',
         }
     }
 };

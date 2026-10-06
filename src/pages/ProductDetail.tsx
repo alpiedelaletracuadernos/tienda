@@ -1,6 +1,6 @@
 // src/pages/ProductDetail.tsx
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
@@ -31,6 +31,8 @@ import { KitPriceBox } from '@/components/presale/KitPriceBox';
 import { KitValueBreakdown } from '@/components/presale/KitValueBreakdown';
 import { KitFaq } from '@/components/presale/KitFaq';
 import { PresaleCompareBox } from '@/components/presale/PresaleCompareBox';
+import { InteriorPicker } from '@/components/products/InteriorPicker';
+import { INTERIOR_INFO, interiorLabel, interiorSlug } from '@/data/interiors';
 import { kitPricingFor, listPriceFor } from '@/lib/pricing/kit';
 import { presale } from '@/config/presale';
 import { PersonalizationStep } from '@/components/products/pdp/PersonalizationStep';
@@ -100,9 +102,27 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
   // tapas (arrays vacíos), el estado queda undefined y esos bloques no se
   // renderizan ni se envían al pedido.
   const [selectedSize, setSelectedSize] = useState<ProductSize | undefined>(product.sizes[0]);
+  // Interior con foto (InteriorPicker) cuando todas las opciones tienen fotos.
+  // Se puede linkear directo: `?interior=con-horarios` (p. ej. desde historias).
+  const usesInteriorPicker =
+    product.interiors.length > 1 && product.interiors.every((i) => !!INTERIOR_INFO[i]);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedInterior, setSelectedInterior] = useState<InteriorType | undefined>(
-    product.interiors[0]
+    () =>
+      product.interiors.find((i) => interiorSlug(i) === searchParams.get('interior')) ??
+      product.interiors[0]
   );
+  const chooseInterior = (i: InteriorType) => {
+    setSelectedInterior(i);
+    if (!usesInteriorPicker) return;
+    setSearchParams(
+      (prev) => {
+        prev.set('interior', interiorSlug(i));
+        return prev;
+      },
+      { replace: true }
+    );
+  };
   const [selectedCover, setSelectedCover] = useState<CoverType | undefined>(product.coverTypes[0]);
   const [personalization, setPersonalization] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -189,8 +209,15 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
     const rest = (product.images ?? []).filter((src) => src !== selectedModelImage);
     // En el kit la primera foto es el kit completo; la tapa elegida va segunda.
     if (isKit && rest.length) return [rest[0], selectedModelImage, ...rest.slice(1)];
+    // Agenda con interiores con foto: la página que cambia (la semana) va
+    // segunda, después de la tapa elegida, y cambia con el interior.
+    const interiorPhoto =
+      !isKit && usesInteriorPicker && selectedInterior
+        ? INTERIOR_INFO[selectedInterior]?.photos[0]?.src
+        : undefined;
+    if (interiorPhoto) return [selectedModelImage, interiorPhoto, ...rest];
     return [selectedModelImage, ...rest];
-  }, [hasModels, isKit, selectedModelImage, product.images]);
+  }, [hasModels, isKit, usesInteriorPicker, selectedInterior, selectedModelImage, product.images]);
 
   // B5: la lupa de una miniatura abre ESE diseño en pantalla completa,
   // no necesariamente el seleccionado.
@@ -336,7 +363,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
   // "48" solo no dice nada al cliente; con diseño se antepone "Diseño".
   // Con colores, el summary usa el nombre del color en su lugar.
   const stickySummary = [
-    isKit && selectedInterior ? `Agenda ${selectedInterior}` : null,
+    (isKit || usesInteriorPicker) && selectedInterior ? interiorLabel(selectedInterior) : null,
     usesColors ? selectedColor?.name : usesModels ? `Diseño ${selectedModelLabel}` : null,
     isKit ? null : selectedSize,
   ]
@@ -463,15 +490,16 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
 
               {/* ——— Kit · Paso ①: Elegí tu agenda (define el precio) ——— */}
               {isKit && (
-                <StepSection step={versionStepNumber} title="Elegí tu agenda">
-                  <VariantSelector
-                    label="Agenda"
+                <StepSection
+                  step={versionStepNumber}
+                  title="Elegí tu agenda"
+                  hint="La semanal viene con o sin horarios. Tocá «Ver por dentro» para comparar las páginas."
+                >
+                  <InteriorPicker
                     options={product.interiors}
                     value={selectedInterior}
-                    onChange={setSelectedInterior}
-                    formatOption={(i) =>
-                      `${i.charAt(0).toUpperCase()}${i.slice(1)} · ${formatARS(listPriceFor(product, i))}`
-                    }
+                    onChange={chooseInterior}
+                    priceFor={(i) => listPriceFor(product, i)}
                   />
                 </StepSection>
               )}
@@ -504,7 +532,34 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
               ) : null}
 
               {/* ——— Paso ②: Configurá (sólo si hay variantes reales) ——— */}
-              {isKit ? null : hasRealChoices ? (
+              {isKit ? null : usesInteriorPicker ? (
+                <StepSection
+                  step={configStepNumber}
+                  title="Elegí el interior"
+                  hint="La tapa es la misma, cambia cómo organizás la semana."
+                >
+                  <InteriorPicker
+                    options={product.interiors}
+                    value={selectedInterior}
+                    onChange={chooseInterior}
+                  />
+                  <div className="mt-3 space-y-1">
+                    <VariantSelector
+                      label="Tamaño"
+                      options={product.sizes}
+                      value={selectedSize}
+                      onChange={setSelectedSize}
+                    />
+                    <VariantSelector
+                      label="Tipo de Tapa"
+                      options={product.coverTypes}
+                      value={selectedCover}
+                      onChange={setSelectedCover}
+                      formatOption={(cover) => `Tapa ${cover}`}
+                    />
+                  </div>
+                </StepSection>
+              ) : hasRealChoices ? (
                 <StepSection step={configStepNumber} title="Configurá">
                   <div className="space-y-4">
                     <VariantSelector

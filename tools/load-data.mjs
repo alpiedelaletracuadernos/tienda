@@ -13,7 +13,8 @@ export async function loadData() {
     stdin: {
       contents: `export { catalog, products, productoImagenes } from '@/data/products';
                  export { modeloOptions } from '@/data/options';
-                 export { vars } from '@/data/data';`,
+                 export { vars } from '@/data/data';
+                 export { INTERIOR_INFO } from '@/data/interiors';`,
       resolveDir: root,
       loader: 'ts',
     },

@@ -35,6 +35,8 @@ export type DesignOption = {
 
 export type InteriorType =
   | 'semanal'
+  | 'semanal sin horarios'
+  | 'semanal con horarios'
   | 'diaria'
   | 'dos-por-hoja'
   | 'universitaria'

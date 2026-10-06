@@ -14,7 +14,7 @@ import { presale, presaleDeadlineText } from '@/config/presale';
 
 export function PresaleHero() {
   const product = getProductBySlug(presale.slug);
-  const semanal = product && kitPricingFor(product, 'semanal');
+  const semanal = product && kitPricingFor(product, presale.entryInterior);
   const diaria = product && kitPricingFor(product, 'diaria');
   if (!product || !semanal) return null;
   const image = product.images[0];

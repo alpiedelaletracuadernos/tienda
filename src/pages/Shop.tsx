@@ -7,6 +7,7 @@ import { ProductCard } from '@/components/products/ProductCard';
 import { PromoBar } from '@/components/promos/PromoBar';
 import { isPurchasable } from '@/lib/availability';
 import { isPresaleProduct } from '@/config/presale';
+import { interiorFamily } from '@/data/interiors';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { products } from '@/data/products';
 import AppVars from '@/data/data';
@@ -46,6 +47,8 @@ const CATEGORY_LABELS: Record<ProductCategory, string> = {
 
 const INTERIOR_LABELS: Record<InteriorType, string> = {
   semanal: 'Semanal',
+  'semanal sin horarios': 'Semanal sin horarios',
+  'semanal con horarios': 'Semanal con horarios',
   diaria: 'Diaria',
   'dos-por-hoja': '2 días por hoja',
   universitaria: 'Universitaria',
@@ -143,7 +146,9 @@ const Shop = () => {
 
   const interiorOptions = useMemo(() => {
     const set = new Set<InteriorType>();
-    products.forEach((p) => p.interiors.forEach((i) => set.add(i)));
+    // Las variantes de un mismo interior (semanal con / sin horarios) se
+    // agrupan en un solo filtro.
+    products.forEach((p) => p.interiors.forEach((i) => set.add(interiorFamily(i))));
     return Array.from(set).sort((a, b) =>
       INTERIOR_LABELS[a].localeCompare(INTERIOR_LABELS[b], 'es')
     );
@@ -174,7 +179,8 @@ const Shop = () => {
     const categoryMatch = selectedCategory === 'all' || product.category === selectedCategory;
     const sizeMatch = selectedSize === 'all' || product.sizes.includes(selectedSize as ProductSize);
     const interiorMatch =
-      selectedInterior === 'all' || product.interiors.includes(selectedInterior as InteriorType);
+      selectedInterior === 'all' ||
+      product.interiors.some((i) => interiorFamily(i) === selectedInterior);
     const availabilityMatch = !onlyAvailable || isPurchasable(product);
     return categoryMatch && sizeMatch && interiorMatch && availabilityMatch;
   });
