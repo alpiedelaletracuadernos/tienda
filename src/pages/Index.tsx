@@ -1,4 +1,6 @@
 // src/pages/Index.tsx
+import { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import Hero from '@/components/home/Hero';
@@ -28,6 +30,19 @@ const Index = () => {
   // Durante la preventa la portada empuja el kit; el 17/10 vuelve sola la
   // portada habitual.
   const presaleOn = isPresaleActive();
+
+  // Links a secciones desde otras páginas (pie de página): /?s=como-pedir.
+  // Con HashRouter no se pueden usar anclas (#seccion) en la URL.
+  const [searchParams] = useSearchParams();
+  const section = searchParams.get('s');
+  useEffect(() => {
+    if (!section) return;
+    const t = window.setTimeout(
+      () => document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' }),
+      100
+    );
+    return () => window.clearTimeout(t);
+  }, [section]);
   return (
     <div className="min-h-screen w-full overflow-x-clip">
       <HotSaleBanner />
