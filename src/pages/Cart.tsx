@@ -15,6 +15,7 @@ import { getProductById } from '@/data/products';
 import { isPresaleProduct } from '@/config/presale';
 import { personalizationSurchargeForId } from '@/lib/pricing/personalization';
 import { getCartLineKey } from '@/lib/cart-key';
+import { CuentaDniHint, cuentaDniEnabled } from '@/components/promos/CuentaDniHint';
 
 export default function Cart() {
   const { items, removeItem, updateQuantity, clearCart } = useCart();
@@ -246,6 +247,8 @@ export default function Cart() {
                       <span>Total</span>
                       <span className="text-primary">{formattedTotal}</span>
                     </div>
+                    {/* Beneficio de pago: se elige en el checkout */}
+                    <CuentaDniHint className="w-full" />
                   </div>
 
                   <div className="space-y-3">
@@ -260,7 +263,10 @@ export default function Cart() {
                   <div className="text-sm text-muted-foreground space-y-2 pt-4 border-t">
                     <p>✓ Envíos a todo el país</p>
                     <p>✓ Retiro sin cargo en San Nicolás</p>
-                    <p>✓ Pagás con efectivo, transferencia o Mercado Pago</p>
+                    <p>
+                      ✓ Pagás con efectivo, transferencia, Mercado Pago
+                      {cuentaDniEnabled ? ' o Cuenta DNI' : ''}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
