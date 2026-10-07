@@ -105,7 +105,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
   // Interior con foto (InteriorPicker) cuando todas las opciones tienen fotos.
   // Se puede linkear directo: `?interior=con-horarios` (p. ej. desde historias).
   const usesInteriorPicker =
-    product.interiors.length > 1 && product.interiors.every((i) => !!INTERIOR_INFO[i]);
+    product.interiors.length > 0 && product.interiors.every((i) => !!INTERIOR_INFO[i]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedInterior, setSelectedInterior] = useState<InteriorType | undefined>(
     () =>
@@ -154,7 +154,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
   let stepCounter = 0;
   const versionStepNumber = isKit ? ++stepCounter : 0;
   const designStepNumber = showDesignStep ? ++stepCounter : 0;
-  const configStepNumber = !isKit && hasRealChoices ? ++stepCounter : 0;
+  const configStepNumber = !isKit && (hasRealChoices || usesInteriorPicker) ? ++stepCounter : 0;
   const personalizationStepNumber = showPersonalization ? ++stepCounter : 0;
 
   // ——— Modelo (unificado por ID)
@@ -204,20 +204,19 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
   // B6: la galería principal debe reflejar el diseño elegido. Si el producto
   // tiene modelos, la imagen del modelo seleccionado va primero; el resto de
   // las imágenes del producto siguen después, sin duplicar.
+  // Galería = fotos reales del producto. Los renders de los diseños de tapa
+  // se ven sólo en el selector de diseños (no se mezclan en la galería).
+  // Con interiores con foto, la página que cambia (la semana / el día) va
+  // segunda y cambia con el interior elegido.
   const galleryImages = useMemo(() => {
-    if (!hasModels || !selectedModelImage) return product.images ?? [];
-    const rest = (product.images ?? []).filter((src) => src !== selectedModelImage);
-    // En el kit la primera foto es el kit completo; la tapa elegida va segunda.
-    if (isKit && rest.length) return [rest[0], selectedModelImage, ...rest.slice(1)];
-    // Agenda con interiores con foto: la página que cambia (la semana) va
-    // segunda, después de la tapa elegida, y cambia con el interior.
+    const images = product.images ?? [];
     const interiorPhoto =
       !isKit && usesInteriorPicker && selectedInterior
         ? INTERIOR_INFO[selectedInterior]?.photos[0]?.src
         : undefined;
-    if (interiorPhoto) return [selectedModelImage, interiorPhoto, ...rest];
-    return [selectedModelImage, ...rest];
-  }, [hasModels, isKit, usesInteriorPicker, selectedInterior, selectedModelImage, product.images]);
+    if (!interiorPhoto || !images.length) return images;
+    return [images[0], interiorPhoto, ...images.slice(1)];
+  }, [isKit, usesInteriorPicker, selectedInterior, product.images]);
 
   // B5: la lupa de una miniatura abre ESE diseño en pantalla completa,
   // no necesariamente el seleccionado.
@@ -411,7 +410,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
             {/* Galería */}
             <div className="space-y-4 min-w-0">
               <ProductImageGallery
-                key={selectedModelImage}
+                key={`${product.slug}:${selectedInterior ?? ''}`}
                 images={galleryImages}
                 altBase={product?.name ?? 'Producto'}
                 onOpenFullscreen={(src) => setPreviewModelImage(src)}
@@ -535,8 +534,12 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
               {isKit ? null : usesInteriorPicker ? (
                 <StepSection
                   step={configStepNumber}
-                  title="Elegí el interior"
-                  hint="La tapa es la misma, cambia cómo organizás la semana."
+                  title={product.interiors.length > 1 ? 'Elegí el interior' : 'Así es por dentro'}
+                  hint={
+                    product.interiors.length > 1
+                      ? 'La tapa es la misma, cambia cómo organizás la semana.'
+                      : 'Mirá las páginas antes de comprar.'
+                  }
                 >
                   <InteriorPicker
                     options={product.interiors}

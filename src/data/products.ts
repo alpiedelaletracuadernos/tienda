@@ -763,7 +763,8 @@ export const catalog: Product[] = [
     basePrice: 31000,
     sizes: ['A5'],
     interiors: ['Planner semanal perpetuo con horarios'],
-    coverTypes: ['blanda'],
+    coverTypes: ['dura'],
+    coverDesigns: true, // diseños en stock: los de la Edición 2027
     materials: ['Tapa dura A5', 'Hojas interior 90gr', 'espiral metalico doble alambre'],
     includes: [
       'Tapa a elección',

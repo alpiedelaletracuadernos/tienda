@@ -22,7 +22,7 @@ export type InteriorInfo = {
 
 const con = (n: number) => `${base}agenda-semanal-con-horarios_${String(n).padStart(4, '0')}.webp`;
 const sin = (n: number) => `${base}agenda-semanal-sin-horarios_${String(n).padStart(4, '0')}.webp`;
-const dia = (n: number) => `${base}agenda-diaria-2027_${String(n).padStart(4, '0')}.webp`;
+const dia = (n: number) => `${base}agenda-diaria-interior_${String(n).padStart(4, '0')}.webp`;
 
 export const INTERIOR_INFO: Partial<Record<InteriorType, InteriorInfo>> = {
   'semanal sin horarios': {
@@ -53,11 +53,15 @@ export const INTERIOR_INFO: Partial<Record<InteriorType, InteriorInfo>> = {
   },
   diaria: {
     label: 'Diaria',
-    short: 'Una página por día, con horario de 7 a 21 h.',
+    short: 'Una página por día, con horario de 7 a 21 h, «Por hacer» y notas.',
+    card: `${base}agenda-diaria-interior_card.webp`,
     photos: [
-      { src: dia(15), label: 'Interior diario' },
-      { src: dia(14), label: 'Interior diario' },
-      { src: dia(13), label: 'Planner mensual' },
+      { src: dia(9), label: 'Vista diaria' },
+      { src: dia(8), label: 'Sábado y domingo' },
+      { src: dia(6), label: 'Planner mensual' },
+      { src: dia(2), label: 'Calendario 2027 y 2028' },
+      { src: dia(7), label: 'Balance mensual' },
+      { src: dia(10), label: 'Contraseñas y stickers' },
     ],
   },
 };
