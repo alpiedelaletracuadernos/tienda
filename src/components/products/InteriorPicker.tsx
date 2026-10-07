@@ -30,7 +30,10 @@ type Props = {
 export function InteriorPicker({ options, value, onChange, priceFor }: Props) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<InteriorType | undefined>(value);
-  const rows = options.length > 2;
+  // Una sola opción (Agenda Diaria): no hay nada que elegir; la tarjeta
+  // muestra el interior y abre "Ver por dentro".
+  const single = options.length === 1;
+  const rows = single || options.length > 2;
 
   const openViewer = (interior?: InteriorType) => {
     setTab(interior ?? value ?? options[0]);
@@ -40,8 +43,8 @@ export function InteriorPicker({ options, value, onChange, priceFor }: Props) {
   return (
     <div className="space-y-3">
       <div
-        role="radiogroup"
-        aria-label="Interior de la agenda"
+        role={single ? undefined : 'radiogroup'}
+        aria-label={single ? undefined : 'Interior de la agenda'}
         className={cn(rows ? 'space-y-2' : 'grid grid-cols-2 gap-3')}
       >
         {options.map((opt) => {
@@ -53,20 +56,23 @@ export function InteriorPicker({ options, value, onChange, priceFor }: Props) {
             <button
               key={opt}
               type="button"
-              role="radio"
-              aria-checked={checked}
-              onClick={() => onChange(opt)}
+              role={single ? undefined : 'radio'}
+              aria-checked={single ? undefined : checked}
+              aria-label={single ? `Ver por dentro: ${interiorLabel(opt)}` : undefined}
+              onClick={() => (single ? openViewer(opt) : onChange(opt))}
               className={cn(
                 'relative w-full overflow-hidden rounded-2xl border bg-card text-left transition-shadow',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                checked ? 'border-primary ring-2 ring-primary' : 'hover:border-muted-foreground/40',
+                checked && !single
+                  ? 'border-primary ring-2 ring-primary'
+                  : 'hover:border-muted-foreground/40',
                 rows && 'flex items-center gap-3 p-2'
               )}
             >
               {cardSrc && (
                 <img
                   src={cardSrc}
-                  alt={`${interiorLabel(opt)}: detalle de la vista semanal`}
+                  alt={`${interiorLabel(opt)}: detalle del interior`}
                   loading="lazy"
                   decoding="async"
                   className={cn(
@@ -84,17 +90,19 @@ export function InteriorPicker({ options, value, onChange, priceFor }: Props) {
                   <p className="text-sm font-semibold text-primary">{formatARS(priceFor(opt))}</p>
                 )}
               </div>
-              <span
-                aria-hidden
-                className={cn(
-                  'absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full border-2',
-                  checked
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-muted-foreground/40 bg-background'
-                )}
-              >
-                {checked && <Check className="h-3.5 w-3.5" />}
-              </span>
+              {!single && (
+                <span
+                  aria-hidden
+                  className={cn(
+                    'absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full border-2',
+                    checked
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-muted-foreground/40 bg-background'
+                  )}
+                >
+                  {checked && <Check className="h-3.5 w-3.5" />}
+                </span>
+              )}
             </button>
           );
         })}
@@ -109,22 +117,24 @@ export function InteriorPicker({ options, value, onChange, priceFor }: Props) {
         <SheetContent side="bottom" className="h-[90svh] flex flex-col gap-0 p-0">
           <SheetHeader className="shrink-0 space-y-3 border-b px-4 pb-3 pt-4 text-left">
             <SheetTitle>Así es por dentro</SheetTitle>
-            <div role="tablist" aria-label="Interiores" className="flex flex-wrap gap-2">
-              {options.map((opt) => (
-                <Button
-                  key={opt}
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === opt}
-                  size="sm"
-                  variant={tab === opt ? 'default' : 'outline'}
-                  className="h-auto rounded-full px-3 py-1.5"
-                  onClick={() => setTab(opt)}
-                >
-                  {interiorLabel(opt)}
-                </Button>
-              ))}
-            </div>
+            {!single && (
+              <div role="tablist" aria-label="Interiores" className="flex flex-wrap gap-2">
+                {options.map((opt) => (
+                  <Button
+                    key={opt}
+                    type="button"
+                    role="tab"
+                    aria-selected={tab === opt}
+                    size="sm"
+                    variant={tab === opt ? 'default' : 'outline'}
+                    className="h-auto rounded-full px-3 py-1.5"
+                    onClick={() => setTab(opt)}
+                  >
+                    {interiorLabel(opt)}
+                  </Button>
+                ))}
+              </div>
+            )}
           </SheetHeader>
 
           <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4">
@@ -138,12 +148,15 @@ export function InteriorPicker({ options, value, onChange, priceFor }: Props) {
                 size="lg"
                 className="w-full"
                 onClick={() => {
-                  onChange(tab);
+                  if (!single) onChange(tab);
                   setOpen(false);
                 }}
               >
-                {tab === value ? 'Seguir con' : 'Elegir'} {interiorLabel(tab).toLowerCase()}
-                {priceFor && ` · ${formatARS(priceFor(tab))}`}
+                {single
+                  ? 'Listo'
+                  : `${tab === value ? 'Seguir con' : 'Elegir'} ${interiorLabel(tab).toLowerCase()}${
+                      priceFor ? ` · ${formatARS(priceFor(tab))}` : ''
+                    }`}
               </Button>
             </div>
           )}
