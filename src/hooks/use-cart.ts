@@ -8,12 +8,14 @@ import { products } from '@/data/products';
 import { isPurchasable } from '@/lib/availability';
 import { personalizationSurchargeFor } from '@/lib/pricing/personalization';
 import { listPriceFor } from '@/lib/pricing/kit';
+import { modeloRenumerado } from '@/data/options';
 
 /**
  * Alinea un carrito guardado con el catálogo vigente: saca los productos que
  * ya no existen o no se pueden comprar ("Próximamente") y re-sincroniza
  * nombre y precio de lista (base + recargo si es personalizado), así un
  * carrito armado antes de un cambio de precios no queda con valores viejos.
+ * También pasa los diseños 2027 de la numeración vieja (66–81) a la nueva.
  */
 const reconcileWithCatalog = (items: CartItem[]): CartItem[] =>
   items.flatMap((it) => {
@@ -26,6 +28,7 @@ const reconcileWithCatalog = (items: CartItem[]): CartItem[] =>
     return [
       {
         ...it,
+        selectedModel: it.selectedModel && (modeloRenumerado[it.selectedModel] ?? it.selectedModel),
         product: {
           ...it.product,
           name: current.name,
