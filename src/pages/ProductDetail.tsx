@@ -201,22 +201,10 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
 
   const selectedModelImage = selectedModelDef?.image ?? product.images?.[0] ?? '';
 
-  // B6: la galería principal debe reflejar el diseño elegido. Si el producto
-  // tiene modelos, la imagen del modelo seleccionado va primero; el resto de
-  // las imágenes del producto siguen después, sin duplicar.
   // Galería = fotos reales del producto. Los renders de los diseños de tapa
   // se ven sólo en el selector de diseños (no se mezclan en la galería).
-  // Con interiores con foto, la página que cambia (la semana / el día) va
-  // segunda y cambia con el interior elegido.
-  const galleryImages = useMemo(() => {
-    const images = product.images ?? [];
-    const interiorPhoto =
-      !isKit && usesInteriorPicker && selectedInterior
-        ? INTERIOR_INFO[selectedInterior]?.photos[0]?.src
-        : undefined;
-    if (!interiorPhoto || !images.length) return images;
-    return [images[0], interiorPhoto, ...images.slice(1)];
-  }, [isKit, usesInteriorPicker, selectedInterior, product.images]);
+  // Las fotos de los interiores se ven sólo en "Ver por dentro".
+  const galleryImages = product.images ?? [];
 
   // B5: la lupa de una miniatura abre ESE diseño en pantalla completa,
   // no necesariamente el seleccionado.
@@ -410,7 +398,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
             {/* Galería */}
             <div className="space-y-4 min-w-0">
               <ProductImageGallery
-                key={`${product.slug}:${selectedInterior ?? ''}`}
+                key={product.slug}
                 images={galleryImages}
                 altBase={product?.name ?? 'Producto'}
                 onOpenFullscreen={(src) => setPreviewModelImage(src)}
