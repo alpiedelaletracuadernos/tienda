@@ -20,7 +20,7 @@ const FAQ = [
   },
   {
     q: '¿Cómo pago?',
-    a: 'Con efectivo, transferencia o Mercado Pago. Al finalizar la compra te escribimos por WhatsApp con los datos.',
+    a: 'Con efectivo, transferencia, Mercado Pago o Cuenta DNI. Pagando con Cuenta DNI tenés 20% de reintegro de lunes a viernes: te mandamos el link de pago por WhatsApp al confirmar el pedido.',
   },
   {
     q: '¿Puedo personalizar la tapa?',
