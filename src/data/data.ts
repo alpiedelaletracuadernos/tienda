@@ -20,6 +20,14 @@ export interface AppVars {
     maxUploadSizeBytes?: number;
     dateFormat?: string;
     personalizationSurcharge: number; // Recargo por personalizar producto
+    /** Beneficio por pagar con Cuenta DNI (precio, checkout y WhatsApp). */
+    cuentaDni: {
+        enabled: boolean;
+        label: string;   // 'Cuenta DNI'
+        benefit: string; // '20% de reintegro'
+        days: string;    // 'de lunes a viernes'
+        howTo: string;   // cómo se paga
+    };
     promotions: {
         discount: {
             enabled: boolean;
@@ -54,7 +62,6 @@ export interface AppVars {
             campaignCode: string;   // va en el mensaje de WhatsApp para identificar pedidos
             ctaLabel: string;       // único texto del botón principal en todo el sitio
             delivery: string;       // plazo de entrega
-            paymentPromo: string;   // beneficio de pago (debajo del precio del kit)
             closedLabel: string;    // badge cuando terminó
             closedMessage: string;  // texto de la ficha cuando terminó
             barStorageKey: string;  // cierre de la barra superior (por sesión)
@@ -83,6 +90,13 @@ export const vars: AppVars = {
     maxUploadSizeBytes: 5 * 1024 * 1024, // 5 MB
     dateFormat: 'dd/MM/yyyy',
     personalizationSurcharge: 8000, // Recargo por personalizar la tapa
+    cuentaDni: {
+        enabled: true,
+        label: 'Cuenta DNI',
+        benefit: '20% de reintegro',
+        days: 'de lunes a viernes',
+        howTo: 'Te mandamos el link de pago por WhatsApp al confirmar el pedido.',
+    },
     promotions: {
         discount: {
             enabled: false,
@@ -116,7 +130,6 @@ export const vars: AppVars = {
             campaignCode: 'KIT27',
             ctaLabel: 'Quiero mi kit',
             delivery: 'Se entrega 5 días hábiles después de la compra',
-            paymentPromo: '20% de reintegro de lunes a viernes',
             closedLabel: 'PREVENTA CERRADA',
             closedMessage:
                 'La preventa del Kit Mi Año 2027 cerró el 16/10. Las agendas 2027 siguen disponibles por separado.',

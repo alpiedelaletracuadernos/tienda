@@ -13,7 +13,8 @@ import { useCart } from '@/hooks/use-cart';
 import AppVars from '@/data/data';
 import { formatARS } from '@/lib/currency';
 import { buildCheckoutMessage, buildWaLink } from '@/lib/whatsapp';
-import type { BuyerInfo } from '@/types/cart';
+import type { BuyerInfo, PaymentMethod } from '@/types/cart';
+import { cuentaDniEnabled } from '@/components/promos/CuentaDniHint';
 
 // ✅ CHANGE: Checkout ya no debe recalcular descuentos.
 // Motivo: evitamos solapes. Todo sale del motor.
@@ -39,9 +40,7 @@ const Checkout = () => {
   const [buyerNotes, setBuyerNotes] = useState('');
 
   // (Opcional) método de pago para informar en el mensaje
-  const [paymentMethod, setPaymentMethod] = useState<'efectivo' | 'transferencia' | 'mercado-pago'>(
-    'efectivo'
-  );
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('efectivo');
 
   const whatsappMessage = useMemo(() => {
     const buyer: BuyerInfo = {
@@ -164,7 +163,7 @@ const Checkout = () => {
                   <RadioGroup
                     value={paymentMethod}
                     onValueChange={(v) =>
-                      setPaymentMethod(v as 'efectivo' | 'transferencia' | 'mercado-pago')
+                      setPaymentMethod(v as PaymentMethod)
                     }
                     className="flex flex-wrap gap-6"
                   >
@@ -180,6 +179,30 @@ const Checkout = () => {
                       <RadioGroupItem value="mercado-pago" id="p-mp" />
                       <Label htmlFor="p-mp">Mercado Pago</Label>
                     </div>
+                    {cuentaDniEnabled && (
+                      <label
+                        htmlFor="p-dni"
+                        className={`flex w-full cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors ${
+                          paymentMethod === 'cuenta-dni'
+                            ? 'border-success bg-success/10'
+                            : 'border-success/40 hover:bg-success/5'
+                        }`}
+                      >
+                        <RadioGroupItem value="cuenta-dni" id="p-dni" className="mt-0.5" />
+                        <span className="space-y-0.5">
+                          <span className="flex flex-wrap items-center gap-2 font-medium leading-none">
+                            {AppVars.cuentaDni.label}
+                            <span className="rounded bg-success px-1.5 py-0.5 text-[11px] font-bold text-success-foreground">
+                              {AppVars.cuentaDni.benefit}
+                            </span>
+                          </span>
+                          <span className="block text-xs text-muted-foreground">
+                            {AppVars.cuentaDni.days.charAt(0).toUpperCase() + AppVars.cuentaDni.days.slice(1)}.{' '}
+                            {AppVars.cuentaDni.howTo}
+                          </span>
+                        </span>
+                      </label>
+                    )}
                   </RadioGroup>
                 </div>
               </div>

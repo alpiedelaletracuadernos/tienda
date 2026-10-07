@@ -17,6 +17,7 @@ import { kitPricingFor } from '@/lib/pricing/kit';
 import { presale } from '@/config/presale';
 import { cn } from '@/lib/utils';
 import { isVideo, responsiveSrcSet, stillOf } from '@/lib/media';
+import { CuentaDniHint } from '@/components/promos/CuentaDniHint';
 
 interface ProductCardProps {
   product: Product;
@@ -177,6 +178,8 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
               {formatARS(pricing.listUnit)}
             </p>
           )}
+          {/* Beneficio de pago, en una línea que no cambia el alto de la card */}
+          {purchasable && <CuentaDniHint variant="card" className="mt-1" />}
         </div>
 
         {featured && purchasable && (

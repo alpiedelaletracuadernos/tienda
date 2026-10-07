@@ -1,6 +1,7 @@
 // src/lib/whatsapp.ts
 import type { Product, ProductSize, InteriorType, CoverType } from '@/types/product';
-import type { CartItem, BuyerInfo } from '@/types/cart';
+import type { CartItem, BuyerInfo, PaymentMethod } from '@/types/cart';
+import vars from '@/data/data';
 import { formatARS } from '@/lib/currency';
 import { interiorLabel } from '@/data/interiors';
 import { catalog } from '@/data/products';
@@ -149,6 +150,14 @@ export function buildRestockMessage(product: Pick<Product, 'name'>): string {
 }
 
 // Checkout (carrito completo)
+const PAYMENT_LABELS: Record<PaymentMethod, string> = {
+  efectivo: 'Efectivo',
+  transferencia: 'Transferencia',
+  'mercado-pago': 'Mercado Pago',
+  'cuenta-dni': `${vars.cuentaDni.label} (${vars.cuentaDni.benefit} ${vars.cuentaDni.days}) — mandame el link de pago`,
+};
+const paymentMethodLabel = (m: PaymentMethod) => PAYMENT_LABELS[m] ?? m;
+
 export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): string {
   const lines: string[] = [];
   lines.push('¡Hola! Quiero *finalizar la compra* 👋');
@@ -218,7 +227,7 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
     lines.push(`• Dirección: ${buyer.address || 'A completar'}`);
   if (buyer.notes) lines.push(`• Notas: ${buyer.notes}`);
   if (buyer.paymentMethod)
-    lines.push(`• Método de pago preferido: ${buyer.paymentMethod.replace('-', ' ')}`);
+    lines.push(`• Método de pago preferido: ${paymentMethodLabel(buyer.paymentMethod)}`);
   lines.push('');
   lines.push('¿Me confirmás disponibilidad y próximos pasos? ¡Gracias!');
   return lines.join('\n');

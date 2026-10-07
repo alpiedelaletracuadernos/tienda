@@ -30,5 +30,7 @@ export interface BuyerInfo {
   deliveryMethod: 'retiro' | 'envio';
   address?: string;
   notes?: string;
-  paymentMethod?: 'efectivo' | 'transferencia' | 'mercado-pago';
+  paymentMethod?: PaymentMethod;
 }
+
+export type PaymentMethod = 'efectivo' | 'transferencia' | 'mercado-pago' | 'cuenta-dni';
