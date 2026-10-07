@@ -54,6 +54,7 @@ export interface AppVars {
             campaignCode: string;   // va en el mensaje de WhatsApp para identificar pedidos
             ctaLabel: string;       // único texto del botón principal en todo el sitio
             delivery: string;       // plazo de entrega
+            paymentPromo: string;   // beneficio de pago (debajo del precio del kit)
             closedLabel: string;    // badge cuando terminó
             closedMessage: string;  // texto de la ficha cuando terminó
             barStorageKey: string;  // cierre de la barra superior (por sesión)
@@ -115,6 +116,7 @@ export const vars: AppVars = {
             campaignCode: 'KIT27',
             ctaLabel: 'Quiero mi kit',
             delivery: 'Se entrega 5 días hábiles después de la compra',
+            paymentPromo: '20% de reintegro de lunes a viernes',
             closedLabel: 'PREVENTA CERRADA',
             closedMessage:
                 'La preventa del Kit Mi Año 2027 cerró el 16/10. Las agendas 2027 siguen disponibles por separado.',
