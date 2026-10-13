@@ -17,7 +17,7 @@ const PERSONALIZATION_STYLES: { id: PersonalizationStyleId; label: string }[] = 
 
 type Props = {
   step: number;
-  /** Recargo por personalizar; 0 = incluida en el precio. */
+  /** Recargo por personalizar; 0 = sin recargo (no se muestra aviso). */
   surcharge: number;
   isCustom: boolean;
   onCustomChange: (v: boolean) => void;
@@ -41,11 +41,7 @@ export function PersonalizationStep({
     <StepSection
       step={step}
       title="¿Lo querés personalizado?"
-      hint={
-        surcharge > 0
-          ? `+${formatARS(surcharge)} sobre el precio de lista`
-          : 'Incluida en el precio'
-      }
+      hint={surcharge > 0 ? `+${formatARS(surcharge)} sobre el precio de lista` : undefined}
     >
       <div className="space-y-4 rounded-2xl border p-4 sm:p-5">
         <div className="flex items-center justify-between gap-4">

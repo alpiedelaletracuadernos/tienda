@@ -20,6 +20,7 @@ export interface AppVars {
     maxUploadSizeBytes?: number;
     dateFormat?: string;
     personalizationSurcharge: number; // Recargo por personalizar producto
+    shippingNote: string; // aclaración del costo de envío (carrito, checkout, WhatsApp)
     /** Beneficio por pagar con Cuenta DNI (precio, checkout y WhatsApp). */
     cuentaDni: {
         enabled: boolean;
@@ -90,6 +91,7 @@ export const vars: AppVars = {
     maxUploadSizeBytes: 5 * 1024 * 1024, // 5 MB
     dateFormat: 'dd/MM/yyyy',
     personalizationSurcharge: 8000, // Recargo por personalizar la tapa
+    shippingNote: 'El costo del envío corre por cuenta del comprador.',
     cuentaDni: {
         enabled: true,
         label: 'Cuenta DNI',

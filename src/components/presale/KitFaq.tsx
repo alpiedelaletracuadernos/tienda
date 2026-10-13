@@ -16,7 +16,7 @@ const FAQ = [
   },
   {
     q: '¿Hacen envíos?',
-    a: 'Sí, enviamos a todo el país. También podés retirarlo sin cargo en San Nicolás de los Arroyos. El costo del envío lo coordinamos por WhatsApp antes de confirmar el pedido.',
+    a: 'Sí, enviamos a todo el país. También podés retirarlo sin cargo en San Nicolás de los Arroyos. El costo del envío corre por cuenta del comprador y lo coordinamos por WhatsApp antes de confirmar el pedido.',
   },
   {
     q: '¿Cómo pago?',

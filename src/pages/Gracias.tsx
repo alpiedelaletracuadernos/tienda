@@ -88,7 +88,7 @@ Quedo atento/a a los próximos pasos. ¡Gracias!`;
                 <li className="flex items-start gap-3">
                   <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                   <span>
-                    <strong>Entrega:</strong> retiro en punto acordado en zona centro (San Nicolás) o envío a domicilio.
+                    <strong>Entrega:</strong> retiro en punto acordado en zona centro (San Nicolás) o envío a domicilio (el costo del envío corre por cuenta del comprador).
                   </span>
                 </li>
               </ul>

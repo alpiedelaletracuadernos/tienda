@@ -133,8 +133,8 @@ export default function Cart() {
                               <p>
                                 Personalización de tapa:{' '}
                                 {personalizationSurchargeForId(item.product.id) > 0
-                                  ? `+${formatARS(personalizationSurchargeForId(item.product.id))} c/u (incluido)`
-                                  : 'incluida en el precio'}
+                                  ? `+${formatARS(personalizationSurchargeForId(item.product.id))} c/u`
+                                  : 'sí'}
                               </p>
                             )}
                           </div>
@@ -240,7 +240,7 @@ export default function Cart() {
 
                     <div className="flex justify-between text-muted-foreground">
                       <span>Envío</span>
-                      <span>A calcular</span>
+                      <span>A cargo del comprador</span>
                     </div>
 
                     <div className="border-t pt-2 flex justify-between text-xl font-bold">
@@ -261,7 +261,7 @@ export default function Cart() {
                   </div>
 
                   <div className="text-sm text-muted-foreground space-y-2 pt-4 border-t">
-                    <p>✓ Envíos a todo el país</p>
+                    <p>✓ Envíos a todo el país (costo a cargo del comprador)</p>
                     <p>✓ Retiro sin cargo en San Nicolás</p>
                     <p>
                       ✓ Pagás con efectivo, transferencia, Mercado Pago

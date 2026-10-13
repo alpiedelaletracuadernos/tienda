@@ -73,7 +73,7 @@ export function buildShopMessage(
     if (personalization.buyerCity) lines.push(`• Ciudad/Localidad: ${personalization.buyerCity}`);
     if (personalization.deliveryMethod)
       lines.push(
-        `• Entrega: ${personalization.deliveryMethod === 'envio' ? 'Envío a domicilio' : 'Retiro en punto'}`
+        `• Entrega: ${personalization.deliveryMethod === 'envio' ? 'Envío a domicilio (costo a cargo del comprador)' : 'Retiro en punto'}`
       );
     if (personalization.deliveryMethod === 'envio' && personalization.deliveryAddress)
       lines.push(`• Dirección: ${personalization.deliveryAddress}`);
@@ -193,8 +193,8 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
         const surcharge = personalizationSurchargeForId(it.product.id);
         lines.push(
           surcharge > 0
-            ? `   Personalización de tapa: +${formatARS(surcharge)} (incluido en el unitario)`
-            : '   Personalización de tapa: incluida en el precio'
+            ? `   Personalización de tapa: +${formatARS(surcharge)} (sumado al unitario)`
+            : '   Personalización de tapa: sí'
         );
       }
       lines.push(`   Unitario: ${formatARS(unit)}  |  Subtotal: ${formatARS(subtotal)}`);
@@ -221,7 +221,7 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
   lines.push(`• Nombre: ${buyer.name || 'A completar'}`);
   lines.push(`• Ciudad/Localidad: ${buyer.city || 'A completar'}`);
   lines.push(
-    `• Entrega: ${buyer.deliveryMethod === 'envio' ? 'Envío a domicilio' : 'Retiro en punto de entrega'}`
+    `• Entrega: ${buyer.deliveryMethod === 'envio' ? 'Envío a domicilio (costo a cargo del comprador)' : 'Retiro en punto de entrega'}`
   );
   if (buyer.deliveryMethod === 'envio')
     lines.push(`• Dirección: ${buyer.address || 'A completar'}`);

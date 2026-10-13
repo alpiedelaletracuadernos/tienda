@@ -134,6 +134,9 @@ const Checkout = () => {
                       <Label htmlFor="envio">Envío a domicilio</Label>
                     </div>
                   </RadioGroup>
+                  <p className="text-xs text-muted-foreground">
+                    {AppVars.shippingNote} Lo coordinamos por WhatsApp.
+                  </p>
                 </div>
 
                 {deliveryMethod === 'envio' && (
