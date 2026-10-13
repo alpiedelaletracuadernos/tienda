@@ -4,7 +4,7 @@ const features = [
   {
     icon: Truck,
     title: 'Envíos a Todo el País',
-    description: 'Llegamos a cualquier punto de Argentina. Envío seguro con seguimiento.',
+    description: 'Llegamos a cualquier punto de Argentina, con seguimiento. El costo del envío corre por cuenta del comprador.',
   },
   {
     icon: MapPin,

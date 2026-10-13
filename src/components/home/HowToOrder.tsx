@@ -19,7 +19,7 @@ const steps = [
   {
     icon: Truck,
     title: 'Recibilo o retiralo',
-    description: 'Envíos a todo el país o retiro sin cargo en el centro de San Nicolás.',
+    description: 'Envíos a todo el país (a cargo del comprador) o retiro sin cargo en el centro de San Nicolás.',
   },
 ];
 

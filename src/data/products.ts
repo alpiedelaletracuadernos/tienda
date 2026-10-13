@@ -471,7 +471,6 @@ export const catalog: Product[] = [
       'Elástico de cierre',
     ],
     includes: [
-      'Personalización de tapa incluida',
       'Bolsillo interno',
       'Plancha de stickers',
       'Calendario 2026 y 2027',
@@ -502,7 +501,6 @@ export const catalog: Product[] = [
     coverTypes: ['dura'],
     materials: ['Tapa dura', 'hojas Interior 90g', 'Espiral metálico doble alambre'],
     includes: [
-      'Personalización de tapa incluida',
       'Hoja de datos',
       'Hoja de contraseñas',
       'Calendarios',
@@ -544,7 +542,6 @@ export const catalog: Product[] = [
     coverTypes: ['dura'],
     materials: ['Tapa dura', 'hojas Interior 90g', 'Espiral metálico doble alambre'],
     includes: [
-      'Personalización de tapa incluida',
       'Hoja de datos',
       'Hoja de contraseñas',
       'Horario semanal',
@@ -589,7 +586,6 @@ export const catalog: Product[] = [
     coverTypes: ['dura'],
     materials: ['Tapa dura', 'hojas Interior 90g', 'Espiral metálico doble alambre'],
     includes: [
-      'Personalización de tapa incluida',
       'Hoja de datos',
       'Hoja de contraseñas',
       'Horario semanal',
@@ -743,7 +739,6 @@ export const catalog: Product[] = [
     materials: ['Tapa dura A5', 'Hojas interior 90gr', 'espiral metalico doble alambre'],
     includes: [
       'Tapa a elección',
-      'Personalización de tapa incluida',
       '100 hojas interior de 2,3 o 6 pedidos por hoja',
     ],
     productionTime: '8-10 horas hábiles',
@@ -854,7 +849,6 @@ export const catalog: Product[] = [
       'Señalador inmantado',
       'Tarjeta dedicatoria',
       'Caja regalo',
-      'Personalización de tapa incluida',
     ],
     productionTime: '8-10 dias hábiles',
     inStock: true,
