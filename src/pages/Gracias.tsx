@@ -82,7 +82,7 @@ Quedo atento/a a los próximos pasos. ¡Gracias!`;
                 <li className="flex items-start gap-3">
                   <Package className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                   <span>
-                    <strong>Producción:</strong> 8–10 h hábiles. Opción de entrega rápida 24–48 h con recargo.
+                    <strong>Tiempo de entrega:</strong> {AppVars.delivery.time} ({AppVars.delivery.stockNote}).
                   </span>
                 </li>
                 <li className="flex items-start gap-3">

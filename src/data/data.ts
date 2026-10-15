@@ -21,6 +21,12 @@ export interface AppVars {
     dateFormat?: string;
     personalizationSurcharge: number; // Recargo por personalizar producto
     shippingNote: string; // aclaración del costo de envío (carrito, checkout, WhatsApp)
+    /** Plazo de entrega de toda la tienda (fichas, portada, gracias). */
+    delivery: {
+        time: string;      // '5 días hábiles'
+        stockNote: string; // aclaración de stock
+        text: string;      // frase completa
+    };
     /** Beneficio por pagar con Cuenta DNI (precio, checkout y WhatsApp). */
     cuentaDni: {
         enabled: boolean;
@@ -92,6 +98,11 @@ export const vars: AppVars = {
     dateFormat: 'dd/MM/yyyy',
     personalizationSurcharge: 8000, // Recargo por personalizar la tapa
     shippingNote: 'El costo del envío corre por cuenta del comprador.',
+    delivery: {
+        time: '5 días hábiles',
+        stockNote: 'puede ser menos si hay stock, consultanos',
+        text: 'Entrega en 5 días hábiles (puede ser menos si hay stock, consultanos)',
+    },
     cuentaDni: {
         enabled: true,
         label: 'Cuenta DNI',

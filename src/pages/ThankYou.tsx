@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Package, Mail, Phone } from 'lucide-react';
+import vars from '@/data/data';
 
 const ThankYou = () => {
   return (
@@ -31,7 +32,9 @@ const ThankYou = () => {
                     <ul className="space-y-2 text-sm text-muted-foreground">
                       <li>✓ Comenzaremos la producción de tu agenda/cuaderno personalizado</li>
                       <li>✓ Te mantendremos informado sobre el estado de tu pedido</li>
-                      <li>✓ Tiempo estimado de producción: 8-10 horas hábiles</li>
+                      <li>
+                        ✓ Tiempo de entrega: {vars.delivery.time} ({vars.delivery.stockNote})
+                      </li>
                     </ul>
                   </div>
                 </div>

@@ -11,6 +11,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import type { Product } from '@/types/product';
+import vars from '@/data/data';
 
 type Props = {
   product: Pick<Product, 'includes' | 'materials' | 'sizes' | 'productionTime'>;
@@ -49,7 +50,9 @@ export function ProductSpecs({ product }: Props) {
               {product.materials.map((item) => (
                 <li key={item}>{item}</li>
               ))}
-              <li>Tiempo de producción: {product.productionTime}</li>
+              <li>
+                Tiempo de entrega: {product.productionTime} ({vars.delivery.stockNote})
+              </li>
             </ul>
           </AccordionContent>
         </AccordionItem>

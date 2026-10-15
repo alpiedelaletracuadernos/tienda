@@ -116,7 +116,7 @@ export default function Hero() {
           <p className="text-base sm:text-xl text-white/90">
             Agendas y cuadernos artesanales con diseños propios, y la opción de{" "}
             <strong>personalizar la tapa</strong> con nombre, frase, foto o tramas.
-            Hecho a mano en San Nicolás de los Arroyos, con entrega rápida.
+            Hecho a mano en San Nicolás de los Arroyos, con entrega en 5 días hábiles.
           </p>
 
           {/* CTA primario/secundario */}
@@ -136,8 +136,8 @@ export default function Hero() {
           {/* Trust + Objeciones resueltas */}
           <ul className="hidden mt-4 md:grid grid-cols-2 max-w-xs gap-4 text-left text-[0.8rem] sm:text-sm">
             <li className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-bold text-primary-light">48&nbsp;h</span>
-              <span className="text-white/85">Entrega rápida</span>
+              <span className="text-xl sm:text-2xl font-bold text-primary-light">5&nbsp;días</span>
+              <span className="text-white/85">Hábiles de entrega</span>
             </li>
             <li className="flex flex-col">
               <span className="text-xl sm:text-2xl font-bold text-primary-light">

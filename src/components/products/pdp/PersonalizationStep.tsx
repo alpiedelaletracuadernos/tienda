@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { StepSection } from '@/components/products/StepSection';
 import { formatARS } from '@/lib/currency';
 import type { PersonalizationStyleId } from '@/lib/whatsapp';
+import vars from '@/data/data';
 
 const PERSONALIZATION_STYLES: { id: PersonalizationStyleId; label: string }[] = [
   { id: 'nombre', label: 'Nombre/Iniciales' },
@@ -104,8 +105,7 @@ export function PersonalizationStep({
 
             <ul className="text-xs text-muted-foreground space-y-1">
               <li>
-                • Boceto incluido (1 revisión). Producción: 8–10 h. Entrega rápida 24–48 h
-                (con recargo).
+                • Boceto incluido (1 revisión). {vars.delivery.text}.
               </li>
               <li>• Para fotos: luz natural y al menos ~1500 px del lado más corto.</li>
             </ul>
