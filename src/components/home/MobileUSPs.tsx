@@ -9,7 +9,7 @@ type USP = {
 };
 
 const USPS: USP[] = [
-  { icon: Clock,      headline: "48 h", sub: "Entrega rápida" },
+  { icon: Clock,      headline: "5 días", sub: "Hábiles de entrega" },
   { icon: LayoutGrid, headline: String(modeloOptions.length), sub: "Diseños 2027" },
   { icon: ShieldCheck,headline: "Premium", sub: "Materiales y terminación" },
   { icon: MessageSquare, headline: "1:1", sub: "Atención por WhatsApp" },

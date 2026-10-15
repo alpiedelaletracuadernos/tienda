@@ -13,8 +13,8 @@ const features = [
   },
   {
     icon: Clock,
-    title: 'Entrega Rápida 48hs',
-    description: 'Opción de producción express. Pedilo hoy, recibilo en 2 días.',
+    title: 'Entrega en 5 Días Hábiles',
+    description: 'Puede ser menos si hay stock: consultanos por WhatsApp.',
   },
   {
     icon: Shield,

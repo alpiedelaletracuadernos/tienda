@@ -160,7 +160,7 @@ export default function Promo2x1Modal({
           {/* Bullets de confianza */}
           <ul className="text-sm text-foreground/80 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
             <li>• Hecho a mano</li>
-            <li>• Entrega 24–48h</li>
+            <li>• Entrega en 5 días hábiles</li>
           </ul>
 
           {/* CTA principal */}
