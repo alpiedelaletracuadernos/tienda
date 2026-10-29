@@ -57,8 +57,9 @@ export interface AppVars {
             storageKey: string;  // clave localStorage para cooldown del modal
         };
         /**
-         * Cyber Week APL: 15% OFF en toda la web + 3x2 (pagás los 2 de mayor
-         * valor) + regalito en todas las compras. Se prende y apaga sola por
+         * Cyber Week APL: 15% OFF en toda la web o 3x2 (pagás los 2 de mayor
+         * valor), NO acumulables: el carrito aplica el que más le conviene al
+         * cliente. Más regalito en todas las compras. Se prende y apaga sola por
          * fecha (hora de Argentina); `enabled: false` la apaga del todo.
          */
         cyberWeek: {
@@ -70,8 +71,8 @@ export interface AppVars {
             rangeLabel: string;      // 'del 2 al 7 de noviembre'
             endLabel: string;        // 'el sábado 7/11'
             percentage: number;      // descuento en toda la web
-            /** 3x2: por cada 3 unidades, la más barata sale gratis. El % se suma
-             *  sobre lo que se paga (acumulable). */
+            /** 3x2: por cada 3 unidades, la más barata sale gratis. No se suma
+             *  al %: el motor aplica la opción que más le conviene al cliente. */
             threeForTwo: boolean;
             gift: string;            // texto del regalito (carrito, checkout, WhatsApp)
             campaignCode: string;    // va en el mensaje de WhatsApp

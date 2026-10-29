@@ -22,8 +22,8 @@ export function CyberPdpNote() {
         <p className="flex items-start gap-2">
           <Layers className="mt-0.5 h-4 w-4 shrink-0 text-promo" aria-hidden />
           <span>
-            <strong>3x2:</strong> llevando 3 productos, el de menor valor te sale gratis. Podés
-            combinar modelos.
+            <strong>O 3x2:</strong> llevando 3 productos, el de menor valor te sale gratis. No se
+            suma al {cyberWeek.percentage}%: en el carrito te aplicamos el que más te conviene.
           </span>
         </p>
       )}

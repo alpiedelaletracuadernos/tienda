@@ -38,7 +38,7 @@ Three promotions stack, applied in this order, each on the running line total:
 1. **2x1** (`twoForOne`) — pools all eligible units across lines, makes the cheapest `floor(n/2)` free. Category-restricted.
 2. **Percentage discount** (`discount`) — category-restricted, applied to the post-2x1 total so free units aren't double-discounted.
 3. **Hot Sale** (`hotSale`) — applies to **all** categories, but only when today falls inside the `startDate`/`endDate` window *and* `enabled` is true.
-4. **Cyber Week** (`cyberWeek`, helpers in `src/config/cyberweek.ts`) — date window in Argentina time (UTC-3). 3x2 over all units (the cheapest `floor(n/3)` are free), then the % on what's left. Excludes `excludeFromPromos` products. UI in `src/components/cyber/`. To preview it before the dates, build with `VITE_PROMO_NOW=<ISO date>` (local only; the deploy build never sets it).
+4. **Cyber Week** (`cyberWeek`, helpers in `src/config/cyberweek.ts`) — date window in Argentina time (UTC-3). 15% OR 3x2, not stacked: the engine prices the cart both ways and keeps the cheaper one for the buyer (3x2 on the 3·k most expensive units, the k cheapest of those free, plus the % on units outside a trio). Excludes `excludeFromPromos` products. UI in `src/components/cyber/`. To preview it before the dates, build with `VITE_PROMO_NOW=<ISO date>` (local only; the deploy build never sets it).
 
 `calculateCartPricing` returns a per-line `lines` breakdown keyed by the same identity tuple as the cart, plus nullable `promo` / `percent` / `hotSale` summary objects that the UI and the WhatsApp message render only when non-null.
 

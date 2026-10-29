@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { X } from 'lucide-react';
-import { cyberWeek, isCyberWeekActive } from '@/config/cyberweek';
+import { cyberHeadline, cyberWeek, isCyberWeekActive } from '@/config/cyberweek';
 import { useCyberClock } from './useCyberClock';
 
 const readDismissed = () => {
@@ -40,9 +40,7 @@ export function CyberTopBar() {
           <span className="mr-1.5 inline-block rounded bg-promo px-1.5 py-0.5 text-[10px] sm:text-[11px] font-extrabold tracking-wide text-promo-foreground">
             {cyberWeek.badge}
           </span>
-          <span className="font-semibold">
-            {cyberWeek.percentage}% OFF en todo{cyberWeek.threeForTwo && ' + 3x2'} + regalito
-          </span>
+          <span className="font-semibold">{cyberHeadline()}</span>
           <span className={clock.lastDay ? 'font-semibold text-promo' : 'text-white/80'}>
             {' '}
             · {clock.text}

@@ -141,7 +141,14 @@ export function calculateCartPricing(items: CartItem[]) {
   }
 
   // =====================
-  // 4) CYBER WEEK (si activa): 3x2 y después el % sobre lo que se paga
+  // 4) CYBER WEEK (si activa): 15% OFF o 3x2, NO acumulables.
+  //    Se calcula el carrito de las dos formas y se aplica la que más le
+  //    conviene al cliente:
+  //    A) 3x2: las unidades se ordenan de mayor a menor valor; las 3·k más
+  //       caras forman los tríos y, dentro de ellos, las k más baratas salen
+  //       gratis (se pagan siempre las de mayor valor). Las unidades que no
+  //       completan un trío llevan el 15%.
+  //    B) 15% OFF sobre todas las unidades.
   // =====================
   const cyberOn = isCyberWeekActive();
   const cw = vars.promotions.cyberWeek;
@@ -149,10 +156,9 @@ export function calculateCartPricing(items: CartItem[]) {
   let cyberPercentTotal = 0;
   let cyber3x2FreeCount = 0;
   let cyberEligibleQty = 0;
+  let cyberMode: '3x2' | 'percent' = 'percent';
 
   if (cyberOn) {
-    // 3x2: se juntan las unidades de todo el carrito y, por cada 3, la más
-    // barata sale gratis (el cliente paga siempre las de mayor valor).
     const units: Unit[] = [];
     for (const it of items) {
       if (!isEligibleForCyberWeek(it)) continue;
@@ -163,34 +169,55 @@ export function calculateCartPricing(items: CartItem[]) {
       for (let i = 0; i < qty; i++) units.push({ price, key });
     }
     cyberEligibleQty = units.length;
+    units.sort((a, b) => b.price - a.price);
 
-    if (cw.threeForTwo) {
-      cyber3x2FreeCount = Math.floor(units.length / 3);
-      units.sort((a, b) => a.price - b.price);
-      for (const u of units.slice(0, cyber3x2FreeCount)) {
+    const cwRate = cw.percentage / 100;
+    /** Suma el % por línea (redondeo por línea, como las demás promos). */
+    const percentByLine = (list: Unit[]) => {
+      const base: Record<string, number> = {};
+      for (const u of list) base[u.key] = (base[u.key] ?? 0) + u.price;
+      return Object.fromEntries(
+        Object.entries(base).map(([k, v]) => [k, Math.round(v * cwRate)])
+      ) as Record<string, number>;
+    };
+    const sum = (r: Record<string, number>) => Object.values(r).reduce((a, b) => a + b, 0);
+
+    // B) 15% en todo
+    const pctAll = percentByLine(units);
+    const savingB = sum(pctAll);
+
+    // A) 3x2 + 15% en lo que no completa un trío
+    const k = cw.threeForTwo ? Math.floor(units.length / 3) : 0;
+    const trio = units.slice(0, 3 * k);
+    const free = trio.slice(2 * k);
+    const pctRest = percentByLine(units.slice(3 * k));
+    const savingA = free.reduce((a, u) => a + Math.round(u.price), 0) + sum(pctRest);
+
+    const applyPercent = (r: Record<string, number>) => {
+      for (const [key, d] of Object.entries(r)) {
+        if (d <= 0) continue;
+        cyberPercentTotal += d;
+        lines[key].cyberDiscount += d;
+        lines[key].discount += d;
+      }
+    };
+
+    if (k > 0 && savingA >= savingB) {
+      cyberMode = '3x2';
+      cyber3x2FreeCount = k;
+      for (const u of free) {
         const d = Math.round(u.price);
         cyber3x2Discount += d;
         lines[u.key].discount += d;
         lines[u.key].freeUnits += 1;
       }
-      for (const k of Object.keys(lines)) {
-        lines[k].total = Math.max(0, lines[k].listSubtotal - lines[k].discount);
-      }
+      applyPercent(pctRest);
+    } else {
+      applyPercent(pctAll);
     }
 
-    const cwRate = cw.percentage / 100;
-    for (const it of items) {
-      if (!isEligibleForCyberWeek(it)) continue;
-      const key = getCartLineKey(it);
-      const d = Math.round(lines[key].total * cwRate);
-      if (d > 0) {
-        cyberPercentTotal += d;
-        lines[key].cyberDiscount += d;
-        lines[key].discount += d;
-      }
-    }
-    for (const k of Object.keys(lines)) {
-      lines[k].total = Math.max(0, lines[k].listSubtotal - lines[k].discount);
+    for (const key of Object.keys(lines)) {
+      lines[key].total = Math.max(0, lines[key].listSubtotal - lines[key].discount);
     }
   }
 
@@ -209,18 +236,33 @@ export function calculateCartPricing(items: CartItem[]) {
     totalQty,
     total,
     lines,
-    promo: vars.promotions.twoForOne.enabled ? { label: 'Promo 2x1', amount: promo2x1Discount } : null,
-    percent: vars.promotions.discount.enabled ? { label: `Descuento del ${discountSettings.percentage}% en la unidad`, amount: percentDiscountTotal } : null,
-    hotSale: isHotSaleActive() ? { label: `${hotSaleSettings.label} ${hotSaleSettings.percentage}% OFF`, amount: hotSaleDiscountTotal } : null,
-    cyber3x2: cyberOn && cw.threeForTwo
-      ? { label: `3x2 ${cw.name}`, amount: cyber3x2Discount }
+    promo: vars.promotions.twoForOne.enabled
+      ? { label: 'Promo 2x1', amount: promo2x1Discount }
       : null,
-    cyberPercent: cyberOn ? { label: `${cw.name} ${cw.percentage}% OFF`, amount: cyberPercentTotal } : null,
+    percent: vars.promotions.discount.enabled
+      ? {
+          label: `Descuento del ${discountSettings.percentage}% en la unidad`,
+          amount: percentDiscountTotal,
+        }
+      : null,
+    hotSale: isHotSaleActive()
+      ? {
+          label: `${hotSaleSettings.label} ${hotSaleSettings.percentage}% OFF`,
+          amount: hotSaleDiscountTotal,
+        }
+      : null,
+    cyber3x2:
+      cyberOn && cw.threeForTwo ? { label: `3x2 ${cw.name}`, amount: cyber3x2Discount } : null,
+    cyberPercent: cyberOn
+      ? { label: `${cw.name} ${cw.percentage}% OFF`, amount: cyberPercentTotal }
+      : null,
     /** Datos para el aviso "sumá 1 más y te llevás 3x2" del carrito. */
     cyber: cyberOn
       ? {
           eligibleQty: cyberEligibleQty,
           freeCount: cyber3x2FreeCount,
+          /** Cuál se aplicó: '3x2' (más 15% en lo que no completa un trío) o 'percent'. */
+          mode: cyberMode,
           gift: cw.gift,
           savings: cyber3x2Discount + cyberPercentTotal,
         }

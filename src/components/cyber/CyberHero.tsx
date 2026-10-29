@@ -7,8 +7,8 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
-import { CuentaDniHint } from '@/components/promos/CuentaDniHint';
 import { getProductBySlug } from '@/data/products';
+import vars from '@/data/data';
 import { formatARS } from '@/lib/currency';
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
 import { cyberWeek } from '@/config/cyberweek';
@@ -48,6 +48,9 @@ const BENEFITS = [
   { big: `${cyberWeek.percentage}%`, small: 'OFF en toda la web' },
   ...(cyberWeek.threeForTwo ? [{ big: '3x2', small: 'Llevás 3, pagás los 2 de mayor valor' }] : []),
   { big: '🎁', small: 'Regalito en todas las compras' },
+  ...(vars.cuentaDni.enabled
+    ? [{ big: '20%', small: `Reintegro con ${vars.cuentaDni.label}, ${vars.cuentaDni.days}` }]
+    : []),
 ];
 
 export function CyberHero() {
@@ -99,7 +102,7 @@ export function CyberHero() {
           </div>
 
           {/* Los tres beneficios: se leen de un vistazo */}
-          <ul className="grid grid-cols-3 gap-2 sm:gap-3">
+          <ul className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
             {BENEFITS.map((b) => (
               <li
                 key={b.small}
@@ -114,6 +117,13 @@ export function CyberHero() {
               </li>
             ))}
           </ul>
+
+          {cyberWeek.threeForTwo && (
+            <p className="text-sm text-white/85">
+              El {cyberWeek.percentage}% y el 3x2 no se suman: en el carrito te aplicamos solo el
+              que más te conviene.
+            </p>
+          )}
 
           {/* Ejemplo concreto con precios reales: el ahorro en pesos convence más que el % */}
           {example && (
@@ -143,10 +153,10 @@ export function CyberHero() {
           </div>
 
           <div className="space-y-2 text-xs text-white/75">
-            <CuentaDniHint />
             <p>
-              Los descuentos se aplican solos en el carrito. Se suman entre sí. No aplica al Kit Mi
-              Año 2027.
+              Los descuentos se aplican solos en el carrito. El reintegro de {vars.cuentaDni.label}{' '}
+              vale para todas las compras pagadas {vars.cuentaDni.days}. No aplica al Kit Mi Año
+              2027.
             </p>
           </div>
         </div>

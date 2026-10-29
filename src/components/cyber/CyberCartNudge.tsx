@@ -10,7 +10,13 @@ import { cyberWeek } from '@/config/cyberweek';
 import { cn } from '@/lib/utils';
 
 type Props = {
-  cyber: { eligibleQty: number; freeCount: number; gift: string; savings: number };
+  cyber: {
+    eligibleQty: number;
+    freeCount: number;
+    gift: string;
+    savings: number;
+    mode: '3x2' | 'percent';
+  };
   /** Versión compacta para el checkout (sin el link al catálogo). */
   compact?: boolean;
   className?: string;
@@ -40,11 +46,18 @@ export function CyberCartNudge({ cyber, compact = false, className }: Props) {
       {cyberWeek.threeForTwo && (
         <div className="space-y-2">
           <p className="text-sm">
-            {missing > 0 ? (
+            {cyber.mode === 'percent' && cyber.eligibleQty >= 3 ? (
+              <>
+                Con estos productos te conviene más el{' '}
+                <strong className="text-promo">{cyberWeek.percentage}% OFF</strong>, y ya está
+                aplicado (no se suma al 3x2).
+              </>
+            ) : missing > 0 ? (
               <>
                 Sumá{' '}
                 <strong>{missing === 1 ? '1 producto más' : `${missing} productos más`}</strong> y
-                el de menor valor te sale <strong className="text-promo">gratis</strong> (3x2).
+                el de menor valor te sale <strong className="text-promo">gratis</strong> (3x2). Te
+                aplicamos el {cyberWeek.percentage}% o el 3x2, el que más te convenga.
               </>
             ) : (
               <>

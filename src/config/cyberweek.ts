@@ -40,10 +40,8 @@ export const cyberDeadlineText = (now: Date = promoNow()): string => {
   return `Hasta ${cfg.endLabel}`;
 };
 
-/** "15% OFF + 3x2 + regalito" (titular corto). */
+/** "15% OFF o 3x2 + regalito" (titular corto). El % y el 3x2 no se suman. */
 export const cyberHeadline = () =>
-  [`${cfg.percentage}% OFF`, cfg.threeForTwo ? '3x2' : null, 'regalito']
-    .filter(Boolean)
-    .join(' + ');
+  `${cfg.percentage}% OFF${cfg.threeForTwo ? ' o 3x2' : ''} + regalito`;
 
 export const cyberWeek = cfg;
