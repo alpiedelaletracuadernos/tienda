@@ -74,7 +74,13 @@ export function calculateProductPricing(args: {
   const finalTotal = pricing.total;
   const finalUnit = Math.round(finalTotal / qty);
 
-  const discounts = [pricing.promo, pricing.percent, pricing.hotSale].filter(
+  const discounts = [
+    pricing.promo,
+    pricing.percent,
+    pricing.hotSale,
+    pricing.cyber3x2,
+    pricing.cyberPercent,
+  ].filter(
     (d): d is { label: string; amount: number } => !!d && d.amount > 0
   );
 

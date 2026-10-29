@@ -3,6 +3,7 @@ import type { CartItem } from '@/types/cart';
 import { catalog } from '@/data/products';
 import { format, isSameDay, isSameMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { isCyberWeekActive } from '@/config/cyberweek';
 
 export const normalizeCategory = (c?: string) => (c ?? '').trim().toLowerCase();
 
@@ -120,3 +121,10 @@ export const isEligibleFor2x1 = (item: CartItem | EligibilityInput): boolean => 
 
   return true;
 };
+
+/**
+ * Cyber Week: 15% OFF y 3x2 en toda la web, personalizados incluidos.
+ * Sólo quedan afuera los productos `excludeFromPromos` (el kit).
+ */
+export const isEligibleForCyberWeek = (item: CartItem | EligibilityInput): boolean =>
+  isCyberWeekActive() && !isExcluded(item);

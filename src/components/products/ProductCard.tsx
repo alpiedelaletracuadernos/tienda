@@ -18,6 +18,7 @@ import { presale } from '@/config/presale';
 import { cn } from '@/lib/utils';
 import { isVideo, responsiveSrcSet, stillOf } from '@/lib/media';
 import { CuentaDniHint } from '@/components/promos/CuentaDniHint';
+import { cyberWeek } from '@/config/cyberweek';
 
 interface ProductCardProps {
   product: Product;
@@ -50,6 +51,8 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
   const hoverImage =
     !featured && product.images[1] && !isVideo(product.images[1]) ? product.images[1] : null;
 
+  // Cyber Week: el badge propio manda sobre los demás.
+  const cyberEligible = pricing.discounts.some((d) => d.label.startsWith(cyberWeek.name));
   // El badge Hot Sale se resalta aunque haya otras promos acumuladas.
   const hsEligible = pricing.discounts.some((d) =>
     d.label.startsWith(vars.promotions.hotSale.label)
@@ -109,6 +112,8 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
         )}
         {!purchasable ? (
           <Badge className="bg-foreground text-background">{availabilityLabel(product)}</Badge>
+        ) : cyberEligible ? (
+          <Badge className="bg-announcement text-promo">CYBER -{cyberWeek.percentage}%</Badge>
         ) : showBadge ? (
           <Badge className="bg-primary text-primary-foreground">{product.badge}</Badge>
         ) : hsEligible ? (
@@ -166,7 +171,12 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
               <span className="text-xs text-muted-foreground line-through">
                 {formatARS(pricing.listUnit)}
               </span>
-              <span className={cn('text-lg font-bold', hsEligible ? 'text-accent' : 'text-primary')}>
+              <span
+                className={cn(
+                  'text-lg font-bold',
+                  hsEligible || cyberEligible ? 'text-accent' : 'text-primary'
+                )}
+              >
                 {formatARS(pricing.finalUnit)}
               </span>
             </p>

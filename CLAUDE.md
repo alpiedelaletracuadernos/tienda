@@ -38,6 +38,7 @@ Three promotions stack, applied in this order, each on the running line total:
 1. **2x1** (`twoForOne`) — pools all eligible units across lines, makes the cheapest `floor(n/2)` free. Category-restricted.
 2. **Percentage discount** (`discount`) — category-restricted, applied to the post-2x1 total so free units aren't double-discounted.
 3. **Hot Sale** (`hotSale`) — applies to **all** categories, but only when today falls inside the `startDate`/`endDate` window *and* `enabled` is true.
+4. **Cyber Week** (`cyberWeek`, helpers in `src/config/cyberweek.ts`) — date window in Argentina time (UTC-3). 3x2 over all units (the cheapest `floor(n/3)` are free), then the % on what's left. Excludes `excludeFromPromos` products. UI in `src/components/cyber/`. To preview it before the dates, build with `VITE_PROMO_NOW=<ISO date>` (local only; the deploy build never sets it).
 
 `calculateCartPricing` returns a per-line `lines` breakdown keyed by the same identity tuple as the cart, plus nullable `promo` / `percent` / `hotSale` summary objects that the UI and the WhatsApp message render only when non-null.
 
@@ -45,7 +46,7 @@ Three promotions stack, applied in this order, each on the running line total:
 
 `src/data/data.ts` (`vars`, typed as `AppVars`) is the single source of truth for business variables: contact/WhatsApp number, social links, `personalizationSurcharge`, and all three promotion configs. **Enable, disable, and retune promos by editing `vars.promotions` in `data.ts`.**
 
-The `.env` file (`VITE_PROMO_2X1`, `VITE_DESCUENTOS`, `VITE_PORCENTAJE_DESCUENTO`) is **dead configuration** — nothing in `src/` reads `import.meta.env`. Don't add env reads in components; if a value must be configurable, add it to `vars`.
+The `.env` file (`VITE_PROMO_2X1`, `VITE_DESCUENTOS`, `VITE_PORCENTAJE_DESCUENTO`) is **dead configuration** — the only `import.meta.env` read in `src/` is the local-preview `VITE_PROMO_NOW` in `src/config/cyberweek.ts`. Don't add env reads in components; if a value must be configurable, add it to `vars`.
 
 Promo UI components live in `src/components/promos/` (`HotSaleBanner`, `HotSaleModal`, `Promo2x1`, `AnnouncementBar`, `BlackFridayModal`) and are mounted from `src/pages/Index.tsx` and `src/pages/Shop.tsx`. Modal frequency capping is handled by `src/hooks/usePromoModal..ts` (note the double dot in the filename) via localStorage/sessionStorage cooldowns.
 

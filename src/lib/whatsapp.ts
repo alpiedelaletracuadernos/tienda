@@ -212,6 +212,15 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
     if (pricing.hotSale) {
       lines.push(`*${pricing.hotSale.label}:* -${formatARS(pricing.hotSale.amount)}`);
     }
+    if (pricing.cyber3x2 && pricing.cyber3x2.amount > 0) {
+      lines.push(`*${pricing.cyber3x2.label}:* -${formatARS(pricing.cyber3x2.amount)}`);
+    }
+    if (pricing.cyberPercent && pricing.cyberPercent.amount > 0) {
+      lines.push(`*${pricing.cyberPercent.label}:* -${formatARS(pricing.cyberPercent.amount)}`);
+    }
+    if (pricing.cyber) {
+      lines.push(`🎁 *${vars.promotions.cyberWeek.gift}* (${vars.promotions.cyberWeek.campaignCode})`);
+    }
 
     lines.push(`*Total estimado:* ${formatARS(pricing.total)}`);
     lines.push('');

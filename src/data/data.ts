@@ -56,6 +56,27 @@ export interface AppVars {
             label: string;
             storageKey: string;  // clave localStorage para cooldown del modal
         };
+        /**
+         * Cyber Week APL: 15% OFF en toda la web + 3x2 (pagás los 2 de mayor
+         * valor) + regalito en todas las compras. Se prende y apaga sola por
+         * fecha (hora de Argentina); `enabled: false` la apaga del todo.
+         */
+        cyberWeek: {
+            enabled: boolean;
+            name: string;            // 'Cyber Week APL'
+            badge: string;           // etiqueta corta (barra, cards)
+            startDate: string;       // 'YYYY-MM-DD' (desde las 00:00 hora AR)
+            endDate: string;         // 'YYYY-MM-DD' (inclusive, hasta las 23:59 hora AR)
+            rangeLabel: string;      // 'del 2 al 7 de noviembre'
+            endLabel: string;        // 'el sábado 7/11'
+            percentage: number;      // descuento en toda la web
+            /** 3x2: por cada 3 unidades, la más barata sale gratis. El % se suma
+             *  sobre lo que se paga (acumulable). */
+            threeForTwo: boolean;
+            gift: string;            // texto del regalito (carrito, checkout, WhatsApp)
+            campaignCode: string;    // va en el mensaje de WhatsApp
+            barStorageKey: string;   // cierre de la barra superior (por sesión)
+        };
         /** Preventa del producto principal de la temporada (Kit Mi Año 2027). */
         presale: {
             enabled: boolean;
@@ -130,6 +151,20 @@ export const vars: AppVars = {
             endDate:   '2026-05-13',
             label:     'Hot Sale',
             storageKey: 'hs26_modal_seen',
+        },
+        cyberWeek: {
+            enabled: true,
+            name: 'Cyber Week APL',
+            badge: 'CYBER WEEK',
+            startDate: '2026-11-02',
+            endDate:   '2026-11-07',
+            rangeLabel: 'del 2 al 7 de noviembre',
+            endLabel: 'el sábado 7/11',
+            percentage: 15,
+            threeForTwo: true,
+            gift: 'Regalito sorpresa en todas las compras',
+            campaignCode: 'CYBER26',
+            barStorageKey: 'cyber26_bar_dismissed',
         },
         presale: {
             enabled: true,

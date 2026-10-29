@@ -14,6 +14,8 @@ import { PresaleHero } from '@/components/presale/PresaleHero';
 import { PresaleValueBlock } from '@/components/presale/PresaleValueBlock';
 import { CraftBlock } from '@/components/presale/CraftBlock';
 import { isPresaleActive } from '@/config/presale';
+import { isCyberWeekActive } from '@/config/cyberweek';
+import { CyberHero } from '@/components/cyber/CyberHero';
 import Promo2x1Modal from '@/components/promos/Promo2x1';
 import HotSaleBanner from '@/components/promos/HotSaleBanner';
 import HotSaleModal from '@/components/promos/HotSaleModal';
@@ -30,6 +32,8 @@ const Index = () => {
   // Durante la preventa la portada empuja el kit; el 17/10 vuelve sola la
   // portada habitual.
   const presaleOn = isPresaleActive();
+  // Cyber Week (2 al 7/11): portada propia; el 8/11 vuelve sola la habitual.
+  const cyberOn = isCyberWeekActive();
 
   // Links a secciones desde otras páginas (pie de página): /?s=como-pedir.
   // Con HashRouter no se pueden usar anclas (#seccion) en la URL.
@@ -99,7 +103,7 @@ const Index = () => {
 
       <Header />
       <main>
-        {presaleOn ? <PresaleHero /> : <Hero />}
+        {cyberOn ? <CyberHero /> : presaleOn ? <PresaleHero /> : <Hero />}
         <MobileUSPs />
         {presaleOn && <PresaleValueBlock />}
         <FeaturedProducts />
