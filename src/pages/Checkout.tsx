@@ -165,9 +165,7 @@ const Checkout = () => {
                   <Label>Método de pago preferido</Label>
                   <RadioGroup
                     value={paymentMethod}
-                    onValueChange={(v) =>
-                      setPaymentMethod(v as PaymentMethod)
-                    }
+                    onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
                     className="flex flex-wrap gap-6"
                   >
                     <div className="flex items-center space-x-2">
@@ -200,8 +198,9 @@ const Checkout = () => {
                             </span>
                           </span>
                           <span className="block text-xs text-muted-foreground">
-                            {AppVars.cuentaDni.days.charAt(0).toUpperCase() + AppVars.cuentaDni.days.slice(1)}.{' '}
-                            {AppVars.cuentaDni.howTo}
+                            {AppVars.cuentaDni.days.charAt(0).toUpperCase() +
+                              AppVars.cuentaDni.days.slice(1)}
+                            . {AppVars.cuentaDni.howTo}
                           </span>
                         </span>
                       </label>
@@ -221,9 +220,7 @@ const Checkout = () => {
                   <Badge variant="outline">{totalQty} u</Badge>
                 </div>
 
-                <div
-                  className="space-y-3 max-h-[40svh] overflow-auto pr-1 scrollbar-soft"
-                >
+                <div className="space-y-3 max-h-[40svh] overflow-auto pr-1 scrollbar-soft">
                   {(!items || items.length === 0) && (
                     <p className="text-sm text-muted-foreground">Tu carrito está vacío.</p>
                   )}
@@ -239,6 +236,7 @@ const Checkout = () => {
 
                     const lineFinal = line?.total ?? listLineSubtotal;
                     const hasAnyPromo =
+                      (line?.cyberDiscount ?? 0) > 0 ||
                       (line?.discount ?? 0) > 0 ||
                       (line?.freeUnits ?? 0) > 0 ||
                       (line?.percentDiscount ?? 0) > 0;
@@ -254,7 +252,9 @@ const Checkout = () => {
                               {it.selectedModel && <p>Modelo: {it.selectedModel}</p>}
                               {it.selectedColor && <p>Color: {it.selectedColor}</p>}
                               {it.selectedSize && <p>Tamaño: {it.selectedSize}</p>}
-                              {it.selectedInterior && <p>Interior: {interiorLabel(it.selectedInterior)}</p>}
+                              {it.selectedInterior && (
+                                <p>Interior: {interiorLabel(it.selectedInterior)}</p>
+                              )}
                               {it.selectedCover && <p>Tapa: {it.selectedCover}</p>}
                               {it.personalization && <p>Personalización: “{it.personalization}”</p>}
                             </div>
@@ -262,7 +262,7 @@ const Checkout = () => {
                             {/* ✅ opcional: mostrar notas promo por ítem */}
                             {line?.freeUnits > 0 && (
                               <p className="text-[11px] text-muted-foreground mt-1">
-                                2x1: {line.freeUnits} gratis
+                                {pricing.cyber ? '3x2' : '2x1'}: {line.freeUnits} gratis
                               </p>
                             )}
                             {line?.percentDiscount > 0 && (
@@ -281,7 +281,11 @@ const Checkout = () => {
                                 <p className="text-xs text-muted-foreground line-through">
                                   {formatARS(listLineSubtotal)}
                                 </p>
-                                <p className="text-sm font-semibold">{formatARS(lineFinal)}</p>
+                                <p className="text-sm font-semibold">
+                                  {lineFinal === 0 && listLineSubtotal > 0
+                                    ? '¡Gratis!'
+                                    : formatARS(lineFinal)}
+                                </p>
                               </>
                             ) : (
                               <>
@@ -325,6 +329,27 @@ const Checkout = () => {
                     <div className="flex items-center justify-between text-accent font-medium">
                       <span>{pricing.hotSale.label}</span>
                       <span>-{formatARS(pricing.hotSale.amount)}</span>
+                    </div>
+                  )}
+
+                  {pricing.cyber3x2 && pricing.cyber3x2.amount > 0 && (
+                    <div className="flex items-center justify-between font-medium">
+                      <span>{pricing.cyber3x2.label}</span>
+                      <span>-{formatARS(pricing.cyber3x2.amount)}</span>
+                    </div>
+                  )}
+
+                  {pricing.cyberPercent && pricing.cyberPercent.amount > 0 && (
+                    <div className="flex items-center justify-between font-medium">
+                      <span>{pricing.cyberPercent.label}</span>
+                      <span>-{formatARS(pricing.cyberPercent.amount)}</span>
+                    </div>
+                  )}
+
+                  {pricing.cyber && (
+                    <div className="flex items-center justify-between font-medium">
+                      <span>🎁 Regalito sorpresa</span>
+                      <span>De regalo</span>
                     </div>
                   )}
 

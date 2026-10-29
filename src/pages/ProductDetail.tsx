@@ -29,6 +29,8 @@ import { ShareButton } from '@/components/products/ShareButton';
 import { PromoBar } from '@/components/promos/PromoBar';
 import { KitPriceBox } from '@/components/presale/KitPriceBox';
 import { CuentaDniHint } from '@/components/promos/CuentaDniHint';
+import { CyberPdpNote } from '@/components/cyber/CyberPdpNote';
+import { isCyberWeekActive } from '@/config/cyberweek';
 import { KitValueBreakdown } from '@/components/presale/KitValueBreakdown';
 import { KitFaq } from '@/components/presale/KitFaq';
 import { PresaleCompareBox } from '@/components/presale/PresaleCompareBox';
@@ -463,6 +465,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
                         Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:{' '}
                         <span className="font-semibold text-foreground">{formattedFinalTotal}</span>
                       </p>
+                      {isCyberWeekActive() && !product.excludeFromPromos && <CyberPdpNote />}
                       {/* Beneficio de pago: a la vista junto al precio */}
                       <CuentaDniHint className="mt-1" />
                     </div>

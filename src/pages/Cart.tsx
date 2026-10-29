@@ -15,6 +15,7 @@ import { getProductById } from '@/data/products';
 import { isPresaleProduct } from '@/config/presale';
 import { personalizationSurchargeForId } from '@/lib/pricing/personalization';
 import { getCartLineKey } from '@/lib/cart-key';
+import { CyberCartNudge } from '@/components/cyber/CyberCartNudge';
 import { CuentaDniHint, cuentaDniEnabled } from '@/components/promos/CuentaDniHint';
 
 export default function Cart() {
@@ -60,6 +61,8 @@ export default function Cart() {
         <div className="container px-4">
           <h1 className="text-4xl font-bold mb-8">Tu Carrito</h1>
 
+          {pricing.cyber && <CyberCartNudge cyber={pricing.cyber} className="mb-6" />}
+
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Items */}
             <div className="lg:col-span-2 space-y-4">
@@ -74,9 +77,11 @@ export default function Cart() {
                 const lineFinal = line?.total ?? listLineSubtotal;
 
                 const formattedLineList = formatARS(listLineSubtotal);
-                const formattedLineFinal = formatARS(lineFinal);
+                const formattedLineFinal =
+                  lineFinal === 0 && listLineSubtotal > 0 ? '¡Gratis!' : formatARS(lineFinal);
 
                 const hasAnyPromo =
+                  (line?.cyberDiscount ?? 0) > 0 ||
                   (line?.discount ?? 0) > 0 ||
                   (line?.freeUnits ?? 0) > 0 ||
                   (line?.percentDiscount ?? 0) > 0;
@@ -174,7 +179,8 @@ export default function Cart() {
 
                                   {line?.freeUnits > 0 && (
                                     <p className="text-xs text-muted-foreground">
-                                      2x1 aplicado: {line.freeUnits} gratis
+                                      {pricing.cyber ? '3x2' : '2x1'} aplicado: {line.freeUnits}{' '}
+                                      gratis
                                     </p>
                                   )}
 
@@ -235,6 +241,27 @@ export default function Cart() {
                       <div className="flex justify-between text-accent font-medium">
                         <span>{pricing.hotSale.label}</span>
                         <span>-{formatARS(pricing.hotSale.amount)}</span>
+                      </div>
+                    )}
+
+                    {pricing.cyber3x2 && pricing.cyber3x2.amount > 0 && (
+                      <div className="flex justify-between font-medium">
+                        <span>{pricing.cyber3x2.label}</span>
+                        <span>-{formatARS(pricing.cyber3x2.amount)}</span>
+                      </div>
+                    )}
+
+                    {pricing.cyberPercent && pricing.cyberPercent.amount > 0 && (
+                      <div className="flex justify-between font-medium">
+                        <span>{pricing.cyberPercent.label}</span>
+                        <span>-{formatARS(pricing.cyberPercent.amount)}</span>
+                      </div>
+                    )}
+
+                    {pricing.cyber && (
+                      <div className="flex justify-between font-medium">
+                        <span>🎁 Regalito sorpresa</span>
+                        <span>De regalo</span>
                       </div>
                     )}
 
