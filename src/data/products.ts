@@ -494,7 +494,6 @@ export const catalog: Product[] = [
       'Planificador anual y espacio para fechas importantes',
       'Sección universitaria con: hojas de horarios, contacto de profesores, plan de estudio, lecturas pendientes, apuntes prestados, trabajos por entregar, parciales, finales y gastos (para anotar gastos en fotocopias y demás!)',
       'Planner mensual con tracker de habitos',
-      'Balance mensual para anotar ingresos y gastos',
       'Planner semanal: la semana completa en dos páginas',
       'Seccion de notas',
       'Hoja para contraseñas',
