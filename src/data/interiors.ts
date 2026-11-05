@@ -72,7 +72,7 @@ export const INTERIOR_INFO: Partial<Record<InteriorType, InteriorInfo>> = {
     card: `${base}agenda-universitaria-interior_card.webp`,
     photos: [
       { src: uni(16), label: 'Vista semanal' },
-      { src: uni(15), label: 'Planner mensual' },
+      { src: uni(15), label: 'Planner mensual y registro de hábitos' },
       { src: uni(7), label: 'Horario de cursada' },
       { src: uni(8), label: 'Profesores y plan de estudio' },
       { src: uni(12), label: 'Parciales y finales' },
@@ -82,7 +82,9 @@ export const INTERIOR_INFO: Partial<Record<InteriorType, InteriorInfo>> = {
       { src: uni(13), label: 'Gastos' },
       { src: uni(3), label: 'Calendario 2027 y 2028' },
       { src: uni(4), label: 'Planificador anual' },
+      { src: uni(5), label: 'Fechas importantes' },
       { src: uni(6), label: 'Mis objetivos' },
+      { src: uni(17), label: 'Notas' },
       { src: uni(18), label: 'Contraseñas y stickers' },
     ],
   },
