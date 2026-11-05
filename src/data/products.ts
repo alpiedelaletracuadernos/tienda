@@ -185,6 +185,13 @@ export const productoImagenes: ModelAssets = {
     `${routeBase}productos/agenda-universitaria-2026_0014.webp`,
     `${routeBase}productos/agenda-universitaria-2026_0015.webp`,
   ],
+  // Universitaria 2027: tapa, portada interior y bolsillo. Las páginas del
+  // interior se ven en "Ver por dentro" (src/data/interiors.ts).
+  'agenda-universitaria-2027': [
+    `${routeBase}productos/agenda-universitaria-2027_0001.webp`,
+    `${routeBase}productos/agenda-universitaria-2027_0002.webp`,
+    `${routeBase}productos/agenda-universitaria-2027_0003.webp`,
+  ],
   'block-de-organizacion-semanal': [
     `${routeBase}productos/block-de-organizacion-semanal_0001.webp`,
     `${routeBase}productos/block-de-organizacion-semanal_0002.webp`,
@@ -460,7 +467,7 @@ export const catalog: Product[] = [
     category: 'agendas',
     description:
       'Tu cuatrimestre bajo control: secciones para plan de estudios, parciales, finales, trabajos, gastos + vista semanal para planificar cursadas. Personaliza la tapa como más te guste. Hecha a mano por pedido, con tapa dura y en papel de 90gr con anillado doble alambre. Entrega en 5 días hábiles (puede ser menos si hay stock, consultanos). Envíos a todo el país y retiro en zona centro de San Nicolás de los Arroyos. ',
-    basePrice: 33000,
+    basePrice: 37000,
     sizes: ['A5'],
     interiors: ['universitaria'],
     coverTypes: ['dura'],
@@ -473,20 +480,20 @@ export const catalog: Product[] = [
     includes: [
       'Bolsillo interno',
       'Plancha de stickers',
-      'Calendario 2026 y 2027',
+      'Calendario 2027 y 2028',
       'Planificador anual y espacio para fechas importantes',
       'Sección universitaria con: hojas de horarios, contacto de profesores, plan de estudio, lecturas pendientes, apuntes prestados, trabajos por entregar, parciales, finales y gastos (para anotar gastos en fotocopias y demás!)',
       'Planner mensual con tracker de habitos',
       'Balance mensual para anotar ingresos y gastos',
-      'Planner con los dias distribuidos 2 por cada pagina',
+      'Planner semanal: la semana completa en dos páginas',
       'Seccion de notas',
       'Hoja para contraseñas',
     ],
     productionTime: vars.delivery.time,
-    inStock: false,
+    inStock: true,
     weeklyQuota: 10,
     remainingQuota: 15,
-    images: productoImagenes['agenda-universitaria-2026'],
+    images: productoImagenes['agenda-universitaria-2027'],
   },
   {
     id: '4',
