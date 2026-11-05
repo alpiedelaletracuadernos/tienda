@@ -1,9 +1,9 @@
 // src/data/interiors.ts
 //
 // Interiores que se eligen con foto (InteriorPicker): nombre, la diferencia en
-// una línea y las fotos curadas que se ven en "Ver por dentro". Lo comparten
-// la Agenda Semanal y el Kit Mi Año 2027. Las fotos siguen la convención de
-// src/lib/media.ts (`_thumb.webp` para las tarjetas).
+// una línea y las fotos curadas que se ven en "Ver por dentro". Las usan las
+// agendas Semanal, Diaria y Universitaria y el Kit Mi Año 2027. Las fotos
+// siguen la convención de src/lib/media.ts (`_thumb.webp` para las tarjetas).
 import type { InteriorType } from '@/types/product';
 
 const base = 'assets/productos/';
@@ -22,6 +22,8 @@ export type InteriorInfo = {
 
 const con = (n: number) => `${base}agenda-semanal-con-horarios_${String(n).padStart(4, '0')}.webp`;
 const sin = (n: number) => `${base}agenda-semanal-sin-horarios_${String(n).padStart(4, '0')}.webp`;
+const uni = (n: number) =>
+  `${base}agenda-universitaria-interior_${String(n).padStart(4, '0')}.webp`;
 const dia = (n: number) => `${base}agenda-diaria-interior_${String(n).padStart(4, '0')}.webp`;
 
 export const INTERIOR_INFO: Partial<Record<InteriorType, InteriorInfo>> = {
@@ -62,6 +64,26 @@ export const INTERIOR_INFO: Partial<Record<InteriorType, InteriorInfo>> = {
       { src: dia(2), label: 'Calendario 2027 y 2028' },
       { src: dia(7), label: 'Balance mensual' },
       { src: dia(10), label: 'Contraseñas y stickers' },
+    ],
+  },
+  universitaria: {
+    label: 'Universitaria',
+    short: 'Semana a la vista en dos páginas, más todo lo de la facu: horarios, parciales, finales y más.',
+    card: `${base}agenda-universitaria-interior_card.webp`,
+    photos: [
+      { src: uni(16), label: 'Vista semanal' },
+      { src: uni(15), label: 'Planner mensual' },
+      { src: uni(7), label: 'Horario de cursada' },
+      { src: uni(8), label: 'Profesores y plan de estudio' },
+      { src: uni(12), label: 'Parciales y finales' },
+      { src: uni(11), label: 'Trabajos por entregar' },
+      { src: uni(9), label: 'Lecturas pendientes' },
+      { src: uni(10), label: 'Apuntes prestados' },
+      { src: uni(13), label: 'Gastos' },
+      { src: uni(3), label: 'Calendario 2027 y 2028' },
+      { src: uni(4), label: 'Planificador anual' },
+      { src: uni(6), label: 'Mis objetivos' },
+      { src: uni(18), label: 'Contraseñas y stickers' },
     ],
   },
 };
