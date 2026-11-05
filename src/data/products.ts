@@ -185,12 +185,22 @@ export const productoImagenes: ModelAssets = {
     `${routeBase}productos/agenda-universitaria-2026_0014.webp`,
     `${routeBase}productos/agenda-universitaria-2026_0015.webp`,
   ],
-  // Universitaria 2027: tapa, portada interior y bolsillo. Las páginas del
-  // interior se ven en "Ver por dentro" (src/data/interiors.ts).
+  // Universitaria 2027: tapa, portada interior y bolsillo, intercaladas con
+  // fotos de la sesión 2027 con agendas cerradas (mismas tapas y formato;
+  // sin páginas de interior, que cambian). Las páginas del interior se ven
+  // en "Ver por dentro" (src/data/interiors.ts).
   'agenda-universitaria-2027': [
     `${routeBase}productos/agenda-universitaria-2027_0001.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0002.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0004.webp`,
     `${routeBase}productos/agenda-universitaria-2027_0002.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0006.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0007.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0009.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0014.webp`,
+    `${routeBase}productos/agenda-diaria-2027_0002.webp`,
     `${routeBase}productos/agenda-universitaria-2027_0003.webp`,
+    `${routeBase}productos/agenda-semanal-2027_0019.webp`,
   ],
   'block-de-organizacion-semanal': [
     `${routeBase}productos/block-de-organizacion-semanal_0001.webp`,
@@ -484,7 +494,6 @@ export const catalog: Product[] = [
       'Planificador anual y espacio para fechas importantes',
       'Sección universitaria con: hojas de horarios, contacto de profesores, plan de estudio, lecturas pendientes, apuntes prestados, trabajos por entregar, parciales, finales y gastos (para anotar gastos en fotocopias y demás!)',
       'Planner mensual con tracker de habitos',
-      'Balance mensual para anotar ingresos y gastos',
       'Planner semanal: la semana completa en dos páginas',
       'Seccion de notas',
       'Hoja para contraseñas',
