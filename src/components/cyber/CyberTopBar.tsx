@@ -40,8 +40,17 @@ export function CyberTopBar() {
           <span className="mr-1.5 inline-block rounded bg-promo px-1.5 py-0.5 text-[10px] sm:text-[11px] font-extrabold tracking-wide text-promo-foreground">
             {cyberWeek.badge}
           </span>
+          {cyberWeek.extendedBadge && (
+            <span className="mr-1.5 inline-block rounded bg-white px-1.5 py-0.5 text-[10px] sm:text-[11px] font-extrabold tracking-wide text-black">
+              {cyberWeek.extendedBadge}
+            </span>
+          )}
           <span className="font-semibold">{cyberHeadline()}</span>
-          <span className={clock.lastDay ? 'font-semibold text-promo' : 'text-white/80'}>
+          <span
+            className={
+              clock.lastDay || cyberWeek.extendedText ? 'font-semibold text-promo' : 'text-white/80'
+            }
+          >
             {' '}
             · {clock.text}
           </span>

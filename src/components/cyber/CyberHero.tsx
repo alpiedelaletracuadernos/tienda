@@ -84,9 +84,14 @@ export function CyberHero() {
             <span className="rounded bg-promo px-2 py-1 text-xs font-extrabold tracking-widest text-promo-foreground">
               {cyberWeek.badge}
             </span>
+            {cyberWeek.extendedBadge && (
+              <span className="rounded bg-white px-2 py-1 text-xs font-extrabold tracking-widest text-black">
+                {cyberWeek.extendedBadge}
+              </span>
+            )}
             <span
               className={`text-xs font-semibold uppercase tracking-wide ${
-                clock.lastDay ? 'text-promo' : 'text-white/85'
+                clock.lastDay || cyberWeek.extendedText ? 'text-promo' : 'text-white/85'
               }`}
               aria-live="polite"
             >

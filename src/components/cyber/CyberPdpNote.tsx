@@ -10,11 +10,20 @@ export function CyberPdpNote() {
   const clock = useCyberClock();
   return (
     <div className="mt-2 space-y-1.5 rounded-xl bg-announcement p-3 text-sm text-announcement-foreground">
-      <p className="flex items-center gap-2">
+      <p className="flex flex-wrap items-center gap-2">
         <span className="rounded bg-promo px-1.5 py-0.5 text-[11px] font-extrabold tracking-wide text-promo-foreground">
           {cyberWeek.badge}
         </span>
-        <span className={clock.lastDay ? 'font-semibold text-promo' : 'text-white/85'}>
+        {cyberWeek.extendedBadge && (
+          <span className="rounded bg-white px-1.5 py-0.5 text-[11px] font-extrabold tracking-wide text-black">
+            {cyberWeek.extendedBadge}
+          </span>
+        )}
+        <span
+          className={
+            clock.lastDay || cyberWeek.extendedText ? 'font-semibold text-promo' : 'text-white/85'
+          }
+        >
           {clock.text}
         </span>
       </p>

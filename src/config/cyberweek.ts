@@ -36,6 +36,7 @@ export const cyberDaysLeft = (now: Date = promoNow()): number => {
 export const cyberDeadlineText = (now: Date = promoNow()): string => {
   const left = cyberDaysLeft(now);
   if (left <= 1) return 'Último día: termina hoy a las 23:59';
+  if (cfg.extendedText) return cfg.extendedText;
   if (left <= 3) return `Quedan ${left} días`;
   return `Hasta ${cfg.endLabel}`;
 };
