@@ -77,6 +77,9 @@ export interface AppVars {
             gift: string;            // texto del regalito (carrito, checkout, WhatsApp)
             campaignCode: string;    // va en el mensaje de WhatsApp
             barStorageKey: string;   // cierre de la barra superior (por sesión)
+            /** Extensión anunciada: etiqueta y frase (vacías = sin extensión). */
+            extendedBadge?: string;
+            extendedText?: string;
         };
         /** Preventa del producto principal de la temporada (Kit Mi Año 2027). */
         presale: {
@@ -158,14 +161,18 @@ export const vars: AppVars = {
             name: 'Cyber Week APL',
             badge: 'CYBER WEEK',
             startDate: '2026-11-02',
-            endDate:   '2026-11-07',
-            rangeLabel: 'del 2 al 7 de noviembre',
-            endLabel: 'el sábado 7/11',
+            // Extendida un día: cerraba el sábado 7/11.
+            endDate:   '2026-11-08',
+            rangeLabel: 'del 2 al 8 de noviembre',
+            endLabel: 'el domingo 8/11',
             percentage: 15,
             threeForTwo: true,
             gift: 'Regalito sorpresa en todas las compras',
             campaignCode: 'CYBER26',
-            barStorageKey: 'cyber26_bar_dismissed',
+            // Clave nueva: quien cerró la barra vuelve a ver el aviso de la extensión.
+            barStorageKey: 'cyber26ext_bar_dismissed',
+            extendedBadge: 'EXTENDIDA',
+            extendedText: '¡La extendimos hasta el domingo 8/11!',
         },
         presale: {
             enabled: true,

@@ -34,10 +34,15 @@ export function CyberCartNudge({ cyber, compact = false, className }: Props) {
         className
       )}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <span className="rounded bg-promo px-1.5 py-0.5 text-[11px] font-extrabold tracking-wide text-promo-foreground">
           {cyberWeek.badge}
         </span>
+        {cyberWeek.extendedBadge && (
+          <span className="rounded bg-white px-1.5 py-0.5 text-[11px] font-extrabold tracking-wide text-black">
+            {cyberWeek.extendedBadge}
+          </span>
+        )}
         {cyber.savings > 0 && (
           <span className="text-sm font-semibold">Ya ahorrás {formatARS(cyber.savings)}</span>
         )}
