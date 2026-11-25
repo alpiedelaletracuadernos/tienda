@@ -3,7 +3,7 @@ import type { CartItem } from '@/types/cart';
 import { catalog } from '@/data/products';
 import { format, isSameDay, isSameMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { isCyberWeekActive } from '@/config/cyberweek';
+import { isCyberWeekActive, giftEnabled, giftPerUnit } from '@/config/cyberweek';
 
 export const normalizeCategory = (c?: string) => (c ?? '').trim().toLowerCase();
 
@@ -128,3 +128,13 @@ export const isEligibleFor2x1 = (item: CartItem | EligibilityInput): boolean => 
  */
 export const isEligibleForCyberWeek = (item: CartItem | EligibilityInput): boolean =>
   isCyberWeekActive() && !isExcluded(item);
+
+/**
+ * Regalo por unidad (libreta A6 en composé): ítem elegible a la promo y fuera
+ * de las categorías excluidas (las libretas no llevan regalo).
+ */
+export const isEligibleForCyberGift = (item: CartItem | EligibilityInput): boolean => {
+  if (!giftEnabled || !giftPerUnit || !isEligibleForCyberWeek(item)) return false;
+  const excluded = giftPerUnit.excludeCategories.map((c) => normalizeCategory(c));
+  return !excluded.includes(normalizeCategory(item.product.category));
+};

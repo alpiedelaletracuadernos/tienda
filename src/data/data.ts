@@ -57,10 +57,10 @@ export interface AppVars {
             storageKey: string;  // clave localStorage para cooldown del modal
         };
         /**
-         * Cyber Week APL: 15% OFF en toda la web o 3x2 (pagás los 2 de mayor
-         * valor), NO acumulables: el carrito aplica el que más le conviene al
-         * cliente. Más regalito en todas las compras. Se prende y apaga sola por
-         * fecha (hora de Argentina); `enabled: false` la apaga del todo.
+         * Config de la campaña reutilizable (motor "Cyber Week"). Hoy: Black Friday
+         * APL, % OFF + una libreta de regalo por producto elegible. Opcional 3x2
+         * (no se suma al %: se aplica el que más le conviene al cliente). Se prende
+         * y apaga sola por fecha (hora de Argentina); `enabled: false` la apaga.
          */
         cyberWeek: {
             enabled: boolean;
@@ -80,6 +80,16 @@ export interface AppVars {
             /** Extensión anunciada: etiqueta y frase (vacías = sin extensión). */
             extendedBadge?: string;
             extendedText?: string;
+            /** Desde cuándo se muestra el aviso "mañana arranca" ('YYYY-MM-DD', 00:00 AR). */
+            teaserFrom?: string;
+            /** Regalo por unidad elegible (informativo: no cambia los totales). */
+            giftPerUnit?: {
+                enabled: boolean;
+                productName: string;     // 'Libreta A6'
+                label: string;           // texto corto del regalo
+                value: number;           // precio regular en ARS (lo que el cliente no paga)
+                excludeCategories: string[]; // categorías que no reciben regalo
+            };
         };
         /** Preventa del producto principal de la temporada (Kit Mi Año 2027). */
         presale: {
@@ -158,21 +168,25 @@ export const vars: AppVars = {
         },
         cyberWeek: {
             enabled: true,
-            name: 'Cyber Week APL',
-            badge: 'CYBER WEEK',
-            startDate: '2026-11-02',
-            // Extendida un día: cerraba el sábado 7/11.
-            endDate:   '2026-11-08',
-            rangeLabel: 'del 2 al 8 de noviembre',
-            endLabel: 'el domingo 8/11',
+            name: 'Black Friday APL',
+            badge: 'BLACK FRIDAY',
+            startDate: '2026-11-26',
+            endDate:   '2026-11-30',
+            rangeLabel: 'del 26 al 30 de noviembre',
+            endLabel: 'el lunes 30/11',
             percentage: 15,
-            threeForTwo: true,
-            gift: 'Regalito sorpresa en todas las compras',
-            campaignCode: 'CYBER26',
-            // Clave nueva: quien cerró la barra vuelve a ver el aviso de la extensión.
-            barStorageKey: 'cyber26ext_bar_dismissed',
-            extendedBadge: 'EXTENDIDA',
-            extendedText: '¡La extendimos hasta el domingo 8/11!',
+            threeForTwo: false,
+            gift: 'Libreta A6 en composé de regalo (precio regular $5.000)',
+            campaignCode: 'BF26',
+            barStorageKey: 'bf26_bar_dismissed',
+            teaserFrom: '2026-11-25',
+            giftPerUnit: {
+                enabled: true,
+                productName: 'Libreta A6',
+                label: 'Libreta A6 en composé',
+                value: 5000,
+                excludeCategories: ['libretas'],
+            },
         },
         presale: {
             enabled: true,

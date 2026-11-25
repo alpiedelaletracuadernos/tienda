@@ -1,13 +1,15 @@
 // src/components/cyber/CyberCartNudge.tsx
 //
-// Aviso del carrito durante la Cyber Week: cuánto falta para el próximo 3x2
-// (con barra de progreso), el ahorro ya ganado y el regalito. Es el empujón
-// que más sube el ticket: "sumá 1 más y el de menor valor te sale gratis".
+// Aviso del carrito durante Black Friday: el ahorro ya ganado y las libretas
+// A6 en composé que se lleva de regalo (una por unidad elegible). El bloque 3x2
+// sólo se muestra si la promo lo tuviera activo (`threeForTwo`).
 import { Link } from 'react-router-dom';
 import { Gift } from 'lucide-react';
 import { formatARS } from '@/lib/currency';
 import { cyberWeek } from '@/config/cyberweek';
 import { cn } from '@/lib/utils';
+
+type CyberGift = { key: string; forProduct: string; model?: string; qty: number };
 
 type Props = {
   cyber: {
@@ -16,16 +18,61 @@ type Props = {
     gift: string;
     savings: number;
     mode: '3x2' | 'percent';
+    gifts?: CyberGift[];
+    giftQty?: number;
+    giftValue?: number;
   };
   /** Versión compacta para el checkout (sin el link al catálogo). */
   compact?: boolean;
+  /** Hay productos en el carrito (para sugerir sumar uno si sólo hay libretas). */
+  hasItems?: boolean;
   className?: string;
 };
 
-export function CyberCartNudge({ cyber, compact = false, className }: Props) {
+const modelText = (model?: string) =>
+  model && model !== 'a confirmar' ? `Modelo ${model}` : 'modelo a confirmar';
+
+/** Subtítulo por línea de carrito: "+ 2x Libreta A6 Modelo 12 de regalo  $0 ~$10.000~". */
+export function CyberGiftLine({
+  giftQty,
+  model,
+  className,
+}: {
+  giftQty: number;
+  model?: string;
+  className?: string;
+}) {
+  if (!giftQty || giftQty <= 0) return null;
+  const value = (cyberWeek.giftPerUnit?.value ?? 0) * giftQty;
+  return (
+    <p
+      className={cn(
+        'flex flex-wrap items-center justify-between gap-x-2 text-xs font-medium text-primary',
+        className
+      )}
+    >
+      <span>
+        🎁 + {giftQty > 1 ? `${giftQty}x ` : ''}Libreta A6 {modelText(model)} de regalo
+      </span>
+      <span className="whitespace-nowrap">
+        <span className="text-muted-foreground line-through">{formatARS(value)}</span>{' '}
+        <span className="font-bold text-success-foreground">GRATIS</span>
+      </span>
+    </p>
+  );
+}
+
+export function CyberCartNudge({
+  cyber,
+  compact = false,
+  hasItems = true,
+  className,
+}: Props) {
   const inTrio = cyber.eligibleQty % 3;
   const missing = inTrio === 0 ? 0 : 3 - inTrio;
   const filled = inTrio === 0 && cyber.eligibleQty > 0 ? 3 : inTrio;
+  const giftQty = cyber.giftQty ?? 0;
+  const gifts = (cyber.gifts ?? []).filter((g) => g.qty > 0);
 
   return (
     <div
@@ -38,13 +85,10 @@ export function CyberCartNudge({ cyber, compact = false, className }: Props) {
         <span className="rounded bg-promo px-1.5 py-0.5 text-[11px] font-extrabold tracking-wide text-promo-foreground">
           {cyberWeek.badge}
         </span>
-        {cyberWeek.extendedBadge && (
-          <span className="rounded bg-white px-1.5 py-0.5 text-[11px] font-extrabold tracking-wide text-black">
-            {cyberWeek.extendedBadge}
-          </span>
-        )}
         {cyber.savings > 0 && (
-          <span className="text-sm font-semibold">Ya ahorrás {formatARS(cyber.savings)}</span>
+          <span className="rounded-full bg-success px-2.5 py-0.5 text-sm font-bold text-success-foreground">
+            Ya ahorrás {formatARS(cyber.savings)}
+          </span>
         )}
       </div>
 
@@ -93,10 +137,38 @@ export function CyberCartNudge({ cyber, compact = false, className }: Props) {
         </div>
       )}
 
-      <p className="flex items-center gap-2 text-sm text-white/90">
-        <Gift className="h-4 w-4 shrink-0 text-promo" aria-hidden />
-        Tu pedido incluye un regalito sorpresa.
-      </p>
+      {giftQty > 0 ? (
+        <div className="space-y-2">
+          <p className="flex items-center gap-2 text-sm font-semibold">
+            <Gift className="h-4 w-4 shrink-0 text-promo" aria-hidden />
+            Te {giftQty === 1 ? 'regalamos 1 libreta' : `regalamos ${giftQty} libretas`} en composé:
+            ahorrás {formatARS(cyber.giftValue ?? 0)} más (precio regular)
+          </p>
+          <ul className="space-y-1 text-sm text-white/90">
+            {gifts.map((g) => (
+              <li key={g.key}>
+                🎁 {g.qty > 1 ? `${g.qty}x ` : ''}Libreta A6 {modelText(g.model)} — en composé con{' '}
+                {g.forProduct}
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-white/70">
+            Si querés la libreta en otro diseño, avisanos en las notas del pedido.
+          </p>
+        </div>
+      ) : (
+        hasItems && (
+          <p className="flex flex-wrap items-center gap-x-2 text-sm text-white/90">
+            <Gift className="h-4 w-4 shrink-0 text-promo" aria-hidden />
+            <span>Sumá una agenda o un cuaderno y te regalamos una libreta en composé</span>
+            {!compact && (
+              <Link to="/catalogo" className="font-semibold underline underline-offset-4">
+                Ver catálogo
+              </Link>
+            )}
+          </p>
+        )
+      )}
     </div>
   );
 }
