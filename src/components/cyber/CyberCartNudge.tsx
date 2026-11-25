@@ -1,7 +1,7 @@
 // src/components/cyber/CyberCartNudge.tsx
 //
 // Aviso del carrito durante Black Friday: el ahorro ya ganado y las libretas
-// A6 a juego que se lleva de regalo (una por unidad elegible). El bloque 3x2
+// A6 en composé que se lleva de regalo (una por unidad elegible). El bloque 3x2
 // sólo se muestra si la promo lo tuviera activo (`threeForTwo`).
 import { Link } from 'react-router-dom';
 import { Gift } from 'lucide-react';
@@ -140,13 +140,13 @@ export function CyberCartNudge({
         <div className="space-y-2">
           <p className="flex items-center gap-2 text-sm font-semibold">
             <Gift className="h-4 w-4 shrink-0 text-promo" aria-hidden />
-            Te llevás {giftQty} {giftQty === 1 ? 'libreta' : 'libretas'} de regalo (valor{' '}
-            {formatARS(cyber.giftValue ?? 0)})
+            Te {giftQty === 1 ? 'regalamos 1 libreta' : `regalamos ${giftQty} libretas`} en composé:
+            ahorrás {formatARS(cyber.giftValue ?? 0)} más (precio regular)
           </p>
           <ul className="space-y-1 text-sm text-white/90">
             {gifts.map((g) => (
               <li key={g.key}>
-                🎁 {g.qty > 1 ? `${g.qty}x ` : ''}Libreta A6 {modelText(g.model)} — a juego con{' '}
+                🎁 {g.qty > 1 ? `${g.qty}x ` : ''}Libreta A6 {modelText(g.model)} — en composé con{' '}
                 {g.forProduct}
               </li>
             ))}
@@ -159,7 +159,7 @@ export function CyberCartNudge({
         hasItems && (
           <p className="flex flex-wrap items-center gap-x-2 text-sm text-white/90">
             <Gift className="h-4 w-4 shrink-0 text-promo" aria-hidden />
-            <span>Sumá una agenda o un cuaderno y te regalamos una libreta a juego</span>
+            <span>Sumá una agenda o un cuaderno y te regalamos una libreta en composé</span>
             {!compact && (
               <Link to="/catalogo" className="font-semibold underline underline-offset-4">
                 Ver catálogo

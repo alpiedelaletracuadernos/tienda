@@ -74,7 +74,7 @@ export function CyberTopBar() {
                 </span>
                 <span className="hidden sm:inline">
                   {cyberHeadline()}
-                  {gift ? ' a juego' : ''}
+                  {gift ? ' en composé' : ''}
                 </span>
               </span>
               <span

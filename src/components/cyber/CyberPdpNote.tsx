@@ -21,7 +21,7 @@ type Props = {
 export function CyberPdpNote({ giftEligible = false, modelImage, modelLabel }: Props) {
   const clock = useCyberClock();
   const hasModel = !!modelLabel && modelLabel !== 'a confirmar';
-  const caption = hasModel ? `Libreta A6 · Modelo ${modelLabel}` : 'Libreta A6 a juego';
+  const caption = hasModel ? `Libreta A6 · Modelo ${modelLabel}` : 'Libreta A6 en composé';
   const giftValue = giftPerUnit?.value ?? 0;
 
   return (
@@ -53,7 +53,11 @@ export function CyberPdpNote({ giftEligible = false, modelImage, modelLabel }: P
           </div>
           <div className="min-w-0">
             <p className="font-semibold leading-snug">
-              🎁 Llevás de regalo una Libreta A6 con este mismo diseño (valor {formatARS(giftValue)}).
+              🎁 Te regalamos una Libreta A6 en composé, con este mismo diseño.
+            </p>
+            <p className="mt-0.5 text-sm">
+              Precio regular <span className="line-through">{formatARS(giftValue)}</span> ·{' '}
+              <strong className="text-promo">para vos, $0</strong>
             </p>
             <p className="mt-0.5 text-xs text-white/75">{caption}</p>
           </div>

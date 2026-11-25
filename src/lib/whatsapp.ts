@@ -230,7 +230,7 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
       lines.push(`🎁 *Regalos ${cw.name.replace(/ APL$/, '')} (${cw.campaignCode}):*`);
       for (const g of pricing.cyber.gifts) {
         lines.push(
-          `   • ${g.qty > 1 ? `${g.qty}x ` : ''}${cw.giftPerUnit?.productName ?? 'Regalo'} ${giftModelText(g.model)} — a juego con ${g.forProduct}`
+          `   • ${g.qty > 1 ? `${g.qty}x ` : ''}${cw.giftPerUnit?.productName ?? 'Regalo'} ${giftModelText(g.model)} — en composé con ${g.forProduct}`
         );
       }
     }

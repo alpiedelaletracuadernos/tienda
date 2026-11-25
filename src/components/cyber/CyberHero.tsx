@@ -44,25 +44,33 @@ export function CyberHero() {
           <div className="space-y-4">
             <p className="text-xs font-extrabold tracking-widest text-promo">{label}</p>
             <h1 className="text-4xl sm:text-6xl font-extrabold leading-[1.05]">
-              Tu agenda + libreta a juego
+              Tu agenda + libreta en composé
             </h1>
             <p className="text-base sm:text-lg text-white/85">
-              {cyberWeek.percentage}% OFF en toda la web y, con cada producto, una Libreta A6 del
-              mismo diseño de regalo (valor {formatARS(cyberWeek.giftPerUnit?.value ?? 0)}).
+              {cyberWeek.percentage}% OFF en toda la web y, con cada producto, te regalamos una
+              Libreta A6 con el mismo diseño. No la pagás: su precio regular es{' '}
+              {formatARS(cyberWeek.giftPerUnit?.value ?? 0)}.
             </p>
 
             {ex && (
               <div className="rounded-xl border border-white/15 bg-white/5 px-4 py-3">
+                <p className="text-xs text-white/70">
+                  Precio regular del combo{' '}
+                  <span className="line-through">{formatARS(ex.list)}</span>
+                </p>
                 <p className="flex flex-wrap items-baseline gap-x-3">
-                  <span className="text-sm text-white/60 line-through">{formatARS(ex.list)}</span>
+                  <span className="text-sm text-white/80">Pagás</span>
                   <span className="text-3xl font-extrabold text-white">{formatARS(ex.final)}</span>
+                  <span className="text-sm font-semibold text-promo">
+                    Ahorrás {formatARS(ex.list - ex.final)}
+                  </span>
                 </p>
                 {ex.dni !== null && (
                   <p className="text-sm font-semibold text-promo">
                     Con {vars.cuentaDni.label}: {formatARS(ex.dni)}
                   </p>
                 )}
-                <p className="mt-1 text-xs text-white/70">Agenda Semanal 2027 + Libreta A6 a juego</p>
+                <p className="mt-1 text-xs text-white/70">Agenda Semanal 2027 + Libreta A6 en composé de regalo</p>
               </div>
             )}
 

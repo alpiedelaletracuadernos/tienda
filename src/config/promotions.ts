@@ -130,7 +130,7 @@ export const isEligibleForCyberWeek = (item: CartItem | EligibilityInput): boole
   isCyberWeekActive() && !isExcluded(item);
 
 /**
- * Regalo por unidad (libreta A6 a juego): ítem elegible a la promo y fuera
+ * Regalo por unidad (libreta A6 en composé): ítem elegible a la promo y fuera
  * de las categorías excluidas (las libretas no llevan regalo).
  */
 export const isEligibleForCyberGift = (item: CartItem | EligibilityInput): boolean => {

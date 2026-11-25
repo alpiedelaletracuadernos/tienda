@@ -87,7 +87,7 @@ export interface AppVars {
                 enabled: boolean;
                 productName: string;     // 'Libreta A6'
                 label: string;           // texto corto del regalo
-                value: number;           // valor de referencia en ARS
+                value: number;           // precio regular en ARS (lo que el cliente no paga)
                 excludeCategories: string[]; // categorías que no reciben regalo
             };
         };
@@ -176,14 +176,14 @@ export const vars: AppVars = {
             endLabel: 'el lunes 30/11',
             percentage: 15,
             threeForTwo: false,
-            gift: 'Libreta A6 de regalo a juego (valor $5.000)',
+            gift: 'Libreta A6 en composé de regalo (precio regular $5.000)',
             campaignCode: 'BF26',
             barStorageKey: 'bf26_bar_dismissed',
             teaserFrom: '2026-11-25',
             giftPerUnit: {
                 enabled: true,
                 productName: 'Libreta A6',
-                label: 'Libreta A6 a juego',
+                label: 'Libreta A6 en composé',
                 value: 5000,
                 excludeCategories: ['libretas'],
             },
