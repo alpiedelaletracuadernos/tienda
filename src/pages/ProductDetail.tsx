@@ -472,7 +472,6 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
                       {isCyberWeekActive() && !product.excludeFromPromos && (
                         <CyberPdpNote
                           giftEligible={isEligibleForCyberGift({ product })}
-                          modelImage={selectedModelImage}
                           modelLabel={usesModels ? selectedModelLabel : undefined}
                         />
                       )}

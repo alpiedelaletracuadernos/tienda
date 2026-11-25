@@ -150,11 +150,11 @@ export function buildRestockMessage(product: Pick<Product, 'name'>): string {
 }
 
 // Checkout (carrito completo)
-/** 'Modelo 5' / 'modelo a confirmar' a partir de selectedModel (ej. '5'). */
+/** ' (Modelo 5)' a partir de selectedModel (ej. '5'); vacío si no hay modelo. */
 const giftModelText = (model?: string): string => {
   const m = (model ?? '').trim();
-  if (!m || /confirmar/i.test(m)) return 'modelo a confirmar';
-  return /modelo/i.test(m) ? m : `Modelo ${m}`;
+  if (!m || /confirmar/i.test(m)) return '';
+  return ` (${/modelo/i.test(m) ? m : `Modelo ${m}`})`;
 };
 
 const PAYMENT_LABELS: Record<PaymentMethod, string> = {
@@ -230,7 +230,7 @@ export function buildCheckoutMessage(cartItems: CartItem[], buyer: BuyerInfo): s
       lines.push(`🎁 *Regalos ${cw.name.replace(/ APL$/, '')} (${cw.campaignCode}):*`);
       for (const g of pricing.cyber.gifts) {
         lines.push(
-          `   • ${g.qty > 1 ? `${g.qty}x ` : ''}${cw.giftPerUnit?.productName ?? 'Regalo'} ${giftModelText(g.model)} — en composé con ${g.forProduct}`
+          `   • ${g.qty > 1 ? `${g.qty}x ` : ''}${cw.giftPerUnit?.productName ?? 'Regalo'} en composé — diseño combinado con ${g.forProduct}${giftModelText(g.model)}`
         );
       }
     }

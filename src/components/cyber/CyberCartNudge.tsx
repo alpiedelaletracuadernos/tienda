@@ -29,16 +29,17 @@ type Props = {
   className?: string;
 };
 
+/** ' (Modelo 5)' o vacío si no hay modelo elegido. */
 const modelText = (model?: string) =>
-  model && model !== 'a confirmar' ? `Modelo ${model}` : 'modelo a confirmar';
+  model && model !== 'a confirmar' ? ` (Modelo ${model})` : '';
 
-/** Subtítulo por línea de carrito: "+ 2x Libreta A6 Modelo 12 de regalo  $0 ~$10.000~". */
+/** Subtítulo por línea de carrito: "+ 2x Libreta A6 en composé de regalo  ~$10.000~ GRATIS". */
 export function CyberGiftLine({
   giftQty,
-  model,
   className,
 }: {
   giftQty: number;
+  /** Modelo del producto (se mantiene por compatibilidad; el regalo se combina, no se repite). */
   model?: string;
   className?: string;
 }) {
@@ -52,7 +53,7 @@ export function CyberGiftLine({
       )}
     >
       <span>
-        🎁 + {giftQty > 1 ? `${giftQty}x ` : ''}Libreta A6 {modelText(model)} de regalo
+        🎁 + {giftQty > 1 ? `${giftQty}x ` : ''}Libreta A6 en composé de regalo
       </span>
       <span className="whitespace-nowrap">
         <span className="text-muted-foreground line-through">{formatARS(value)}</span>{' '}
@@ -147,13 +148,15 @@ export function CyberCartNudge({
           <ul className="space-y-1 text-sm text-white/90">
             {gifts.map((g) => (
               <li key={g.key}>
-                🎁 {g.qty > 1 ? `${g.qty}x ` : ''}Libreta A6 {modelText(g.model)} — en composé con{' '}
+                🎁 {g.qty > 1 ? `${g.qty}x ` : ''}Libreta A6 — diseño combinado con{' '}
                 {g.forProduct}
+                {modelText(g.model)}
               </li>
             ))}
           </ul>
           <p className="text-xs text-white/70">
-            Si querés la libreta en otro diseño, avisanos en las notas del pedido.
+            Elegimos un diseño que combine con el tuyo. Si tenés alguna preferencia, avisanos en
+            las notas del pedido.
           </p>
         </div>
       ) : (
