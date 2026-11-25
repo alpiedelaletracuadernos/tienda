@@ -19,6 +19,8 @@ import { cuentaDniEnabled } from '@/components/promos/CuentaDniHint';
 // ✅ CHANGE: Checkout ya no debe recalcular descuentos.
 // Motivo: evitamos solapes. Todo sale del motor.
 import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
+import { cyberWeek } from '@/config/cyberweek';
+import { CyberGiftLine } from '@/components/cyber/CyberCartNudge';
 import { getCartLineKey } from '@/lib/cart-key';
 import { interiorLabel } from '@/data/interiors';
 
@@ -262,7 +264,7 @@ const Checkout = () => {
                             {/* ✅ opcional: mostrar notas promo por ítem */}
                             {line?.freeUnits > 0 && (
                               <p className="text-[11px] text-muted-foreground mt-1">
-                                {pricing.cyber ? '3x2' : '2x1'}: {line.freeUnits} gratis
+                                {pricing.cyber && cyberWeek.threeForTwo ? '3x2' : '2x1'}: {line.freeUnits} gratis
                               </p>
                             )}
                             {line?.percentDiscount > 0 && (
@@ -299,6 +301,11 @@ const Checkout = () => {
                             )}
                           </div>
                         </div>
+                        <CyberGiftLine
+                          giftQty={line?.giftQty ?? 0}
+                          model={it.selectedModel}
+                          className="mt-2 border-t pt-2"
+                        />
                       </div>
                     );
                   })}
@@ -348,7 +355,7 @@ const Checkout = () => {
 
                   {pricing.cyber && (
                     <div className="flex items-center justify-between font-medium">
-                      <span>🎁 Regalito sorpresa</span>
+                      <span>🎁 Libretas A6 de regalo</span>
                       <span>De regalo</span>
                     </div>
                   )}

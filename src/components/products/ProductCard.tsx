@@ -11,13 +11,14 @@ import { Product } from '@/types/product';
 import vars from '@/data/data';
 import { formatARS } from '@/lib/currency';
 import { calculateProductPricing } from '@/lib/pricing/calc-product-pricing';
-import { isEligibleForDiscount } from '@/config/promotions';
+import { isEligibleForCyberGift, isEligibleForDiscount } from '@/config/promotions';
 import { availabilityLabel, availabilityNote, isPurchasable } from '@/lib/availability';
 import { kitPricingFor } from '@/lib/pricing/kit';
 import { presale } from '@/config/presale';
 import { cn } from '@/lib/utils';
 import { isVideo, responsiveSrcSet, stillOf } from '@/lib/media';
 import { CuentaDniHint } from '@/components/promos/CuentaDniHint';
+import { Gift } from 'lucide-react';
 import { cyberWeek } from '@/config/cyberweek';
 
 interface ProductCardProps {
@@ -57,6 +58,10 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
   const hsEligible = pricing.discounts.some((d) =>
     d.label.startsWith(vars.promotions.hotSale.label)
   );
+  const giftEligible =
+    purchasable &&
+    cyberEligible &&
+    isEligibleForCyberGift({ product: { category: product.category, id: product.id } });
   const discountEligible =
     !hsEligible &&
     isEligibleForDiscount({ product: { category: product.category, id: product.id } });
@@ -113,7 +118,9 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
         {!purchasable ? (
           <Badge className="bg-foreground text-background">{availabilityLabel(product)}</Badge>
         ) : cyberEligible ? (
-          <Badge className="bg-announcement text-promo">CYBER -{cyberWeek.percentage}%</Badge>
+          <Badge className="bg-black text-white">
+            {cyberWeek.badge} -{cyberWeek.percentage}%
+          </Badge>
         ) : showBadge ? (
           <Badge className="bg-primary text-primary-foreground">{product.badge}</Badge>
         ) : hsEligible ? (
@@ -189,6 +196,16 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
             </p>
           )}
           {/* Beneficio de pago, en una línea que no cambia el alto de la card */}
+          {purchasable && pricing.hasDiscount && cyberEligible && pricing.listUnit > pricing.finalUnit && (
+            <p className="text-xs font-medium">
+              Ahorrás {formatARS(pricing.listUnit - pricing.finalUnit)}
+            </p>
+          )}
+          {giftEligible && (
+            <p className="mt-1 inline-flex items-center gap-1 rounded bg-black px-1.5 py-0.5 text-[11px] font-semibold text-white">
+              <Gift className="h-3 w-3" aria-hidden="true" />+ Libreta de regalo
+            </p>
+          )}
           {purchasable && <CuentaDniHint variant="card" className="mt-1" />}
         </div>
 

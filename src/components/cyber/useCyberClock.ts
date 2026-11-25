@@ -19,8 +19,9 @@ export function useCyberClock() {
   const lastDay = cyberDaysLeft(now) <= 1;
 
   useEffect(() => {
-    if (!lastDay) return;
-    const id = window.setInterval(() => setNow(promoNow()), 1000);
+    // Último día: cada segundo (cuenta regresiva). Resto: cada 30 s, sólo para
+    // cruzar medianoche (previa -> promo, cambio de "Quedan X días").
+    const id = window.setInterval(() => setNow(promoNow()), lastDay ? 1000 : 30_000);
     return () => window.clearInterval(id);
   }, [lastDay]);
 
@@ -30,6 +31,7 @@ export function useCyberClock() {
   )}`;
 
   return {
+    now,
     lastDay,
     /** "Termina en 05:12:33" el último día; si no, la frase de cierre. */
     text: lastDay

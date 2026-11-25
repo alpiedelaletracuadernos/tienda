@@ -6,6 +6,7 @@ import {
   isHotSaleActive,
   isEligibleForHotSale,
   isEligibleForCyberWeek,
+  isEligibleForCyberGift,
 } from '@/config/promotions';
 import { isCyberWeekActive } from '@/config/cyberweek';
 import vars from '@/data/data';
@@ -32,6 +33,7 @@ export function calculateCartPricing(items: CartItem[]) {
       percentDiscount: number; // descuento por % (solo categorías)
       hotSaleDiscount: number; // descuento por Hot Sale
       cyberDiscount: number; // descuento por el % de la Cyber Week
+      giftQty: number; // libretas de regalo que acompañan a la línea
     }
   > = {};
 
@@ -46,6 +48,7 @@ export function calculateCartPricing(items: CartItem[]) {
       percentDiscount: 0,
       hotSaleDiscount: 0,
       cyberDiscount: 0,
+      giftQty: 0,
     };
   }
 
@@ -141,14 +144,16 @@ export function calculateCartPricing(items: CartItem[]) {
   }
 
   // =====================
-  // 4) CYBER WEEK (si activa): 15% OFF o 3x2, NO acumulables.
-  //    Se calcula el carrito de las dos formas y se aplica la que más le
-  //    conviene al cliente:
+  // 4) CYBER WEEK / BLACK FRIDAY (si activa): % OFF, opcional 3x2 (threeForTwo)
+  //    y regalo por unidad elegible (giftPerUnit, informativo: no toca totales).
+  //    Con 3x2 activo, % y 3x2 NO se acumulan: se calcula el carrito de las dos
+  //    formas y se aplica la que más le conviene al cliente. Con threeForTwo
+  //    en false, k = 0 y siempre rige el %:
   //    A) 3x2: las unidades se ordenan de mayor a menor valor; las 3·k más
   //       caras forman los tríos y, dentro de ellos, las k más baratas salen
   //       gratis (se pagan siempre las de mayor valor). Las unidades que no
-  //       completan un trío llevan el 15%.
-  //    B) 15% OFF sobre todas las unidades.
+  //       completan un trío llevan el %.
+  //    B) % OFF sobre todas las unidades.
   // =====================
   const cyberOn = isCyberWeekActive();
   const cw = vars.promotions.cyberWeek;
@@ -157,8 +162,19 @@ export function calculateCartPricing(items: CartItem[]) {
   let cyber3x2FreeCount = 0;
   let cyberEligibleQty = 0;
   let cyberMode: '3x2' | 'percent' = 'percent';
+  const cyberGifts: Array<{ key: string; forProduct: string; model?: string; qty: number }> = [];
+  let cyberGiftQty = 0;
 
   if (cyberOn) {
+    for (const it of items) {
+      const qty = it.quantity ?? 0;
+      if (qty <= 0 || !isEligibleForCyberGift(it)) continue;
+      const key = getCartLineKey(it);
+      lines[key].giftQty += qty;
+      cyberGiftQty += qty;
+      cyberGifts.push({ key, forProduct: it.product.name, model: it.selectedModel, qty });
+    }
+
     const units: Unit[] = [];
     for (const it of items) {
       if (!isEligibleForCyberWeek(it)) continue;
@@ -182,11 +198,11 @@ export function calculateCartPricing(items: CartItem[]) {
     };
     const sum = (r: Record<string, number>) => Object.values(r).reduce((a, b) => a + b, 0);
 
-    // B) 15% en todo
+    // B) % en todo
     const pctAll = percentByLine(units);
     const savingB = sum(pctAll);
 
-    // A) 3x2 + 15% en lo que no completa un trío
+    // A) 3x2 + % en lo que no completa un trío
     const k = cw.threeForTwo ? Math.floor(units.length / 3) : 0;
     const trio = units.slice(0, 3 * k);
     const free = trio.slice(2 * k);
@@ -265,6 +281,11 @@ export function calculateCartPricing(items: CartItem[]) {
           mode: cyberMode,
           gift: cw.gift,
           savings: cyber3x2Discount + cyberPercentTotal,
+          /** Regalos por unidad (uno por ítem elegible, mismo diseño que el producto). */
+          gifts: cyberGifts,
+          giftQty: cyberGiftQty,
+          giftValue: cyberGiftQty * (cw.giftPerUnit?.value ?? 0),
+          giftLabel: cw.giftPerUnit?.label ?? '',
         }
       : null,
   };

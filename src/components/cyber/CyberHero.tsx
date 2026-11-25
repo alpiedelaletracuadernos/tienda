@@ -1,169 +1,110 @@
 // src/components/cyber/CyberHero.tsx
 //
-// Portada durante la Cyber Week. Mobile primero: arriba de todo la oferta
-// completa (los tres beneficios), un ejemplo con precios reales calculado
-// por el mismo motor del carrito, cuándo termina y un único botón.
-// La foto de fondo es la misma imagen LCP de la portada habitual.
+// Portada durante el Black Friday. Mobile primero: oferta, ejemplo con
+// precios reales calculados desde la config, cuándo termina y un único botón.
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { getProductBySlug } from '@/data/products';
 import vars from '@/data/data';
 import { formatARS } from '@/lib/currency';
-import { calculateCartPricing } from '@/lib/pricing/calc-cart-pricing';
 import { cyberWeek } from '@/config/cyberweek';
-import type { CartItem } from '@/types/cart';
 import { useCyberClock } from './useCyberClock';
 
-const POSTER = 'assets/hero/hero-2027-poster.webp';
-const POSTER_SRCSET =
-  'assets/hero/hero-2027-poster-480.webp 480w, assets/hero/hero-2027-poster.webp 720w';
-
-/** Ejemplo del 3x2 con tres productos reales del catálogo. */
-const EXAMPLE_SLUGS = ['agenda-semanal-a5', 'agenda-diaria-a5', 'agenda-perpetua-pocket-a6'];
+// TODO: reemplazar por foto agenda + libreta del mismo modelo
+const EXAMPLE_SLUG = 'agenda-semanal-a5';
+const GIFT_SLUG = 'libretas-a6';
 
 function useExample() {
-  const products = EXAMPLE_SLUGS.map(getProductBySlug).filter((p) => p && p.inStock);
-  if (products.length < 3) return null;
-  const items: CartItem[] = products.map((p) => ({
-    product: {
-      id: p!.id,
-      name: p!.name,
-      basePrice: p!.basePrice,
-      images: p!.images,
-      category: p!.category,
-    },
-    quantity: 1,
-    price: p!.basePrice,
-  }));
-  const pricing = calculateCartPricing(items);
+  const agenda = getProductBySlug(EXAMPLE_SLUG);
+  if (!agenda) return null;
+  const giftValue = cyberWeek.giftPerUnit?.value ?? 0;
+  const final = Math.round(agenda.basePrice * (1 - cyberWeek.percentage / 100));
+  const dniPct = parseInt(vars.cuentaDni?.benefit ?? '', 10) || 20;
   return {
-    names: products.map((p) => p!.shortName ?? p!.name.replace(/ 2027$/, '')),
-    list: pricing.subtotalList,
-    total: pricing.total,
+    agendaImg: agenda.images[0],
+    giftImg: getProductBySlug(GIFT_SLUG)?.images[0],
+    list: agenda.basePrice + giftValue,
+    final,
+    dni: vars.cuentaDni?.enabled ? Math.round(final * (1 - dniPct / 100)) : null,
   };
 }
 
-const BENEFITS = [
-  { big: `${cyberWeek.percentage}%`, small: 'OFF en toda la web' },
-  ...(cyberWeek.threeForTwo ? [{ big: '3x2', small: 'Llevás 3, pagás los 2 de mayor valor' }] : []),
-  { big: '🎁', small: 'Regalito en todas las compras' },
-  ...(vars.cuentaDni.enabled
-    ? [{ big: '20%', small: `Reintegro con ${vars.cuentaDni.label}, ${vars.cuentaDni.days}` }]
-    : []),
-];
-
 export function CyberHero() {
   const clock = useCyberClock();
-  const example = useExample();
+  const ex = useExample();
+  const label = `${cyberWeek.badge} · ${cyberWeek.rangeLabel.replace(/ de noviembre$/, '/11').toUpperCase()}`;
 
   return (
     <section
-      className="relative isolate min-h-[88svh] flex items-end md:items-center overflow-hidden bg-announcement"
+      className="relative isolate overflow-hidden bg-black text-white"
       aria-label={`${cyberWeek.name}: ${cyberWeek.rangeLabel}`}
     >
-      <div className="absolute inset-0 -z-10">
-        <img
-          src={POSTER}
-          srcSet={POSTER_SRCSET}
-          sizes="100vw"
-          alt=""
-          width={720}
-          height={1280}
-          fetchPriority="high"
-          loading="eager"
-          decoding="async"
-          className="h-full w-full object-cover opacity-70 md:object-[center_35%]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-black/30 md:bg-gradient-to-r md:from-black md:via-black/80 md:to-black/20" />
-      </div>
-
-      <div className="container relative z-10 px-4 pb-10 pt-20 md:py-16">
-        <div className="max-w-xl text-white space-y-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded bg-promo px-2 py-1 text-xs font-extrabold tracking-widest text-promo-foreground">
-              {cyberWeek.badge}
-            </span>
-            {cyberWeek.extendedBadge && (
-              <span className="rounded bg-white px-2 py-1 text-xs font-extrabold tracking-widest text-black">
-                {cyberWeek.extendedBadge}
-              </span>
-            )}
-            <span
-              className={`text-xs font-semibold uppercase tracking-wide ${
-                clock.lastDay || cyberWeek.extendedText ? 'text-promo' : 'text-white/85'
-              }`}
-              aria-live="polite"
-            >
-              {clock.text}
-            </span>
-          </div>
-
-          <div className="space-y-2">
-            <h1 className="text-4xl sm:text-6xl font-extrabold leading-[1.05]">{cyberWeek.name}</h1>
+      <div className="container px-4 py-8 md:py-16">
+        <div className="grid gap-6 md:grid-cols-2 md:items-center">
+          <div className="space-y-4">
+            <p className="text-xs font-extrabold tracking-widest text-promo">{label}</p>
+            <h1 className="text-4xl sm:text-6xl font-extrabold leading-[1.05]">
+              Tu agenda + libreta a juego
+            </h1>
             <p className="text-base sm:text-lg text-white/85">
-              Agendas 2027 y cuadernos hechos a mano, {cyberWeek.rangeLabel}.
+              {cyberWeek.percentage}% OFF en toda la web y, con cada producto, una Libreta A6 del
+              mismo diseño de regalo (valor {formatARS(cyberWeek.giftPerUnit?.value ?? 0)}).
             </p>
-          </div>
 
-          {/* Los tres beneficios: se leen de un vistazo */}
-          <ul className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-            {BENEFITS.map((b) => (
-              <li
-                key={b.small}
-                className="rounded-xl border border-white/15 bg-white/10 p-2.5 sm:p-3 text-center backdrop-blur-sm"
+            {ex && (
+              <div className="rounded-xl border border-white/15 bg-white/5 px-4 py-3">
+                <p className="flex flex-wrap items-baseline gap-x-3">
+                  <span className="text-sm text-white/60 line-through">{formatARS(ex.list)}</span>
+                  <span className="text-3xl font-extrabold text-white">{formatARS(ex.final)}</span>
+                </p>
+                {ex.dni !== null && (
+                  <p className="text-sm font-semibold text-promo">
+                    Con {vars.cuentaDni.label}: {formatARS(ex.dni)}
+                  </p>
+                )}
+                <p className="mt-1 text-xs text-white/70">Agenda Semanal 2027 + Libreta A6 a juego</p>
+              </div>
+            )}
+
+            <div className="space-y-2 pt-1">
+              <Button
+                asChild
+                size="lg"
+                className="w-full sm:w-auto px-8 text-base bg-promo text-promo-foreground hover:bg-promo/90"
               >
-                <p className="text-2xl sm:text-3xl font-extrabold text-promo leading-none">
-                  {b.big}
-                </p>
-                <p className="mt-1.5 text-[11px] sm:text-xs leading-tight text-white/90">
-                  {b.small}
-                </p>
-              </li>
-            ))}
-          </ul>
-
-          {cyberWeek.threeForTwo && (
-            <p className="text-sm text-white/85">
-              El {cyberWeek.percentage}% y el 3x2 no se suman: en el carrito te aplicamos solo el
-              que más te conviene.
-            </p>
-          )}
-
-          {/* Ejemplo concreto con precios reales: el ahorro en pesos convence más que el % */}
-          {example && (
-            <p className="rounded-xl bg-white/10 px-3 py-2.5 text-sm text-white/90">
-              Ej.: {example.names.join(' + ')}:{' '}
-              <span className="line-through text-white/60">{formatARS(example.list)}</span>{' '}
-              <span className="font-bold text-white">{formatARS(example.total)}</span>
-              <span className="font-semibold text-promo">
-                {' '}
-                · ahorrás {formatARS(example.list - example.total)}
-              </span>
-            </p>
-          )}
-
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
-            <Button
-              asChild
-              size="lg"
-              className="px-8 text-base bg-promo text-promo-foreground hover:bg-promo/90"
-            >
-              <Link to="/catalogo">Ver ofertas</Link>
-            </Button>
-            <WhatsAppButton
-              className="px-7"
-              message={`¡Hola! Quiero aprovechar la ${cyberWeek.name} (${cyberWeek.campaignCode}). ¿Me ayudás a armar mi pedido?`}
-            />
+                <Link to="/catalogo">Elegí tu diseño</Link>
+              </Button>
+              <p className="text-xs text-white/75" aria-live="polite">
+                {clock.lastDay ? clock.text : `Termina ${cyberWeek.endLabel} a las 23:59`}
+              </p>
+            </div>
           </div>
 
-          <div className="space-y-2 text-xs text-white/75">
-            <p>
-              Los descuentos se aplican solos en el carrito. El reintegro de {vars.cuentaDni.label}{' '}
-              vale para todas las compras pagadas {vars.cuentaDni.days}. No aplica al Kit Mi Año
-              2027.
-            </p>
-          </div>
+          {ex?.agendaImg && (
+            <div className="relative mx-auto w-full max-w-xs md:max-w-sm">
+              <img
+                src={ex.agendaImg}
+                alt="Agenda Semanal 2027"
+                width={480}
+                height={480}
+                fetchPriority="high"
+                loading="eager"
+                decoding="async"
+                className="aspect-square w-4/5 rounded-2xl object-cover"
+              />
+              {ex.giftImg && (
+                <img
+                  src={ex.giftImg}
+                  alt="Libreta A6 de regalo"
+                  width={240}
+                  height={240}
+                  loading="eager"
+                  decoding="async"
+                  className="absolute bottom-0 right-0 aspect-square w-2/5 rounded-xl border-4 border-black object-cover shadow-xl"
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </section>

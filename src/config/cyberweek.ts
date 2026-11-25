@@ -1,11 +1,12 @@
 // src/config/cyberweek.ts
 //
-// Estado de la Cyber Week APL según la fecha (vars.promotions.cyberWeek).
+// Estado de la campaña "Cyber Week" reutilizable (vars.promotions.cyberWeek).
+// Hoy es el Black Friday APL: del 26/11 a las 00:00 al 30/11 a las 23:59
+// (hora de Argentina), 15% OFF + libreta A6 de regalo por producto.
 // Precios, barra, portada, cards, carrito, checkout y WhatsApp consultan acá:
-// el 2/11 a las 00:00 (hora de Argentina) se prende todo junto y el 7/11 a
-// las 23:59 se apaga, sin tocar código.
+// se prende y se apaga sola, sin tocar código.
 //
-// Vista previa: con `VITE_PROMO_NOW=2026-11-03T10:00:00-03:00` al compilar,
+// Vista previa: con `VITE_PROMO_NOW=2026-11-27T10:00:00-03:00` al compilar,
 // la web se comporta como si fuera ese momento. Sólo para probar localmente:
 // el build de producción no la define.
 import vars from '@/data/data';
@@ -32,17 +33,44 @@ export const cyberDaysLeft = (now: Date = promoNow()): number => {
   return day(cyberWeekEnd()) - day(now) + 1;
 };
 
+const AR_OFFSET_MS = 3 * 3_600_000;
+/** Día de la semana en Argentina (0 = domingo ... 6 = sábado). */
+const arWeekday = (d: Date): number => new Date(d.getTime() - AR_OFFSET_MS).getUTCDay();
+
+/** ¿Estamos en la previa ("mañana arranca"): desde teaserFrom hasta el inicio? */
+export const isTeaserActive = (now: Date = promoNow()): boolean =>
+  cfg.enabled &&
+  !!cfg.teaserFrom &&
+  now >= new Date(`${cfg.teaserFrom}T00:00:00-03:00`) &&
+  now < start();
+
+/** Cuenta DNI reintegra sólo de lunes a viernes (hora AR). */
+export const isCuentaDniDay = (now: Date = promoNow()): boolean => {
+  const wd = arWeekday(now);
+  return !!vars.cuentaDni?.enabled && wd >= 1 && wd <= 5;
+};
+
 /** Frase de cierre honesta: fecha, "Quedan X días" o "Último día". */
 export const cyberDeadlineText = (now: Date = promoNow()): string => {
   const left = cyberDaysLeft(now);
-  if (left <= 1) return 'Último día: termina hoy a las 23:59';
+  if (left <= 1) {
+    return (
+      'Último día: termina hoy a las 23:59' +
+      (isCuentaDniDay(now) ? ' · con reintegro Cuenta DNI' : '')
+    );
+  }
   if (cfg.extendedText) return cfg.extendedText;
+  if (arWeekday(now) === 5) return 'Hoy, último día de la semana con Cuenta DNI';
   if (left <= 3) return `Quedan ${left} días`;
   return `Hasta ${cfg.endLabel}`;
 };
 
-/** "15% OFF o 3x2 + regalito" (titular corto). El % y el 3x2 no se suman. */
+/** Titular corto: "15% OFF + Libreta A6 de regalo" (o % / 3x2 + regalito). */
 export const cyberHeadline = () =>
-  `${cfg.percentage}% OFF${cfg.threeForTwo ? ' o 3x2' : ''} + regalito`;
+  cfg.giftPerUnit?.enabled
+    ? `${cfg.percentage}% OFF + ${cfg.giftPerUnit.productName} de regalo`
+    : `${cfg.percentage}% OFF${cfg.threeForTwo ? ' o 3x2' : ''} + regalito`;
 
 export const cyberWeek = cfg;
+export const giftPerUnit = cfg.giftPerUnit;
+export const giftEnabled = !!cfg.giftPerUnit?.enabled;

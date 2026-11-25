@@ -14,8 +14,9 @@ import { interiorLabel } from '@/data/interiors';
 import { getProductById } from '@/data/products';
 import { isPresaleProduct } from '@/config/presale';
 import { personalizationSurchargeForId } from '@/lib/pricing/personalization';
+import { cyberWeek } from '@/config/cyberweek';
 import { getCartLineKey } from '@/lib/cart-key';
-import { CyberCartNudge } from '@/components/cyber/CyberCartNudge';
+import { CyberCartNudge, CyberGiftLine } from '@/components/cyber/CyberCartNudge';
 import { CuentaDniHint, cuentaDniEnabled } from '@/components/promos/CuentaDniHint';
 
 export default function Cart() {
@@ -61,7 +62,7 @@ export default function Cart() {
         <div className="container px-4">
           <h1 className="text-4xl font-bold mb-8">Tu Carrito</h1>
 
-          {pricing.cyber && <CyberCartNudge cyber={pricing.cyber} className="mb-6" />}
+          {pricing.cyber && <CyberCartNudge cyber={pricing.cyber} hasItems={items.length > 0} className="mb-6" />}
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Items */}
@@ -179,7 +180,7 @@ export default function Cart() {
 
                                   {line?.freeUnits > 0 && (
                                     <p className="text-xs text-muted-foreground">
-                                      {pricing.cyber ? '3x2' : '2x1'} aplicado: {line.freeUnits}{' '}
+                                      {pricing.cyber && cyberWeek.threeForTwo ? '3x2' : '2x1'} aplicado: {line.freeUnits}{' '}
                                       gratis
                                     </p>
                                   )}
@@ -197,6 +198,7 @@ export default function Cart() {
                               )}
                             </div>
                           </div>
+                          <CyberGiftLine giftQty={line?.giftQty ?? 0} model={item.selectedModel} />
                         </div>
                       </div>
                     </CardContent>
@@ -260,7 +262,7 @@ export default function Cart() {
 
                     {pricing.cyber && (
                       <div className="flex justify-between font-medium">
-                        <span>🎁 Regalito sorpresa</span>
+                        <span>🎁 Libretas A6 de regalo</span>
                         <span>De regalo</span>
                       </div>
                     )}

@@ -43,7 +43,11 @@ import { QuantityStepper } from '@/components/products/pdp/QuantityStepper';
 import { safeStorage } from '@/lib/safe-storage';
 
 //PROMOCIONES
-import { isHotSaleActive, formatHotSaleDateRange } from '@/config/promotions';
+import {
+  isHotSaleActive,
+  formatHotSaleDateRange,
+  isEligibleForCyberGift,
+} from '@/config/promotions';
 import { calculateProductPricing } from '@/lib/pricing/calc-product-pricing';
 import { formatARS } from '@/lib/currency';
 import { personalizationSurchargeFor } from '@/lib/pricing/personalization';
@@ -465,7 +469,13 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
                         Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:{' '}
                         <span className="font-semibold text-foreground">{formattedFinalTotal}</span>
                       </p>
-                      {isCyberWeekActive() && !product.excludeFromPromos && <CyberPdpNote />}
+                      {isCyberWeekActive() && !product.excludeFromPromos && (
+                        <CyberPdpNote
+                          giftEligible={isEligibleForCyberGift({ product })}
+                          modelImage={selectedModelImage}
+                          modelLabel={usesModels ? selectedModelLabel : undefined}
+                        />
+                      )}
                       {/* Beneficio de pago: a la vista junto al precio */}
                       <CuentaDniHint className="mt-1" />
                     </div>
