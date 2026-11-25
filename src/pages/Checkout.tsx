@@ -353,10 +353,18 @@ const Checkout = () => {
                     </div>
                   )}
 
-                  {pricing.cyber && (
+                  {pricing.cyber && pricing.cyber.giftQty > 0 && (
                     <div className="flex items-center justify-between font-medium">
-                      <span>🎁 Libretas A6 de regalo</span>
-                      <span>De regalo</span>
+                      <span>
+                        🎁 {pricing.cyber.giftQty}{' '}
+                        {pricing.cyber.giftQty === 1 ? 'Libreta A6' : 'Libretas A6'} de regalo
+                      </span>
+                      <span className="whitespace-nowrap">
+                        <span className="text-muted-foreground line-through">
+                          {formatARS(pricing.cyber.giftValue)}
+                        </span>{' '}
+                        <span className="font-bold text-success-foreground">GRATIS</span>
+                      </span>
                     </div>
                   )}
 

@@ -54,23 +54,36 @@ export function CyberHero() {
 
             {ex && (
               <div className="rounded-xl border border-white/15 bg-white/5 px-4 py-3">
-                <p className="text-xs text-white/70">
+                {/* Jerarquía: 1 solo precio protagonista (blanco, grande). Verde =
+                    ahorro. Amarillo queda reservado a la marca de la campaña y al
+                    botón. Cuenta DNI va aparte, chico y neutro: es un reintegro
+                    posterior según el medio de pago, no el precio de la web. */}
+                <p className="text-xs text-white/60">
                   Precio regular del combo{' '}
                   <span className="line-through">{formatARS(ex.list)}</span>
                 </p>
-                <p className="flex flex-wrap items-baseline gap-x-3">
-                  <span className="text-sm text-white/80">Pagás</span>
-                  <span className="text-3xl font-extrabold text-white">{formatARS(ex.final)}</span>
-                  <span className="text-sm font-semibold text-promo">
+                <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span className="text-4xl font-extrabold leading-none text-white">
+                    {formatARS(ex.final)}
+                  </span>
+                  <span className="rounded-full bg-success px-2.5 py-1 text-sm font-bold text-success-foreground">
                     Ahorrás {formatARS(ex.list - ex.final)}
                   </span>
                 </p>
+                <p className="mt-1.5 text-xs text-white/70">
+                  Agenda Semanal 2027 + Libreta A6 en composé de regalo
+                </p>
                 {ex.dni !== null && (
-                  <p className="text-sm font-semibold text-promo">
-                    Con {vars.cuentaDni.label}: {formatARS(ex.dni)}
+                  <p className="mt-3 flex items-center gap-2 border-t border-white/10 pt-3 text-xs text-white/70">
+                    <span className="shrink-0 rounded bg-white/10 px-1.5 py-0.5 text-[11px] font-bold text-white">
+                      {vars.cuentaDni.label}
+                    </span>
+                    <span>
+                      {vars.cuentaDni.benefit} (lun. a vie.): te queda en{' '}
+                      <span className="font-semibold text-white/90">{formatARS(ex.dni)}</span>
+                    </span>
                   </p>
                 )}
-                <p className="mt-1 text-xs text-white/70">Agenda Semanal 2027 + Libreta A6 en composé de regalo</p>
               </div>
             )}
 

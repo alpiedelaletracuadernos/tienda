@@ -197,7 +197,7 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
           )}
           {/* Beneficio de pago, en una línea que no cambia el alto de la card */}
           {purchasable && pricing.hasDiscount && cyberEligible && pricing.listUnit > pricing.finalUnit && (
-            <p className="text-xs font-medium">
+            <p className="text-xs font-semibold text-success-foreground">
               Ahorrás {formatARS(pricing.listUnit - pricing.finalUnit)}
             </p>
           )}

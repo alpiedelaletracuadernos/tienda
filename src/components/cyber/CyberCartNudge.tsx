@@ -54,8 +54,9 @@ export function CyberGiftLine({
       <span>
         🎁 + {giftQty > 1 ? `${giftQty}x ` : ''}Libreta A6 {modelText(model)} de regalo
       </span>
-      <span>
-        $0 <span className="text-muted-foreground line-through">{formatARS(value)}</span>
+      <span className="whitespace-nowrap">
+        <span className="text-muted-foreground line-through">{formatARS(value)}</span>{' '}
+        <span className="font-bold text-success-foreground">GRATIS</span>
       </span>
     </p>
   );
@@ -85,7 +86,7 @@ export function CyberCartNudge({
           {cyberWeek.badge}
         </span>
         {cyber.savings > 0 && (
-          <span className="text-base font-bold text-promo">
+          <span className="rounded-full bg-success px-2.5 py-0.5 text-sm font-bold text-success-foreground">
             Ya ahorrás {formatARS(cyber.savings)}
           </span>
         )}

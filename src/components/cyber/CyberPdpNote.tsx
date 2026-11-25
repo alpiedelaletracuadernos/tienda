@@ -56,8 +56,11 @@ export function CyberPdpNote({ giftEligible = false, modelImage, modelLabel }: P
               🎁 Te regalamos una Libreta A6 en composé, con este mismo diseño.
             </p>
             <p className="mt-0.5 text-sm">
-              Precio regular <span className="line-through">{formatARS(giftValue)}</span> ·{' '}
-              <strong className="text-promo">para vos, $0</strong>
+              <span className="text-white/60 line-through">{formatARS(giftValue)}</span>{' '}
+              <span className="ml-1 rounded-full bg-success px-2 py-0.5 text-xs font-extrabold text-success-foreground">
+                GRATIS
+              </span>{' '}
+              <span className="text-xs text-white/75">con tu compra</span>
             </p>
             <p className="mt-0.5 text-xs text-white/75">{caption}</p>
           </div>
