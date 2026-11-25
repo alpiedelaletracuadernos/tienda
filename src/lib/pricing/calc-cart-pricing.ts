@@ -281,7 +281,7 @@ export function calculateCartPricing(items: CartItem[]) {
           mode: cyberMode,
           gift: cw.gift,
           savings: cyber3x2Discount + cyberPercentTotal,
-          /** Regalos por unidad (uno por ítem elegible, mismo diseño que el producto). */
+          /** Regalos por unidad (uno por ítem elegible, diseño combinado con el producto). */
           gifts: cyberGifts,
           giftQty: cyberGiftQty,
           giftValue: cyberGiftQty * (cw.giftPerUnit?.value ?? 0),

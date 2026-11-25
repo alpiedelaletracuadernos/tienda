@@ -1,27 +1,29 @@
 // src/components/cyber/CyberPdpNote.tsx
 //
-// Bajo el precio de la ficha durante Black Friday: el regalo (Libreta A6 a
-// juego con el diseño elegido, se actualiza en vivo) y cuándo termina.
+// Bajo el precio de la ficha durante Black Friday: el regalo (Libreta A6 en
+// composé, con un diseño que combina con el elegido) y cuándo termina.
 // El 15% ya se ve en el precio tachado.
 import { Gift } from 'lucide-react';
 import { cyberWeek, giftPerUnit } from '@/config/cyberweek';
 import { formatARS } from '@/lib/currency';
-import { thumbOf } from '@/lib/media';
 import { useCyberClock } from './useCyberClock';
 
 type Props = {
   /** Si el producto lleva libreta de regalo (las libretas no). */
   giftEligible?: boolean;
-  /** Imagen del modelo/diseño elegido. */
-  modelImage?: string;
   /** Número de modelo elegido ('5', 'a confirmar' o undefined si no usa modelos). */
   modelLabel?: string;
 };
 
-export function CyberPdpNote({ giftEligible = false, modelImage, modelLabel }: Props) {
+/** Foto de campaña (agenda + libreta en composé) como miniatura del regalo. */
+const GIFT_PHOTO = 'assets/bf/bf26-agenda-libreta-640.webp';
+
+export function CyberPdpNote({ giftEligible = false, modelLabel }: Props) {
   const clock = useCyberClock();
   const hasModel = !!modelLabel && modelLabel !== 'a confirmar';
-  const caption = hasModel ? `Libreta A6 · Modelo ${modelLabel}` : 'Libreta A6 en composé';
+  const caption = hasModel
+    ? `Diseño combinado con tu Modelo ${modelLabel}`
+    : 'Diseño combinado con tu producto';
   const giftValue = giftPerUnit?.value ?? 0;
 
   return (
@@ -38,22 +40,18 @@ export function CyberPdpNote({ giftEligible = false, modelImage, modelLabel }: P
       {giftEligible ? (
         <div className="flex items-center gap-3 rounded-lg bg-white/10 p-2.5">
           <div className="relative shrink-0">
-            {modelImage ? (
-              <img
-                src={thumbOf(modelImage)}
-                alt={caption}
-                className="h-16 w-16 rounded-lg border border-white/20 bg-white object-cover"
-              />
-            ) : (
-              <div className="h-16 w-16 rounded-lg bg-white/20" />
-            )}
+            <img
+              src={GIFT_PHOTO}
+              alt="Agenda y Libreta A6 en composé"
+              className="h-16 w-16 rounded-lg border border-white/20 bg-white object-cover object-right"
+            />
             <span className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-promo text-promo-foreground">
               <Gift className="h-3.5 w-3.5" aria-hidden />
             </span>
           </div>
           <div className="min-w-0">
             <p className="font-semibold leading-snug">
-              🎁 Te regalamos una Libreta A6 en composé, con este mismo diseño.
+              🎁 Te regalamos una Libreta A6 en composé, con un diseño combinado.
             </p>
             <p className="mt-0.5 text-sm">
               <span className="text-white/60 line-through">{formatARS(giftValue)}</span>{' '}
