@@ -1,5 +1,5 @@
 // src/components/products/StickyBuyBar.tsx
-import { ShoppingCart } from 'lucide-react';
+import { MessageCircle, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -10,6 +10,8 @@ type Props = {
   summary?: string;
   onAddToCart: () => void;
   addLabel?: string;
+  /** Link de WhatsApp: en celular reemplaza al botón flotante (no tapa contenido). */
+  whatsappHref?: string;
 };
 
 export function StickyBuyBar({
@@ -19,6 +21,7 @@ export function StickyBuyBar({
   summary,
   onAddToCart,
   addLabel = 'Agregar',
+  whatsappHref,
 }: Props) {
   return (
     <div
@@ -41,6 +44,17 @@ export function StickyBuyBar({
           </div>
           {summary && <p className="text-xs text-muted-foreground truncate">{summary}</p>}
         </div>
+        {whatsappHref && (
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Consultar por WhatsApp"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-whatsapp text-whatsapp"
+          >
+            <MessageCircle className="h-5 w-5" />
+          </a>
+        )}
         <Button onClick={onAddToCart} className="shrink-0">
           <ShoppingCart className="mr-2 h-4 w-4" />
           {addLabel}

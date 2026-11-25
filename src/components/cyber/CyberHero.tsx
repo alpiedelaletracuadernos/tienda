@@ -10,9 +10,10 @@ import { formatARS } from '@/lib/currency';
 import { cyberWeek } from '@/config/cyberweek';
 import { useCyberClock } from './useCyberClock';
 
-// TODO: reemplazar por foto agenda + libreta del mismo modelo
 const EXAMPLE_SLUG = 'agenda-semanal-a5';
-const GIFT_SLUG = 'libretas-a6';
+/** Foto de campaña: agenda + libreta en composé (1200x900 y 640x480). */
+const HERO_PHOTO = 'assets/bf/bf26-agenda-libreta.webp';
+const HERO_PHOTO_SM = 'assets/bf/bf26-agenda-libreta-640.webp';
 
 function useExample() {
   const agenda = getProductBySlug(EXAMPLE_SLUG);
@@ -21,8 +22,6 @@ function useExample() {
   const final = Math.round(agenda.basePrice * (1 - cyberWeek.percentage / 100));
   const dniPct = parseInt(vars.cuentaDni?.benefit ?? '', 10) || 20;
   return {
-    agendaImg: agenda.images[0],
-    giftImg: getProductBySlug(GIFT_SLUG)?.images[0],
     list: agenda.basePrice + giftValue,
     final,
     dni: vars.cuentaDni?.enabled ? Math.round(final * (1 - dniPct / 100)) : null,
@@ -47,9 +46,16 @@ export function CyberHero() {
               Tu agenda + libreta en composé
             </h1>
             <p className="text-base sm:text-lg text-white/85">
-              {cyberWeek.percentage}% OFF en toda la web y, con cada producto, te regalamos una
-              Libreta A6 con el mismo diseño. No la pagás: su precio regular es{' '}
-              {formatARS(cyberWeek.giftPerUnit?.value ?? 0)}.
+              {cyberWeek.percentage}% OFF en toda la web y, con cada producto, una Libreta A6 en
+              composé de regalo:{' '}
+              <span className="whitespace-nowrap">
+                <span className="text-white/60 line-through">
+                  {formatARS(cyberWeek.giftPerUnit?.value ?? 0)}
+                </span>{' '}
+                <span className="rounded-full bg-success px-2 py-0.5 text-sm font-extrabold text-success-foreground">
+                  GRATIS
+                </span>
+              </span>
             </p>
 
             {ex && (
@@ -101,31 +107,23 @@ export function CyberHero() {
             </div>
           </div>
 
-          {ex?.agendaImg && (
-            <div className="relative mx-auto w-full max-w-xs md:max-w-sm">
-              <img
-                src={ex.agendaImg}
-                alt="Agenda Semanal 2027"
-                width={480}
-                height={480}
-                fetchPriority="high"
-                loading="eager"
-                decoding="async"
-                className="aspect-square w-4/5 rounded-2xl object-cover"
-              />
-              {ex.giftImg && (
-                <img
-                  src={ex.giftImg}
-                  alt="Libreta A6 de regalo"
-                  width={240}
-                  height={240}
-                  loading="eager"
-                  decoding="async"
-                  className="absolute bottom-0 right-0 aspect-square w-2/5 rounded-xl border-4 border-black object-cover shadow-xl"
-                />
-              )}
-            </div>
-          )}
+          <figure className="relative mx-auto w-full max-w-md md:max-w-none">
+            <img
+              src={HERO_PHOTO}
+              srcSet={`${HERO_PHOTO_SM} 640w, ${HERO_PHOTO} 1200w`}
+              sizes="(min-width: 768px) 50vw, 100vw"
+              alt="Agenda 2027 y Libreta A6 en composé sobre un escritorio"
+              width={1200}
+              height={900}
+              fetchPriority="high"
+              loading="eager"
+              decoding="async"
+              className="aspect-[4/3] w-full rounded-2xl object-cover"
+            />
+            <figcaption className="absolute bottom-3 left-3 rounded-full bg-black/75 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+              🎁 La libreta va de regalo
+            </figcaption>
+          </figure>
         </div>
       </div>
     </section>

@@ -670,7 +670,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
       <WhatsAppButton
         message={modeSpecificMessage}
         variant="floating"
-        className={showStickyBar ? 'bottom-24 lg:bottom-6' : undefined}
+        className={showStickyBar ? 'hidden lg:flex' : undefined}
       />
 
       <StickyBuyBar
@@ -680,6 +680,7 @@ const ProductDetailContent = ({ product }: { product: Product }) => {
         summary={stickySummary}
         onAddToCart={handleAddToCart}
         addLabel={isKit ? presale.ctaLabel : undefined}
+        whatsappHref={buildWaLink(AppVars.phoneNumber, modeSpecificMessage)}
       />
     </div>
   );
